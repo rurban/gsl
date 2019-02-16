@@ -83,16 +83,61 @@ and satisfy the ordinary differential equations
    These routines evaluate the physicists' Hermite polynomial :math:`H_n(x)` of order :data:`n` at position :data:`x`.
    If an overflow is detected, :macro:`GSL_EOVRFLW` is returned without calling the error handler.
 
-.. function:: int gsl_sf_hermite_phys_array (const int nmax, const double x, double * result_array)
+.. function:: int gsl_sf_hermite_array (const int nmax, const double x, double * result_array)
 
    This routine evaluates all physicists' Hermite polynomials :math:`H_n` up to order :data:`nmax` at position :data:`x`.
    The results are stored in :data:`result_array`.
 
-.. function:: double gsl_sf_hermite_phys_series (const int n, const double x, const double * a)
-              int gsl_sf_hermite_phys_series_e (const int n, const double x, const double * a, gsl_sf_result * result)
+.. function:: double gsl_sf_hermite_series (const int n, const double x, const double * a)
+              int gsl_sf_hermite_series_e (const int n, const double x, const double * a, gsl_sf_result * result)
 
    These routines evaluate the series :math:`\sum_{j=0}^n a_j H_j(x)` with :math:`H_j` being
    the :math:`j`-th physicists' Hermite polynomial using the Clenshaw algorithm.
+
+Derivatives of Hermite Polynomials
+----------------------------------
+.. index::
+   single: Hermite polynomials, derivatives
+
+.. function:: double gsl_sf_hermite_deriv (const int m, const int n, const double x)
+              int gsl_sf_hermite_deriv_e (const int m, const int n, const double x, gsl_sf_result * result)
+
+   These routines evaluate the :data:`m`-th derivative of the physicists' Hermite polynomial :math:`H_n(x)` of order :data:`n`
+   at position :data:`x`.
+
+.. function::  int gsl_sf_hermite_array_deriv (const int m, const int nmax, const double x, double * result_array)
+
+   This routine evaluates the :data:`m`-th derivative of all physicists' Hermite polynomials :math:`H_n(x)` from
+   orders :math:`0, \dots, \text{nmax}` at position :data:`x`.
+   The result :math:`d^m/dx^m H_n(x)` is stored in :code:`result_array[n]`. The output
+   :data:`result_array` must have length at least :code:`nmax + 1`.
+
+.. function:: int gsl_sf_hermite_deriv_array (const int mmax, const int n, const double x, double * result_array)
+
+   This routine evaluates all derivative orders from :math:`0, \dots, \text{mmax}` of the
+   physicists' Hermite polynomial of order :data:`n`, :math:`H_n`, at position :data:`x`.
+   The result :math:`d^m/dx^m H_n(x)` is stored in :code:`result_array[m]`. The output
+   :data:`result_array` must have length at least :code:`mmax + 1`.
+
+.. function:: double gsl_sf_hermite_prob_deriv (const int m, const  int n, const double x)
+              int gsl_sf_hermite_prob_deriv_e (const int m, const  int n, const double x, gsl_sf_result * result)
+
+   These routines evaluate the :data:`m`-th derivative of the probabilists' Hermite polynomial :math:`He_n(x)`
+   of order :data:`n` at position :data:`x`.
+
+.. function:: int gsl_sf_hermite_prob_array_deriv (const int m, const int nmax, const double x, double * result_array)
+
+   This routine evaluates the :data:`m`-th derivative of all probabilists' Hermite polynomials :math:`He_n(x)` from
+   orders :math:`0, \dots, \text{nmax}` at position :data:`x`.
+   The result :math:`d^m/dx^m He_n(x)` is stored in :code:`result_array[n]`. The output
+   :data:`result_array` must have length at least :code:`nmax + 1`.
+
+.. function:: int gsl_sf_hermite_prob_deriv_array (const int mmax, const int n, const double x, double * result_array)
+
+   This routine evaluates all derivative orders from :math:`0, \dots, \text{mmax}` of the
+   probabilists' Hermite polynomial of order :data:`n`, :math:`He_n`, at position :data:`x`.
+   The result :math:`d^m/dx^m He_n(x)` is stored in :code:`result_array[m]`. The output
+   :data:`result_array` must have length at least :code:`mmax + 1`.
 
 .. index::
    single: Hermite functions
@@ -130,7 +175,7 @@ They are orthonormal,
 
 and form an orthonormal basis of :math:`L^2(\mathbb{R})`. The Hermite functions
 are also eigenfunctions of the continuous Fourier transform. GSL evaluates the Hermite
-functions using the contour integration method of Bunck (2009).
+functions using the modified recurrence method of Bunck (2009).
 
 .. function:: double gsl_sf_hermite_func (const int n, const double x)
               int gsl_sf_hermite_func_e (const int n, const double x, gsl_sf_result * result)
@@ -147,42 +192,6 @@ functions using the contour integration method of Bunck (2009).
 
    These routines evaluate the series :math:`\sum_{j=0}^n a_j \psi_j(x)` with :math:`\psi_j` being
    the :math:`j`-th Hermite function using the Clenshaw algorithm.
-
-Derivatives of Hermite Polynomials
-----------------------------------
-.. index::
-   single: Hermite polynomials, derivatives
-
-.. function:: double gsl_sf_hermite_prob_der (const int m, const  int n, const double x)
-              int gsl_sf_hermite_prob_der_e (const int m, const  int n, const double x, gsl_sf_result * result)
-
-   These routines evaluate the :data:`m`-th derivative of the probabilists' Hermite polynomial :math:`He_n(x)`
-   of order :data:`n` at position :data:`x`.
-
-.. function:: int gsl_sf_hermite_prob_array_der (const int m, const int nmax, const double x, double * result_array)
-
-   This routine evaluates the :data:`m`-th derivative of all probabilists' Hermite polynomials :math:`He_n(x)` up to
-   order :data:`nmax` at position :data:`x`. The results are stored in :data:`result_array`.
-
-.. function:: int gsl_sf_hermite_prob_der_array (const int mmax, const int n, const double x, double * result_array)
-
-   This routine evaluates all derivatives (starting from 0) up to the :data:`mmax`-th derivative of the probabilists' Hermite
-   polynomial of order :data:`n` :math:`He_n(x)` at position :data:`x`. The results are stored in :data:`result_array`.
-
-.. function:: double gsl_sf_hermite_phys_der (const int m, const int n, const double x)
-              int gsl_sf_hermite_phys_der_e (const int m, const int n, const double x, gsl_sf_result * result)
-
-   These routines evaluate the :data:`m`-th derivative of the physicists' Hermite polynomial :math:`H_n(x)` of order :data:`n` at position :data:`x`.
-
-.. function::  int gsl_sf_hermite_phys_array_der (const int m, const int nmax, const double x, double * result_array)
-
-   This routine evaluates the :data:`m`-th derivative of all physicists' Hermite polynomials :math:`H_n` up to order :data:`nmax` at position :data:`x`.
-   The results are stored in :data:`result_array`.
-
-.. function:: int gsl_sf_hermite_phys_der_array (const int mmax, const int n, const double x, double * result_array)
-
-   This routine evaluates all derivatives (starting from 0) up to the :data:`mmax`-th derivative of the
-   physicists' Hermite polynomial of order :data:`n` :math:`H_n` at position :data:`x`. The results are stored in :data:`result_array`.
 
 Derivatives of Hermite Functions
 --------------------------------
