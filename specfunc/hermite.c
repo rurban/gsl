@@ -1468,49 +1468,79 @@ static double He_zero_tab[99] = {
   7.61904854167975829138128156060
 };
 
-/* Computes the s-th zero the probabilists' Hermite polynomial of order n.
-A Newton iteration using a continued fraction representation adapted from [E.T. Whittaker (1914), On the continued fractions which represent the functions of Hermite and other functions defined by differential equations, Proceedings of the Edinburgh Mathematical Society, 32, 65-74] is performed with the initial approximation from [Arpad Elbert and Martin E. Muldoon, Approximations for zeros of Hermite functions, pp. 117-126 in D. Dominici and R. S. Maier, eds, "Special Functions and Orthogonal Polynomials", Contemporary Mathematics, vol 471 (2008)] refined via the bisection method. */
+/*
+ * Computes the s-th zero the probabilists' Hermite polynomial of order n.
+ * A Newton iteration using a continued fraction representation adapted from:
+ *
+ * [E.T. Whittaker (1914), On the continued fractions which represent the
+ * functions of Hermite and other functions defined by differential equations,
+ * Proceedings of the Edinburgh Mathematical Society, 32, 65-74]
+ *
+ * is performed with the initial approximation from
+ *
+ * [Arpad Elbert and Martin E. Muldoon, Approximations for zeros of Hermite
+ * functions, pp. 117-126 in D. Dominici and R. S. Maier, eds, "Special Functions
+ * and Orthogonal Polynomials", Contemporary Mathematics, vol 471 (2008)]
+ *
+ * refined via the bisection method.
+ */
+
 int
 gsl_sf_hermite_prob_zero_e(const int n, const int s, gsl_sf_result * result)
 {
-  if(n <= 0 || s < 0 || s > n/2) {
-    DOMAIN_ERROR(result);
-  }
-  else if(s == 0) {
-    if (GSL_IS_ODD(n) == 1) {
-      result->val = 0.;
+  if (n <= 0 || s < 0 || s > n/2)
+    {
+      DOMAIN_ERROR(result);
+    }
+  else if (s == 0)
+    {
+      if (GSL_IS_ODD(n) == 1)
+        {
+          result->val = 0.;
+          result->err = 0.;
+          return GSL_SUCCESS;
+        }
+      else
+        {
+          DOMAIN_ERROR(result);
+        }
+    }
+  else if (n == 2)
+    {
+      result->val = 1.;
       result->err = 0.;
       return GSL_SUCCESS;
     }
-    else {
-      DOMAIN_ERROR(result);
+  else if (n < 21)
+    {
+      result->val = He_zero_tab[(GSL_IS_ODD(n)?n/2:0)+((n/2)*(n/2-1))+s-2];
+      result->err = GSL_DBL_EPSILON*(result->val);
+      return GSL_SUCCESS;
     }
-  }
-  else if(n == 2) {
-    result->val = 1.;
-    result->err = 0.;
-    return GSL_SUCCESS;
-  }
-  else if(n < 21) {
-    result->val = He_zero_tab[(GSL_IS_ODD(n)?n/2:0)+((n/2)*(n/2-1))+s-2];
-    result->err = GSL_DBL_EPSILON*(result->val);
-    return GSL_SUCCESS;
-  }
-  else {
-    double d = 1., x = 1., x0 = 1.;
-    int j;
-    x = H_zero_init(n,s) * M_SQRT2;
-    do {
-      x0 = x;
-      d = 0.;
-      for (j=1; j<n; j++) d = j/(x-d);
-      x -= (x-d)/n;
-    /* gsl_fcmp can be used since the smallest zero approaches 1/sqrt(n) or 1/sqrt((n-1)/3.) for large n and thus all zeros are non-zero (except for the trivial case handled above) */
-    } while (gsl_fcmp(x,x0,10*GSL_DBL_EPSILON)!=0);
-    result->val = x;
-    result->err = 2*GSL_DBL_EPSILON*x + fabs(x-x0);
-    return GSL_SUCCESS;
-  }
+  else
+    {
+      double d = 1., x = 1., x0 = 1.;
+      int j;
+      x = H_zero_init(n,s) * M_SQRT2;
+      do
+        {
+          x0 = x;
+          d = 0.;
+          for (j=1; j<n; j++)
+            d = j/(x-d);
+
+          x -= (x-d)/n;
+
+          /* gsl_fcmp can be used since the smallest zero approaches 1/sqrt(n) or 1/sqrt((n-1)/3.)
+           * for large n and thus all zeros are non-zero (except for the trivial case handled above) */
+        }
+      while (gsl_fcmp(x, x0, 10*GSL_DBL_EPSILON) != 0);
+
+      result->val = x;
+      result->err = 2*GSL_DBL_EPSILON*x + fabs(x-x0);
+
+      return GSL_SUCCESS;
+    }
 }
 
 double
@@ -1622,61 +1652,94 @@ static double H_zero_tab[99] = {
   5.38748089001123286201690041068
 };
 
-/* Computes the s-th zero the physicists' Hermite polynomial of order n, thus also the s-th zero of the Hermite function of order n.
-A Newton iteration using a continued fraction representation adapted from [E.T. Whittaker (1914), On the continued fractions which represent the functions of Hermite and other functions defined by differential equations, Proceedings of the Edinburgh Mathematical Society, 32, 65-74] is performed with the initial approximation from [Arpad Elbert and Martin E. Muldoon, Approximations for zeros of Hermite functions, pp. 117-126 in D. Dominici and R. S. Maier, eds, "Special Functions and Orthogonal Polynomials", Contemporary Mathematics, vol 471 (2008)] refined via the bisection method. */
+/*
+ * Computes the s-th zero the physicists' Hermite polynomial of order n, thus also
+ * the s-th zero of the Hermite function of order n. A Newton iteration using a continued
+ * fraction representation adapted from:
+ *
+ * [E.T. Whittaker (1914), On the continued fractions which represent the functions of Hermite
+ * and other functions defined by differential equations, Proceedings of the Edinburgh Mathematical
+ * Society, 32, 65-74]
+ *
+ * An initial approximation is used from:
+ *
+ * [Arpad Elbert and Martin E. Muldoon, Approximations for zeros of Hermite functions,
+ * pp. 117-126 in D. Dominici and R. S. Maier, eds, "Special Functions and Orthogonal Polynomials",
+ * Contemporary Mathematics, vol 471 (2008)]
+ *
+ * which is refined via the bisection method.
+ */
+
 int
-gsl_sf_hermite_phys_zero_e(const int n, const int s, gsl_sf_result * result)
+gsl_sf_hermite_zero_e(const int n, const int s, gsl_sf_result * result)
 {
-  if(n <= 0 || s < 0 || s > n/2) {
-    DOMAIN_ERROR(result);
-  }
-  else if(s == 0) {
-    if (GSL_IS_ODD(n) == 1) {
-      result->val = 0.;
+  if (n <= 0 || s < 0 || s > n/2)
+    {
+      DOMAIN_ERROR(result);
+    }
+  else if (s == 0)
+    {
+      if (GSL_IS_ODD(n) == 1)
+        {
+          result->val = 0.;
+          result->err = 0.;
+          return GSL_SUCCESS;
+        }
+      else
+        {
+          DOMAIN_ERROR(result);
+        }
+    }
+  else if (n == 2)
+    {
+      result->val = M_SQRT1_2;
       result->err = 0.;
       return GSL_SUCCESS;
     }
-    else {
-      DOMAIN_ERROR(result);
+  else if (n < 21)
+    {
+      result->val = H_zero_tab[(GSL_IS_ODD(n)?n/2:0)+((n/2)*(n/2-1))+s-2];
+      result->err = GSL_DBL_EPSILON*(result->val);
+      return GSL_SUCCESS;
     }
-  }
-  else if(n == 2) {
-    result->val = M_SQRT1_2;
-    result->err = 0.;
-    return GSL_SUCCESS;
-  }
-  else if(n < 21) {
-    result->val = H_zero_tab[(GSL_IS_ODD(n)?n/2:0)+((n/2)*(n/2-1))+s-2];
-    result->err = GSL_DBL_EPSILON*(result->val);
-    return GSL_SUCCESS;
-  }
-  else {
-    double d = 1., x = 1., x0 = 1.;
-    int j;
-    x = H_zero_init(n,s);
-    do {
-      x0 = x;
-      d = 0.;
-      for (j=1; j<n; j++) d = 2*j/(2.*x-d);
-      x -= (2*x-d)*0.5/n;
-    /* gsl_fcmp can be used since the smallest zero approaches 1/sqrt(n) or 1/sqrt((n-1)/3.) for large n and thus all zeros are non-zero (except for the trivial case handled above) */
-    } while (gsl_fcmp(x,x0,10*GSL_DBL_EPSILON)!=0);
-    result->val = x;
-    result->err = 2*GSL_DBL_EPSILON*x + fabs(x-x0);
-    return GSL_SUCCESS;
-  }
+  else
+    {
+      double d = 1., x = 1., x0 = 1.;
+      int j;
+
+      x = H_zero_init(n,s);
+      do
+        {
+          x0 = x;
+          d = 0.;
+
+          for (j=1; j<n; j++)
+            d = 2*j/(2.*x-d);
+
+          x -= (2*x-d)*0.5/n;
+
+        /* gsl_fcmp can be used since the smallest zero approaches 1/sqrt(n) or 1/sqrt((n-1)/3.)
+         * for large n and thus all zeros are non-zero (except for the trivial case handled above) */
+        }
+      while (gsl_fcmp(x, x0, 10*GSL_DBL_EPSILON) != 0);
+
+      result->val = x;
+      result->err = 2*GSL_DBL_EPSILON*x + fabs(x-x0);
+
+      return GSL_SUCCESS;
+    }
 }
 
 double
-gsl_sf_hermite_phys_zero(const int n, const int s)
+gsl_sf_hermite_zero(const int n, const int s)
 {
-  EVAL_RESULT(gsl_sf_hermite_phys_zero_e(n, s, &result));
+  EVAL_RESULT(gsl_sf_hermite_zero_e(n, s, &result));
 }
 
 int
 gsl_sf_hermite_func_zero_e(const int n, const int s, gsl_sf_result * result)
 {
-  return gsl_sf_hermite_phys_zero_e(n, s, result);
+  return gsl_sf_hermite_zero_e(n, s, result);
 }
 
 double
@@ -1739,6 +1802,18 @@ int
 gsl_sf_hermite_phys_der_array(const int mmax, const int n, const double x, double * result_array)
 {
   return gsl_sf_hermite_deriv_array(mmax, n, x, result_array);
+}
+
+int
+gsl_sf_hermite_phys_zero_e(const int n, const int s, gsl_sf_result * result)
+{
+  return gsl_sf_hermite_zero_e(n, s, result);
+}
+
+double
+gsl_sf_hermite_phys_zero(const int n, const int s)
+{
+  EVAL_RESULT(gsl_sf_hermite_zero_e(n, s, &result));
 }
 
 int

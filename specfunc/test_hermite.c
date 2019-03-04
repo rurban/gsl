@@ -419,7 +419,7 @@ test_hermite(void)
 
     n = 17;
     for (m=1; m<=n/2; m++) {
-      TEST_SF(s, gsl_sf_hermite_phys_zero_e, (n, m, &r),  H17z[m-1],  TEST_TOL0, GSL_SUCCESS);
+      TEST_SF(s, gsl_sf_hermite_zero_e, (n, m, &r),  H17z[m-1],  TEST_TOL0, GSL_SUCCESS);
     }
   }
 
@@ -431,7 +431,7 @@ test_hermite(void)
 
     n = 18;
     for (m=1; m<=n/2; m++) {
-      TEST_SF(s, gsl_sf_hermite_phys_zero_e, (n, m, &r),  H18z[m-1],  TEST_TOL0, GSL_SUCCESS);
+      TEST_SF(s, gsl_sf_hermite_zero_e, (n, m, &r),  H18z[m-1],  TEST_TOL0, GSL_SUCCESS);
     }
   }
 
@@ -444,7 +444,7 @@ test_hermite(void)
 
     n = 23;
     for (m=1; m<=n/2; m++) {
-      TEST_SF(s, gsl_sf_hermite_phys_zero_e, (n, m, &r),  H23z[m-1],  TEST_TOL0, GSL_SUCCESS);
+      TEST_SF(s, gsl_sf_hermite_zero_e, (n, m, &r),  H23z[m-1],  TEST_TOL0, GSL_SUCCESS);
     }
   }
 
@@ -457,7 +457,7 @@ test_hermite(void)
 
     n = 24;
     for (m=1; m<=n/2; m++) {
-      TEST_SF(s, gsl_sf_hermite_phys_zero_e, (n, m, &r),  H24z[m-1],  TEST_TOL0, GSL_SUCCESS);
+      TEST_SF(s, gsl_sf_hermite_zero_e, (n, m, &r),  H24z[m-1],  TEST_TOL0, GSL_SUCCESS);
     }
   }
 
@@ -481,15 +481,15 @@ test_hermite(void)
   res[0] = (double) n;
   sa = 0;
   for (m=1; m<=n/2; m++) {
-    gsl_sf_hermite_phys_zero_e(n, m, &r);
+    gsl_sf_hermite_zero_e(n, m, &r);
     if (x>=r.val) {
       sa += TEST_SF_INCONS;
-      printf("sanity check failed! (gsl_sf_hermite_phys_zero)\n");
+      printf("sanity check failed! (gsl_sf_hermite_zero)\n");
     }
     res[0] = GSL_MIN(res[0],fabs(x-r.val));
     x = r.val;
   }
-  gsl_test(sa, "gsl_sf_hermite_phys_zero(n, m, r)");
+  gsl_test(sa, "gsl_sf_hermite_zero(n, m, r)");
 
   return s;
 }

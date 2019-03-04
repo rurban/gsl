@@ -65,8 +65,8 @@ int gsl_sf_hermite_func_der_e(const int m, const int n, const double x, gsl_sf_r
 double gsl_sf_hermite_func_der(const int m, const int n, const double x);
 int gsl_sf_hermite_prob_zero_e(const int n, const int s, gsl_sf_result * result);
 double gsl_sf_hermite_prob_zero(const int n, const int s);
-int gsl_sf_hermite_phys_zero_e(const int n, const int s, gsl_sf_result * result);
-double gsl_sf_hermite_phys_zero(const int n, const int s);
+int gsl_sf_hermite_zero_e(const int n, const int s, gsl_sf_result * result);
+double gsl_sf_hermite_zero(const int n, const int s);
 int gsl_sf_hermite_func_zero_e(const int n, const int s, gsl_sf_result * result);
 double gsl_sf_hermite_func_zero(const int n, const int s);
 
@@ -81,6 +81,9 @@ int gsl_sf_hermite_phys_series_e(const int n, const double x, const double * a, 
 double gsl_sf_hermite_phys_series(const int n, const double x, const double * a);
 int gsl_sf_hermite_phys_array_der(const int m, const int nmax, const double x, double * result_array);
 int gsl_sf_hermite_phys_der_array(const int mmax, const int n, const double x, double * result_array);
+int gsl_sf_hermite_phys_zero_e(const int n, const int s, gsl_sf_result * result);
+double gsl_sf_hermite_phys_zero(const int n, const int s);
+
 int gsl_sf_hermite_prob_array_der(const int m, const int nmax, const double x, double * result_array);
 int gsl_sf_hermite_prob_der_array(const int mmax, const int n, const double x, double * result_array);
 int gsl_sf_hermite_prob_der_e(const int m, const int n, const double x, gsl_sf_result * result);

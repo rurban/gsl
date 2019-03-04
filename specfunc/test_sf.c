@@ -2746,7 +2746,6 @@ int test_results(void)
 int main(int argc, char * argv[])
 {
   gsl_ieee_env_setup ();
-#if 0
   gsl_set_error_handler_off ();
 
   gsl_test(test_airy(),        "Airy Functions");
@@ -2766,9 +2765,7 @@ int main(int argc, char * argv[])
   gsl_test(test_fermidirac(),  "Fermi-Dirac Functions");
   gsl_test(test_gamma(),       "Gamma Functions");
   gsl_test(test_gegen(),       "Gegenbauer Polynomials");
-#endif
   gsl_test(test_hermite(),     "Hermite Functions");
-#if 0
   gsl_test(test_hyperg(),      "Hypergeometric Functions");
   gsl_test(test_laguerre(),    "Laguerre Polynomials");
   gsl_test(test_lambert(),     "Lambert W Functions");
@@ -2785,7 +2782,6 @@ int main(int argc, char * argv[])
   gsl_test(test_zeta(),        "Zeta Functions");
 
   gsl_test(test_results(),     "Result Methods");
-#endif
 
   exit (gsl_test_summary());
 }
