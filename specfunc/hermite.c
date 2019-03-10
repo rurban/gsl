@@ -444,6 +444,85 @@ gsl_sf_hermite_func(const int n, const double x)
   EVAL_RESULT(gsl_sf_hermite_func_e(n, x, &result));
 }
 
+/*
+ * This algorithm is based on the contour integral algorithm of:
+ *
+ * B. Bunck, BIT Numerical Mathematics, 49, 281 (2009)
+ *
+ * It has O(sqrt(n)) complexity
+ */
+
+int
+gsl_sf_hermite_func_fast_e(const int n, const double x, gsl_sf_result * result)
+{
+  if (n < 1000 || x == 0.0)
+    {
+      /* for small n, the recurrence method is faster and more accurate */
+      return gsl_sf_hermite_func_e(n, x, result);
+    }
+  else
+    {
+      size_t j;
+      const double k = sqrt(0.5*n);
+      const size_t steps = (size_t) ceil(13.0*sqrt(n));
+      const double dt = M_PI/steps;
+      const double invn2 = 1.0/(n*n);
+      double ex, ex_e, cs, cs_e, sn, sn2, t;
+      gsl_sf_result lngamma;
+  
+      if (n < 36)
+        {
+          gsl_sf_lnfact_e(n, &lngamma);
+          lngamma.val *= 0.5;
+          lngamma.err *= 0.5;
+          t = 0.5*n*log(n) + 0.25*M_LNPI;
+          cs = 0.5*n;
+          lngamma.val += cs - t;
+          lngamma.err += (cs + t)*GSL_DBL_EPSILON;
+        }
+      else
+        {
+          /* approximate ln(gamma_{n,k}) using Stirling's formula */
+          lngamma.val = 0.25*log(2*n);
+          lngamma.err = (lngamma.val  + ((((invn2/3360 + 1.0/2520)*invn2 + 1.0/720)*invn2) + 1.0/24)/n)*GSL_DBL_EPSILON;
+          lngamma.val -= ((((invn2/3360 - 1.0/2520)*invn2 + 1.0/720)*invn2) - 1.0/24)/n;
+        }
+  
+      ex = exp(lngamma.val - n - 0.5*x*x - 2*x*k);
+      cs = (GSL_IS_ODD(n) ? -1 : 1);
+      result->val = 0.5*ex*cs;
+      result->err = 0.5*ex*(lngamma.err + (n + 0.5*x*x + fabs(2*x*k) + 1)*GSL_DBL_EPSILON);
+      ex = exp(lngamma.val - n - 0.5*x*x + 2*x*k);
+      result->val += 0.5*ex;
+      result->err += 0.5*ex*(lngamma.err + (n + 0.5*x*x + fabs(2*x*k) + 1)*GSL_DBL_EPSILON);
+  
+      for (j = 1; j < steps; j++)
+        {
+          t = j*dt;
+          cs = cos(t);
+          ex = exp(lngamma.val - 0.5*x*x + (2*x*k - n*cs)*cs);
+          ex_e = ex*(lngamma.err + GSL_DBL_EPSILON*(1 + 0.5*x*x + (fabs(2*x*k) + fabs(n*cs))*fabs(cs)));
+          sn = sin(t);
+          sn2 = sin(2*t);
+          cs = cos(2*x*k*sn - 0.5*n*sn2 - n*t);
+          cs_e = fmin(1.0+fabs(cs), GSL_DBL_EPSILON*(fabs(cs) + (fabs(2*x*k*sn) + fabs(0.5*n*sn2) + n*t)*fabs(sin(2*x*k*sn - 0.5*n*sn2 - n*t))));
+          result->val += ex*cs;
+          result->err += ex*cs_e + ex_e*fabs(cs) + GSL_DBL_EPSILON*fabs(ex*cs);
+        }
+
+      result->val *= M_1_PI*dt;
+      result->err = M_1_PI*dt*result->err + GSL_DBL_EPSILON*fabs(result->val);
+
+      return GSL_SUCCESS;
+    }
+}
+
+double
+gsl_sf_hermite_func_fast(const int n, const double x)
+{
+  EVAL_RESULT(gsl_sf_hermite_func_fast_e(n, x, &result));
+}
+
 /* Evaluates all probabilists' Hermite polynomials up to order nmax at position x. The results are stored in result_array.
  * Since all polynomial orders are needed, upward recurrence is employed. */
 int
@@ -1095,8 +1174,6 @@ gsl_sf_hermite_func_series(const int n, const double x, const double * a)
 /* Evaluates the m-th derivative of the Hermite function of order n at position x.
  * A summation including upward recurrences is used. */
 
-#if 1
-
 int
 gsl_sf_hermite_func_der_e(const int m, const int n, const double x, gsl_sf_result * result)
 {
@@ -1142,187 +1219,87 @@ gsl_sf_hermite_func_der_e(const int m, const int n, const double x, gsl_sf_resul
 
       return GSL_SUCCESS;
     }
-  else if (m == 2)
-    {
-      /* use differential equation: psi''_n(x) + (2n + 1 - x^2) psi_n(x) = 0 */
-      int status = gsl_sf_hermite_func_e(n, x, result);
-      result->val *= x*x - 2.0*n - 1.0;
-      return status;
-    }
   else
     {
+      int j;
+      double r,er,b;
+      double h0 = 1.;
+      double h1 = x;
+      double eh0 = GSL_DBL_EPSILON;
+      double eh1 = GSL_DBL_EPSILON;
+      double p0 = 1.;
+      double p1 = M_SQRT2*x;
+      double ep0 = GSL_DBL_EPSILON;
+      double ep1 = M_SQRT2*GSL_DBL_EPSILON;
+      double f = 1.;
+
+      for (j=GSL_MAX_INT(1,n-m+1);j<=n;j++)
+        f *= sqrt(2.*j);
+
+      if (m > n)
+        {
+          f = (GSL_IS_ODD(m-n)?-f:f);
+
+          for (j=0;j<GSL_MIN_INT(n,m-n);j++)
+            f *= (m-j)/(j+1.);
+        }
+
+      for (j=1;j<=m-n;j++)
+        {
+          b = x*h1-j*h0;
+          h0 = h1;
+          h1 = b;
+	
+          b  = (fabs(x)*eh1+j*eh0);
+          eh0 = eh1;
+          eh1 = b;
+        }
+
+      b = 0.;
+      for (j=1;j<=n-m;j++)
+        {
+          b = (M_SQRT2*x*p1-sqrt(j)*p0)/sqrt(j+1.);
+          p0 = p1;
+          p1 = b;
+	
+          b  = (M_SQRT2*fabs(x)*ep1+sqrt(j)*ep0)/sqrt(j+1.);
+          ep0 = ep1;
+          ep1 = b;
+        }
+
+      b = 0.;
+      r = 0.;
+      er = 0.;
+      for (j=GSL_MAX_INT(0,m-n);j<=m;j++)
+        {
+          r += f*h0*p0;
+          er += eh0*fabs(f*p0)+ep0*fabs(f*h0)+GSL_DBL_EPSILON*fabs(f*h0*p0);
+	
+          b = x*h1-(j+1.)*h0;
+          h0 = h1;
+          h1 = b;
+	
+          b  = 0.5*(fabs(x)*eh1+(j+1.)*eh0);
+          eh0 = eh1;
+          eh1 = b;
+	
+          b = (M_SQRT2*x*p1-sqrt(n-m+j+1.)*p0)/sqrt(n-m+j+2.);
+          p0 = p1;
+          p1 = b;
+	
+          b  = 0.5*(M_SQRT2*fabs(x)*ep1+sqrt(n-m+j+1.)*ep0)/sqrt(n-m+j+2.);
+          ep0 = ep1;
+          ep1 = b;
+	
+          f *= -(m-j)/(j+1.)/sqrt(n-m+j+1.)*M_SQRT1_2;
+        }
+
+      result->val = r*exp(-0.5*x*x)/sqrt(M_SQRTPI);
+      result->err = er*fabs(exp(-0.5*x*x)/sqrt(M_SQRTPI)) + GSL_DBL_EPSILON*fabs(result->val);
+
+      return GSL_SUCCESS;
     }
 }
-
-#else
-
-int
-gsl_sf_hermite_func_der_e(const int m, const int n, const double x, gsl_sf_result * result)
-{
-  /* FIXME: asymptotic formula! */
-  if(m < 0 || n < 0) {
-    DOMAIN_ERROR(result);
-  }
-  else if(m == 0){
-    return gsl_sf_hermite_func_e(n,x,result);
-  }
-  else{
-    int j=0, c=0;
-    double r,er,b;
-    double h0 = 1.;
-    double h1 = x;
-    double eh0 = GSL_DBL_EPSILON;
-    double eh1 = GSL_DBL_EPSILON;
-    double p0 = 1.;
-    double p1 = M_SQRT2*x;
-    double ep0 = GSL_DBL_EPSILON;
-    double ep1 = M_SQRT2*GSL_DBL_EPSILON;
-    double f = 1.;
-    for (j=GSL_MAX_INT(1,n-m+1);j<=n;j++)
-      {
-	f *= sqrt(2.*j);
-      }
-    if (m>n)
-      {
-	f = (GSL_IS_ODD(m-n)?-f:f);
-	for (j=0;j<GSL_MIN_INT(n,m-n);j++)
-	  {
-	    f *= (m-j)/(j+1.);
-	  }
-      }
-    c = 0;
-    for (j=1;j<=m-n;j++)
-      {
-	b = x*h1-j*h0;
-	h0 = h1;
-	h1 = b;
-	
-	b  = (fabs(x)*eh1+j*eh0);
-	eh0 = eh1;
-	eh1 = b;
-
-	while(( GSL_MIN(fabs(h0),fabs(h1)) > 2.0*GSL_SQRT_DBL_MIN ) && ( GSL_MAX(fabs(h0),fabs(h1)) > GSL_SQRT_DBL_MAX )){
-	  h0 *= 0.5;
-	  h1 *= 0.5;
-	  eh0 *= 0.5;
-	  eh1 *= 0.5;
-	  c++;
-	}
-
-	while(( ( (fabs(h0) < GSL_SQRT_DBL_MIN) && (h0 != 0) ) || ( (fabs(h1) < GSL_SQRT_DBL_MIN) && (h1 != 0) ) ) && ( GSL_MAX(fabs(h0),fabs(h1)) < 0.5*GSL_SQRT_DBL_MAX )){
-	  h0 *= 2.0;
-	  h1 *= 2.0;
-	  eh0 *= 2.0;
-	  eh1 *= 2.0;
-	  c--;
-	}
-
-      }
-    h0 *= pow2(c);
-    h1 *= pow2(c);
-    eh0 *= pow2(c);
-    eh1 *= pow2(c);
-
-    b = 0.;
-    c = 0;
-    for (j=1;j<=n-m;j++)
-      {
-	b = (M_SQRT2*x*p1-sqrt(j)*p0)/sqrt(j+1.);
-	p0 = p1;
-	p1 = b;
-	
-	b  = (M_SQRT2*fabs(x)*ep1+sqrt(j)*ep0)/sqrt(j+1.);
-	ep0 = ep1;
-	ep1 = b;
-
-	while(( GSL_MIN(fabs(p0),fabs(p1)) > 2.0*GSL_SQRT_DBL_MIN ) && ( GSL_MAX(fabs(p0),fabs(p1)) > GSL_SQRT_DBL_MAX )){
-	  p0 *= 0.5;
-	  p1 *= 0.5;
-	  ep0 *= 0.5;
-	  ep1 *= 0.5;
-	  c++;
-	}
-
-	while(( ( (fabs(p0) < GSL_SQRT_DBL_MIN) && (p0 != 0) ) || ( (fabs(p1) < GSL_SQRT_DBL_MIN) && (p1 != 0) ) ) && ( GSL_MAX(fabs(p0),fabs(p1)) < 0.5*GSL_SQRT_DBL_MAX )){
-	  p0 = p0*2;
-	  p1 = p1*2;
-	  ep0 = ep0*2;
-	  ep1 = ep1*2;
-	  c--;
-	}
-
-      }
-    p0 *= pow2(c);
-    p1 *= pow2(c);
-    ep0 *= pow2(c);
-    ep1 *= pow2(c);
-
-    c = 0;
-    b = 0.;
-    r = 0.;
-    er = 0.;
-    for (j=GSL_MAX_INT(0,m-n);j<=m;j++)
-      {
-	r += f*h0*p0;
-	er += eh0*fabs(f*p0)+ep0*fabs(f*h0)+GSL_DBL_EPSILON*fabs(f*h0*p0);
-	
-	b = x*h1-(j+1.)*h0;
-	h0 = h1;
-	h1 = b;
-	
-	b  = 0.5*(fabs(x)*eh1+(j+1.)*eh0);
-	eh0 = eh1;
-	eh1 = b;
-	
-	b = (M_SQRT2*x*p1-sqrt(n-m+j+1.)*p0)/sqrt(n-m+j+2.);
-	p0 = p1;
-	p1 = b;
-	
-	b  = 0.5*(M_SQRT2*fabs(x)*ep1+sqrt(n-m+j+1.)*ep0)/sqrt(n-m+j+2.);
-	ep0 = ep1;
-	ep1 = b;
-	
-	f *= -(m-j)/(j+1.)/sqrt(n-m+j+1.)*M_SQRT1_2;
-
-	while(( (fabs(h0) > 2.0*GSL_SQRT_DBL_MIN) && (fabs(h1) > 2.0*GSL_SQRT_DBL_MIN) && (fabs(p0) > 2.0*GSL_SQRT_DBL_MIN) && (fabs(p1) > 2.0*GSL_SQRT_DBL_MIN) && (fabs(r) > 4.0*GSL_SQRT_DBL_MIN) ) && ( (fabs(h0) > GSL_SQRT_DBL_MAX) || (fabs(h1) > GSL_SQRT_DBL_MAX) || (fabs(p0) > GSL_SQRT_DBL_MAX) || (fabs(p1) > GSL_SQRT_DBL_MAX) || (fabs(r) > GSL_SQRT_DBL_MAX) )){
-	  h0 *= 0.5;
-	  h1 *= 0.5;
-	  eh0 *= 0.5;
-	  eh1 *= 0.5;
-	  p0 *= 0.5;
-	  p1 *= 0.5;
-	  ep0 *= 0.5;
-	  ep1 *= 0.5;
-	  r *= 0.25;
-	  er *= 0.25;
-	  c++;
-	}
-
-	while(( ( (fabs(h0) < GSL_SQRT_DBL_MIN) && (h0 != 0) ) || ( (fabs(h1) < GSL_SQRT_DBL_MIN) && (h1 != 0) ) || ( (fabs(p0) < GSL_SQRT_DBL_MIN) && (p0 != 0) ) || ( (fabs(p1) < GSL_SQRT_DBL_MIN) && (p1 != 0) ) || ( (fabs(r) < GSL_SQRT_DBL_MIN) && (r != 0) ) ) && ( (fabs(h0) < 0.5*GSL_SQRT_DBL_MAX) && (fabs(h1) < 0.5*GSL_SQRT_DBL_MAX) && (fabs(p0) < 0.5*GSL_SQRT_DBL_MAX) && (fabs(p1) < 0.5*GSL_SQRT_DBL_MAX) && (fabs(r) < 0.25*GSL_SQRT_DBL_MAX) )){
-	  p0 *= 2.0;
-	  p1 *= 2.0;
-	  ep0 *= 2.0;
-	  ep1 *= 2.0;
-	  h0 *= 2.0;
-	  h1 *= 2.0;
-	  eh0 *= 2.0;
-	  eh1 *= 2.0;
-	  r *= 4.0;
-	  er *= 4.0;
-	  c--;
-	}
-
-      }
-
-    r *= pow2(2*c);
-    er *= pow2(2*c);
-    result->val = r*exp(-0.5*x*x)/sqrt(M_SQRTPI);
-    result->err = er*fabs(exp(-0.5*x*x)/sqrt(M_SQRTPI)) + GSL_DBL_EPSILON*fabs(result->val);
-    return GSL_SUCCESS;
-  }
-}
-
-#endif
 
 double
 gsl_sf_hermite_func_der(const int m, const int n, const double x)

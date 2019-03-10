@@ -7,7 +7,9 @@
    with rest of the library, and deprecated old function names
 
 ** updated gsl_sf_hermite_func() to use a newer algorithm
-   due to B. Bunck which is more stable for large x
+   due to B. Bunck which is more stable for large x; also added
+   gsl_sf_hermite_func_fast() which uses the faster Cauchy integral
+   algorithm in the same paper by Bunck
 
 ** add gsl_vector_memcpy_scale()
 

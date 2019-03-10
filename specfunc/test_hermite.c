@@ -288,42 +288,61 @@ test_hermite(void)
   TEST_SF(s, gsl_sf_hermite_phys_series_e, (n, x, res, &r),  1.07772223811696567390619566842e88,  TEST_TOL0, GSL_SUCCESS);
 
   TEST_SF(s, gsl_sf_hermite_func_e, (0,  1.3, &r),  0.322651504564963746879400858624,  TEST_TOL0, GSL_SUCCESS);
+  TEST_SF(s, gsl_sf_hermite_func_fast_e, (0,  1.3, &r),  0.322651504564963746879400858624,  TEST_TOL0, GSL_SUCCESS);
+
   TEST_SF(s, gsl_sf_hermite_func_e, (1,  1.3, &r),  0.593187573778613235895531272243,  TEST_TOL0, GSL_SUCCESS);
+  TEST_SF(s, gsl_sf_hermite_func_fast_e, (1,  1.3, &r),  0.593187573778613235895531272243,  TEST_TOL0, GSL_SUCCESS);
+
   TEST_SF(s, gsl_sf_hermite_func_e, (1, -1.3, &r), -0.593187573778613235895531272243,  TEST_TOL0, GSL_SUCCESS);
+  TEST_SF(s, gsl_sf_hermite_func_fast_e, (1, -1.3, &r), -0.593187573778613235895531272243,  TEST_TOL0, GSL_SUCCESS);
 
   TEST_SF(s, gsl_sf_hermite_func_e, (27, 0, &r),  0.0,  TEST_TOL0, GSL_SUCCESS);
+  TEST_SF(s, gsl_sf_hermite_func_fast_e, (27, 0, &r),  0.0,  TEST_TOL0, GSL_SUCCESS);
+
   TEST_SF(s, gsl_sf_hermite_func_e, (28, 0, &r),  0.290371943657199641200016132937,  TEST_TOL0, GSL_SUCCESS);
+  TEST_SF(s, gsl_sf_hermite_func_fast_e, (28, 0, &r),  0.290371943657199641200016132937,  TEST_TOL0, GSL_SUCCESS);
 
   TEST_SF(s, gsl_sf_hermite_func_e, (28, 0.75, &r),  0.23526280808621240649319140441,  TEST_TOL1, GSL_SUCCESS);
+  TEST_SF(s, gsl_sf_hermite_func_fast_e, (28, 0.75, &r),  0.23526280808621240649319140441,  TEST_TOL1, GSL_SUCCESS);
+
   TEST_SF(s, gsl_sf_hermite_func_e, (200, 0.75, &r), -0.13725356483699291817038427801, TEST_TOL3, GSL_SUCCESS);
+  TEST_SF(s, gsl_sf_hermite_func_fast_e, (200, 0.75, &r), -0.13725356483699291817038427801, TEST_TOL3, GSL_SUCCESS);
 
   TEST_SF(s, gsl_sf_hermite_func_e, (100028, 0.75, &r),  -0.02903467369856961147236598086,  TEST_TOL4, GSL_SUCCESS);
+  TEST_SF(s, gsl_sf_hermite_func_fast_e, (100028, 0.75, &r),  -0.02903467369856961147236598086,  TEST_TOL4, GSL_SUCCESS);
 
   n = 10025;
   x = ((sqrt(2*n+1.)+aizero1/pow(8.*n,1/6.))/2.5);
   TEST_SF(s, gsl_sf_hermite_func_e, (n, x, &r),  -0.05301278920004176459797680403,  TEST_TOL4, GSL_SUCCESS);
+  TEST_SF(s, gsl_sf_hermite_func_fast_e, (n, x, &r),  -0.05301278920004176459797680403,  TEST_TOL4, GSL_SUCCESS);
 
   n = 10028;
   x = ((sqrt(2*n+1.)+aizero1/pow(8.*n,1/6.))/2.5);
   TEST_SF(s, gsl_sf_hermite_func_e, (n, x, &r),  0.06992968509693993526829596970,  TEST_TOL3, GSL_SUCCESS);
+  TEST_SF(s, gsl_sf_hermite_func_fast_e, (n, x, &r),  0.06992968509693993526829596970,  TEST_TOL3, GSL_SUCCESS);
 
   n = 10025;
   x = (sqrt(2*n+1.)-(aizero1/pow(8.*n,1/6.))/2.5);
   TEST_SF(s, gsl_sf_hermite_func_e, (n, x, &r),  0.08049000991742150521366671021,  TEST_TOL4, GSL_SUCCESS);
+  TEST_SF(s, gsl_sf_hermite_func_fast_e, (n, x, &r),  0.08049000991742150521366671021,  TEST_TOL4, GSL_SUCCESS);
 
   n = 10028;
   x = (sqrt(2*n+1.)-(aizero1/pow(8.*n,1/6.))/2.5);
   TEST_SF(s, gsl_sf_hermite_func_e, (n, x, &r),  0.08048800667512084252723933250,  TEST_TOL4, GSL_SUCCESS);
+  TEST_SF(s, gsl_sf_hermite_func_fast_e, (n, x, &r),  0.08048800667512084252723933250,  TEST_TOL4, GSL_SUCCESS);
 
   n = 10025;
   x = (sqrt(2*n+1.)-2.5*(aizero1/pow(8.*n,1/6.)));
   TEST_SF(s, gsl_sf_hermite_func_e, (n, x, &r),  7.97206830806663013555068100e-6,  TEST_TOL4, GSL_SUCCESS);
+  TEST_SF(s, gsl_sf_hermite_func_fast_e, (n, x, &r),  7.97206830806663013555068100e-6,  1.0e-9, GSL_SUCCESS);
 
   n = 10028;
   x = (sqrt(2*n+1.)-2.5*(aizero1/pow(8.*n,1/6.)));
   TEST_SF(s, gsl_sf_hermite_func_e, (n, x, &r),  7.97188517397786729928465829e-6,  TEST_TOL4, GSL_SUCCESS);
+  TEST_SF(s, gsl_sf_hermite_func_fast_e, (n, x, &r),  7.97188517397786729928465829e-6,  1.0e-9, GSL_SUCCESS);
 
   TEST_SF(s, gsl_sf_hermite_func_e, (10000, 60.0, &r), 0.03162606955427450540143292572, TEST_TOL3, GSL_SUCCESS);
+  TEST_SF(s, gsl_sf_hermite_func_fast_e, (10000, 60.0, &r), 0.03162606955427450540143292572, TEST_TOL3, GSL_SUCCESS);
 
   x = 0.75;
 
@@ -359,7 +378,14 @@ test_hermite(void)
   TEST_SF(s, gsl_sf_hermite_func_der_e, (0, 28, 0.75, &r),  0.235262808086212406493191404,  TEST_TOL1, GSL_SUCCESS);
   TEST_SF(s, gsl_sf_hermite_func_der_e, (1, 28, 0.75, &r),  1.289485094958329643927802330,  TEST_TOL1, GSL_SUCCESS);
   TEST_SF(s, gsl_sf_hermite_func_der_e, (2, 28, 0.75, &r), -13.27764473136561269145948989,  TEST_TOL1, GSL_SUCCESS);
-  TEST_SF(s, gsl_sf_hermite_func_der_e, (5, 28, 0.75, &r),  4035.32788513029308540826835,  TEST_TOL1, GSL_SUCCESS);
+  TEST_SF(s, gsl_sf_hermite_func_der_e, (3, 28, 0.75, &r), -72.42242083458141066943555691,  TEST_TOL1, GSL_SUCCESS);
+  TEST_SF(s, gsl_sf_hermite_func_der_e, (4, 28, 0.75, &r),  753.6960554274941800190147503,  TEST_TOL1, GSL_SUCCESS);
+  TEST_SF(s, gsl_sf_hermite_func_der_e, (5, 28, 0.75, &r),  4035.32788513029308540826835,   TEST_TOL1, GSL_SUCCESS);
+
+  TEST_SF(s, gsl_sf_hermite_func_der_e, (0, 380, 0.75, &r), -0.0400554661321992411631174,    TEST_TOL0, GSL_SUCCESS);
+  TEST_SF(s, gsl_sf_hermite_func_der_e, (1, 380, 0.75, &r), -4.0417244263030600591206553,    TEST_TOL1, GSL_SUCCESS);
+  TEST_SF(s, gsl_sf_hermite_func_der_e, (2, 380, 0.75, &r),  30.4596785269042604519780923,   TEST_TOL2, GSL_SUCCESS);
+  TEST_SF(s, gsl_sf_hermite_func_der_e, (3, 380, 0.75, &r),  3073.4187352276349348458186556, TEST_TOL2, GSL_SUCCESS);
 
   {
     /* positive zeros of the probabilists' Hermite polynomial of order 17 */

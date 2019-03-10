@@ -48,6 +48,8 @@ int gsl_sf_hermite_deriv_e(const int m, const int n, const double x, gsl_sf_resu
 double gsl_sf_hermite_deriv(const int m, const int n, const double x);
 int gsl_sf_hermite_func_e(const int n, const double x, gsl_sf_result * result);
 double gsl_sf_hermite_func(const int n, const double x);
+int gsl_sf_hermite_func_fast_e(const int n, const double x, gsl_sf_result * result);
+double gsl_sf_hermite_func_fast(const int n, const double x);
 int gsl_sf_hermite_prob_array(const int nmax, const double x, double * result_array);
 int gsl_sf_hermite_prob_array_deriv(const int m, const int nmax, const double x, double * result_array);
 int gsl_sf_hermite_prob_deriv_array(const int mmax, const int n, const double x, double * result_array);

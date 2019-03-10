@@ -174,18 +174,30 @@ They are orthonormal,
 .. math:: \int_{-\infty}^{\infty} \psi_m(x) \psi_n(x) dx = \delta_{mn}
 
 and form an orthonormal basis of :math:`L^2(\mathbb{R})`. The Hermite functions
-are also eigenfunctions of the continuous Fourier transform. GSL evaluates the Hermite
-functions using the modified recurrence method of Bunck (2009).
+are also eigenfunctions of the continuous Fourier transform. GSL offers two
+methods for evaluating the Hermite functions. The first uses the standard three-term
+recurrence relation which has :math:`O(n)` complexity and is the most accurate. The
+second uses a Cauchy integral approach due to Bunck (2009) which has :math:`O(\sqrt{n})`
+complexity which represents a significant speed improvement for large :math:`n`, although
+it is slightly less accurate.
 
 .. function:: double gsl_sf_hermite_func (const int n, const double x)
               int gsl_sf_hermite_func_e (const int n, const double x, gsl_sf_result * result)
 
-   These routines evaluate the Hermite function :math:`\psi_n(x)` of order :data:`n` at position :data:`x`.
+   These routines evaluate the Hermite function :math:`\psi_n(x)` of order :data:`n` at position :data:`x`
+   using a three term recurrence relation. The algorithm complexity is :math:`O(n)`.
+
+.. function:: double gsl_sf_hermite_func_fast (const int n, const double x)
+              int gsl_sf_hermite_func_fast_e (const int n, const double x, gsl_sf_result * result)
+
+   These routines evaluate the Hermite function :math:`\psi_n(x)` of order :data:`n` at position :data:`x`
+   using a the Cauchy integral algorithm due to Bunck, 2009. The algorithm complexity is :math:`O(\sqrt{n})`.
 
 .. function:: int gsl_sf_hermite_func_array (const int nmax, const double x, double * result_array)
 
    This routine evaluates all Hermite functions :math:`\psi_n(x)` for orders :math:`n = 0, \dots, \textrm{nmax}`
-   at position :data:`x`. The results are stored in :data:`result_array` which has length at least :code:`nmax + 1`.
+   at position :data:`x`, using the recurrence relation algorithm. The results are stored in
+   :data:`result_array` which has length at least :code:`nmax + 1`.
 
 .. function:: double gsl_sf_hermite_func_series (const int n, const double x, const double * a)
               int gsl_sf_hermite_func_series_e (const int n, const double x, const double * a, gsl_sf_result * result)
