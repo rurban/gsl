@@ -54,8 +54,8 @@ test_hermite_id1(const int n, const double x, const double y)
       b[k] = fac * b[k - 1];
     }
 
-  lhs = gsl_sf_hermite_phys_series(n, x, a);
-  rhs = gsl_sf_hermite_phys(n, x + y);
+  lhs = gsl_sf_hermite_series(n, x, a);
+  rhs = gsl_sf_hermite(n, x + y);
   gsl_test_rel(lhs, rhs, TEST_TOL4, "identity1 phys n=%d x=%g y=%g", n, x, y);
 
   lhs = gsl_sf_hermite_prob_series(n, x, b);
@@ -285,7 +285,7 @@ test_hermite(void)
   for(m=1; m<=n; m++){
     res[m] = res[m-1]/2.;
   }
-  TEST_SF(s, gsl_sf_hermite_phys_series_e, (n, x, res, &r),  1.07772223811696567390619566842e88,  TEST_TOL0, GSL_SUCCESS);
+  TEST_SF(s, gsl_sf_hermite_series_e, (n, x, res, &r),  1.07772223811696567390619566842e88,  TEST_TOL0, GSL_SUCCESS);
 
   TEST_SF(s, gsl_sf_hermite_func_e, (0,  1.3, &r),  0.322651504564963746879400858624,  TEST_TOL0, GSL_SUCCESS);
   TEST_SF(s, gsl_sf_hermite_func_fast_e, (0,  1.3, &r),  0.322651504564963746879400858624,  TEST_TOL0, GSL_SUCCESS);
