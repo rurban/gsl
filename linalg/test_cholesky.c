@@ -153,7 +153,7 @@ static int
 test_cholesky_decomp(gsl_rng * r)
 {
   int s = 0;
-  const size_t N_max = 50;
+  const size_t N_max = 200;
   size_t N;
 
   for (N = 1; N <= N_max; ++N)

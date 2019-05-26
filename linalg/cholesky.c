@@ -2,7 +2,7 @@
  *
  * Copyright (C) 2000 Thomas Walter
  * Copyright (C) 2000, 2001, 2002, 2003, 2005, 2007 Brian Gough, Gerard Jungman
- * Copyright (C) 2016 Patrick Alken
+ * Copyright (C) 2016, 2019 Patrick Alken
  *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -17,6 +17,7 @@
  * 03 May 2000: Modified for GSL by Brian Gough
  * 29 Jul 2005: Additions by Gerard Jungman
  * 04 Mar 2016: Change Cholesky algorithm to gaxpy version by Patrick Alken
+ * 26 May 2019: implement block Cholesky with Level 3 BLAS by Patrick Alken
  */
 
 /*
@@ -71,6 +72,38 @@ gsl_linalg_cholesky_decomp (gsl_matrix * A)
 /*
 gsl_linalg_cholesky_decomp1()
   Perform Cholesky decomposition of a symmetric positive
+definite matrix using lower triangle using Level 3 BLAS algorithm.
+
+Inputs: A - (input) symmetric, positive definite matrix
+            (output) lower triangle contains Cholesky factor
+
+Return: success/error
+
+Notes:
+1) original matrix is saved in upper triangle on output
+*/
+
+int
+gsl_linalg_cholesky_decomp1 (gsl_matrix * A)
+{
+  const size_t N = A->size1;
+
+  if (N != A->size2)
+    {
+      GSL_ERROR("Cholesky decomposition requires square matrix", GSL_ENOTSQR);
+    }
+  else
+    {
+      /* save original matrix in upper triangle for later rcond calculation */
+      gsl_matrix_transpose_tricpy('L', 0, A, A);
+
+      return gsl_linalg_cholesky_decomp_L3(A);
+    }
+}
+
+/*
+gsl_linalg_cholesky_decomp_L2()
+  Perform Cholesky decomposition of a symmetric positive
 definite matrix using lower triangle
 
 Inputs: A - (input) symmetric, positive definite matrix
@@ -80,27 +113,21 @@ Return: success/error
 
 Notes:
 1) Based on algorithm 4.2.1 (Gaxpy Cholesky) of Golub and
-Van Loan, Matrix Computations (4th ed).
-
-2) original matrix is saved in upper triangle on output
+Van Loan, Matrix Computations (4th ed), using Level 2 BLAS.
 */
 
 int
-gsl_linalg_cholesky_decomp1 (gsl_matrix * A)
+gsl_linalg_cholesky_decomp_L2 (gsl_matrix * A)
 {
-  const size_t M = A->size1;
-  const size_t N = A->size2;
+  const size_t N = A->size1;
 
-  if (M != N)
+  if (N != A->size2)
     {
-      GSL_ERROR("cholesky decomposition requires square matrix", GSL_ENOTSQR);
+      GSL_ERROR("Cholesky decomposition requires square matrix", GSL_ENOTSQR);
     }
   else
     {
       size_t j;
-
-      /* save original matrix in upper triangle for later rcond calculation */
-      gsl_matrix_transpose_tricpy('L', 0, A, A);
 
       for (j = 0; j < N; ++j)
         {
@@ -124,6 +151,71 @@ gsl_linalg_cholesky_decomp1 (gsl_matrix * A)
 
           ajj = sqrt(ajj);
           gsl_vector_scale(&v.vector, 1.0 / ajj);
+        }
+
+      return GSL_SUCCESS;
+    }
+}
+
+/*
+gsl_linalg_cholesky_decomp_L3()
+  Perform Cholesky decomposition of a symmetric positive
+definite matrix using Level 3 BLAS.
+
+Inputs: A - (input) symmetric, positive definite matrix in lower triangle
+            (output) lower triangle contains Cholesky factor
+
+Return: success/error
+
+Notes:
+1) Based on block Cholesky algorithm using Level 3 BLAS; see:
+
+   http://www.netlib.org/utk/papers/factor/node9.html
+*/
+
+int
+gsl_linalg_cholesky_decomp_L3 (gsl_matrix * A)
+{
+  const size_t N = A->size1;
+
+  if (N != A->size2)
+    {
+      GSL_ERROR("Cholesky decomposition requires square matrix", GSL_ENOTSQR);
+    }
+  else
+    {
+      int status;
+      const size_t NB = 64; /* block size */
+      size_t j;
+
+      if (NB >= N)
+        {
+          /* use unblocked algorithm */
+          return gsl_linalg_cholesky_decomp_L2(A);
+        }
+
+      for (j = 0; j < N; j += NB)
+        {
+          size_t JB = GSL_MIN(NB, N - j);
+          gsl_matrix_view A11 = gsl_matrix_submatrix(A, j, j, JB, JB);
+
+          /* compute Cholesky factor of A11 with unblocked algorithm */
+          status = gsl_linalg_cholesky_decomp_L2(&A11.matrix);
+          if (status)
+            return status;
+
+          if (j + JB <= N - 1)
+            {
+              gsl_matrix_view A21 = gsl_matrix_submatrix(A, j + JB, j, N - j - JB, JB);
+              gsl_matrix_view A22 = gsl_matrix_submatrix(A, j + JB, j + JB, N - j - JB, N - j - JB);
+
+              /* L21 <- A21 L11^{-T} */
+              gsl_blas_dtrsm(CblasRight, CblasLower, CblasTrans, CblasNonUnit,
+                             1.0, &A11.matrix, &A21.matrix);
+
+              /* A22 <- A22 - L21 L21^T */
+              gsl_blas_dsyrk(CblasLower, CblasNoTrans, -1.0, &A21.matrix, 1.0, &A22.matrix);
+            }
         }
 
       return GSL_SUCCESS;
