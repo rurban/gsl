@@ -21,10 +21,7 @@
  */
 
 /*
- * Cholesky decomposition of a symmetrix positive definite matrix.
- * This is useful to solve the matrix arising in
- *    periodic cubic splines
- *    approximating splines
+ * Cholesky decomposition of a symmetric positive definite matrix.
  *
  * This algorithm does:
  *   A = L * L'
@@ -168,7 +165,7 @@ Inputs: A - (input) symmetric, positive definite matrix in lower triangle
 Return: success/error
 
 Notes:
-1) Based on block Cholesky algorithm using Level 3 BLAS; see:
+1) Based on right-looking block Cholesky algorithm using Level 3 BLAS; see:
 
    http://www.netlib.org/utk/papers/factor/node9.html
 */
@@ -352,53 +349,18 @@ gsl_linalg_cholesky_invert(gsl_matrix * LLT)
     }
   else
     {
-      const size_t N = LLT->size1;
-      size_t i;
-      gsl_vector_view v1, v2;
-
       /* invert the lower triangle of LLT */
       gsl_linalg_tri_lower_invert(LLT);
 
-      /*
-       * The lower triangle of LLT now contains L^{-1}. Now compute
-       * A^{-1} = L^{-T} L^{-1}
-       */
-
-      for (i = 0; i < N; ++i)
-        {
-          double aii = gsl_matrix_get(LLT, i, i);
-
-          if (i < N - 1)
-            {
-              double tmp;
-
-              v1 = gsl_matrix_subcolumn(LLT, i, i, N - i);
-              gsl_blas_ddot(&v1.vector, &v1.vector, &tmp);
-              gsl_matrix_set(LLT, i, i, tmp);
-
-              if (i > 0)
-                {
-                  gsl_matrix_view m = gsl_matrix_submatrix(LLT, i + 1, 0, N - i - 1, i);
-
-                  v1 = gsl_matrix_subcolumn(LLT, i, i + 1, N - i - 1);
-                  v2 = gsl_matrix_subrow(LLT, i, 0, i);
-
-                  gsl_blas_dgemv(CblasTrans, 1.0, &m.matrix, &v1.vector, aii, &v2.vector);
-                }
-            }
-          else
-            {
-              v1 = gsl_matrix_row(LLT, N - 1);
-              gsl_blas_dscal(aii, &v1.vector);
-            }
-        }
+      /* compute A^{-1} = L^{-T} L^{-1} */
+      gsl_linalg_tri_LTL(LLT);
 
       /* copy lower triangle to upper */
       gsl_matrix_transpose_tricpy('L', 0, LLT, LLT);
 
       return GSL_SUCCESS;
     }
-} /* gsl_linalg_cholesky_invert() */
+}
 
 int
 gsl_linalg_cholesky_decomp_unit(gsl_matrix * A, gsl_vector * D)

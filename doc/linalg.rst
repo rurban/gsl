@@ -1687,6 +1687,11 @@ Triangular Systems
    is stored in :data:`rcond` on output, and is defined by :math:`1 / (||T||_1 \cdot ||T^{-1}||_1)`.
    Additional workspace of size :math:`3 N` is required in :data:`work`.
 
+.. function:: int gsl_linalg_tri_LTL (gsl_matrix * L)
+
+   This function computes the product :math:`L^T L` in-place and stores it in the lower
+   triangle of :data:`L` on output.
+
 .. index:: banded matrices
 
 Banded Systems

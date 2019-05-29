@@ -49,6 +49,8 @@ typedef enum
   }
 gsl_linalg_matrix_mod_t;
 
+/* define how a problem is split recursively */
+#define GSL_LINALG_SPLIT(n) ((n >= 16) ? ((n + 8) / 16) * 8 : n / 2)
 
 /* Note: You can now use the gsl_blas_dgemm function instead of matmult */
 
@@ -768,6 +770,8 @@ int gsl_linalg_tri_upper_invert(gsl_matrix * T);
 int gsl_linalg_tri_lower_invert(gsl_matrix * T);
 int gsl_linalg_tri_upper_unit_invert(gsl_matrix * T);
 int gsl_linalg_tri_lower_unit_invert(gsl_matrix * T);
+
+int gsl_linalg_tri_LTL(gsl_matrix * L);
 
 INLINE_DECL void gsl_linalg_givens (const double a, const double b,
                                     double *c, double *s);

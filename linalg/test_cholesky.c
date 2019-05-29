@@ -162,7 +162,7 @@ test_cholesky_decomp(gsl_rng * r)
 
       create_posdef_matrix(m, r);
       test_cholesky_decomp_eps(0, m, -1.0, 1.0e2 * N * GSL_DBL_EPSILON, "cholesky_decomp unscaled random");
-      test_cholesky_decomp_eps(1, m, -1.0, 1.0e2 * N * GSL_DBL_EPSILON, "cholesky_decomp scaled random");
+      test_cholesky_decomp_eps(1, m, -1.0, 1.0e3 * N * GSL_DBL_EPSILON, "cholesky_decomp scaled random");
 
       if (N <= 12)
         {
@@ -224,7 +224,7 @@ int
 test_cholesky_invert(gsl_rng * r)
 {
   int s = 0;
-  const size_t N_max = 50;
+  const size_t N_max = 200;
   size_t N;
 
   for (N = 1; N <= N_max; ++N)

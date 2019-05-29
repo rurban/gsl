@@ -1,9 +1,10 @@
 * What is new in gsl-2.6:
 
-** removed deprecated function gsl_linalg_hessenberg()
+** implemented Level 3 BLAS versions of several linear algebra routines:
+     - Triangular matrix inversion
+     - Cholesky decomposition and inversion
 
-** implemented block Cholesky algorithm based on Level 3 BLAS,
-   which is now the default algorithm for gsl_linalg_cholesky_decomp()
+** removed deprecated function gsl_linalg_hessenberg()
 
 ** renamed gsl_interp2d_eval_e_extrap() to gsl_interp2d_eval_extrap_e()
    to match documentation (reported by D. Lebrun-Grandie)
