@@ -30,35 +30,48 @@
 
 static int triangular_inverse_L2(CBLAS_UPLO_t Uplo, CBLAS_DIAG_t Diag, gsl_matrix * T);
 static int triangular_inverse_L3(CBLAS_UPLO_t Uplo, CBLAS_DIAG_t Diag, gsl_matrix * T);
+static int triangular_singular(const gsl_matrix * T);
 
 #define CROSSOVER_INVTRI       24
 
 int
 gsl_linalg_tri_upper_invert(gsl_matrix * T)
 {
-  int status = triangular_inverse_L3(CblasUpper, CblasNonUnit, T);
-  return status;
+  int status = triangular_singular(T);
+  if (status)
+    return status;
+  
+  return triangular_inverse_L3(CblasUpper, CblasNonUnit, T);
 }
 
 int
 gsl_linalg_tri_lower_invert(gsl_matrix * T)
 {
-  int status = triangular_inverse_L3(CblasLower, CblasNonUnit, T);
-  return status;
+  int status = triangular_singular(T);
+  if (status)
+    return status;
+
+  return triangular_inverse_L3(CblasLower, CblasNonUnit, T);
 }
 
 int
 gsl_linalg_tri_upper_unit_invert(gsl_matrix * T)
 {
-  int status = triangular_inverse_L3(CblasUpper, CblasUnit, T);
-  return status;
+  int status = triangular_singular(T);
+  if (status)
+    return status;
+
+  return triangular_inverse_L3(CblasUpper, CblasUnit, T);
 }
 
 int
 gsl_linalg_tri_lower_unit_invert(gsl_matrix * T)
 {
-  int status = triangular_inverse_L3(CblasLower, CblasUnit, T);
-  return status;
+  int status = triangular_singular(T);
+  if (status)
+    return status;
+
+  return triangular_inverse_L3(CblasLower, CblasUnit, T);
 }
 
 /*
@@ -231,4 +244,19 @@ triangular_inverse_L3(CBLAS_UPLO_t Uplo, CBLAS_DIAG_t Diag, gsl_matrix * T)
 
       return GSL_SUCCESS;
     }
+}
+
+static int
+triangular_singular(const gsl_matrix * T)
+{
+  size_t i;
+
+  for (i = 0; i < T->size1; ++i)
+    {
+      double Tii = gsl_matrix_get(T, i, i);
+      if (Tii == 0.0)
+        return GSL_ESING;
+    }
+
+  return GSL_SUCCESS;
 }

@@ -423,11 +423,17 @@ gsl_linalg_cholesky_invert(gsl_matrix * LLT)
     }
   else
     {
+      int status;
+
       /* invert the lower triangle of LLT */
-      gsl_linalg_tri_lower_invert(LLT);
+      status = gsl_linalg_tri_lower_invert(LLT);
+      if (status)
+        return status;
 
       /* compute A^{-1} = L^{-T} L^{-1} */
-      gsl_linalg_tri_LTL(LLT);
+      status = gsl_linalg_tri_LTL(LLT);
+      if (status)
+        return status;
 
       /* copy lower triangle to upper */
       gsl_matrix_transpose_tricpy('L', 0, LLT, LLT);

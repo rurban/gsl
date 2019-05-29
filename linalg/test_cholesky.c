@@ -564,7 +564,7 @@ test_mcholesky_invert(gsl_rng * r)
       if (N <= 4)
         {
           create_hilbert_matrix2(m);
-          test_mcholesky_invert_eps(m, 256.0 * N * GSL_DBL_EPSILON, "mcholesky_invert unscaled hilbert");
+          test_mcholesky_invert_eps(m, 512.0 * N * GSL_DBL_EPSILON, "mcholesky_invert unscaled hilbert");
         }
 
       gsl_matrix_free(m);
@@ -868,7 +868,7 @@ int
 test_pcholesky_invert(gsl_rng * r)
 {
   int s = 0;
-  const size_t N_max = 30;
+  const size_t N_max = 200;
   size_t N;
 
   for (N = 1; N <= N_max; ++N)
