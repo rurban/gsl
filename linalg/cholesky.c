@@ -154,6 +154,8 @@ gsl_linalg_cholesky_decomp_L2 (gsl_matrix * A)
     }
 }
 
+#if 0
+
 /*
 gsl_linalg_cholesky_decomp_L3()
   Perform Cholesky decomposition of a symmetric positive
@@ -218,6 +220,78 @@ gsl_linalg_cholesky_decomp_L3 (gsl_matrix * A)
       return GSL_SUCCESS;
     }
 }
+
+#else
+
+/*
+gsl_linalg_cholesky_decomp_L3()
+  Perform Cholesky decomposition of a symmetric positive
+definite matrix using Level 3 BLAS.
+
+Inputs: A - (input) symmetric, positive definite matrix in lower triangle
+            (output) lower triangle contains Cholesky factor
+
+Return: success/error
+
+Notes:
+1) Based on ReLAPACK recursive block Cholesky algorithm using Level 3 BLAS
+
+2) 28 May 2019: performed several benchmark tests of this recursive variant
+against the right-looking block variant from LAPACK. This recursive variant
+performed faster in all cases, so it is now the default algorithm.
+*/
+
+int
+gsl_linalg_cholesky_decomp_L3 (gsl_matrix * A)
+{
+  const size_t N = A->size1;
+
+  if (N != A->size2)
+    {
+      GSL_ERROR("Cholesky decomposition requires square matrix", GSL_ENOTSQR);
+    }
+  else if (N <= 24)
+    {
+      /* use unblocked Level 2 algorithm */
+      return gsl_linalg_cholesky_decomp_L2(A);
+    }
+  else
+    {
+      /* partition matrix:
+       *
+       * A11 A12
+       * A21 A22
+       *
+       * where A11 is N1-by-N1
+       */
+      int status;
+      const size_t N1 = GSL_LINALG_SPLIT(N);
+      const size_t N2 = N - N1;
+      gsl_matrix_view A11 = gsl_matrix_submatrix(A, 0, 0, N1, N1);
+      gsl_matrix_view A21 = gsl_matrix_submatrix(A, N1, 0, N2, N1);
+      gsl_matrix_view A22 = gsl_matrix_submatrix(A, N1, N1, N2, N2);
+
+      /* recursion on A11 */
+      status = gsl_linalg_cholesky_decomp_L3(&A11.matrix);
+      if (status)
+        return status;
+
+      /* A21 = A21 * A11^{-1} */
+      gsl_blas_dtrsm(CblasRight, CblasLower, CblasTrans, CblasNonUnit, 1.0, &A11.matrix, &A21.matrix);
+
+      /* A22 -= A21 A21^T */
+      gsl_blas_dsyrk(CblasLower, CblasNoTrans, -1.0, &A21.matrix, 1.0, &A22.matrix);
+
+      /* recursion on A22 */
+      status = gsl_linalg_cholesky_decomp_L3(&A22.matrix);
+      if (status)
+        return status;
+
+      return GSL_SUCCESS;
+    }
+}
+
+#endif
 
 int
 gsl_linalg_cholesky_solve (const gsl_matrix * LLT,
