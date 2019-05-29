@@ -1,5 +1,9 @@
 * What is new in gsl-2.6:
 
+** nonlinear least squares Cholesky solver now uses the new Level 3 BLAS
+   method; the old modified Cholesky solver is still available under
+   gsl_multifit_nlinear_solver_mcholesky and gsl_multilarge_nlinear_solver_mcholesky
+
 ** implemented Level 3 BLAS versions of several linear algebra routines:
      - Triangular matrix inversion
      - Cholesky decomposition and inversion
