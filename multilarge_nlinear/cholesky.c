@@ -218,6 +218,7 @@ cholesky_rcond(double * rcond, const gsl_matrix * JTJ, void * vstate)
 {
   int status;
   cholesky_state_t *state = (cholesky_state_t *) vstate;
+  gsl_error_handler_t * err_handler;
   double rcond_JTJ;
 
   /* its possible the current Cholesky decomposition is from the previous
@@ -226,10 +227,17 @@ cholesky_rcond(double * rcond, const gsl_matrix * JTJ, void * vstate)
   /* copy lower triangle of JTJ to workspace */
   gsl_matrix_tricpy('L', 1, state->work_JTJ, JTJ);
 
-  /* compute Cholesky decomposition */
+  /* compute Cholesky decomposition, turning off error handler */
+  err_handler = gsl_set_error_handler_off();
   status = gsl_linalg_cholesky_decomp1(state->work_JTJ);
+  gsl_set_error_handler(err_handler);
+
   if (status)
-    return status;
+    {
+      /* matrix is singular */
+      *rcond = 0.0;
+      return GSL_SUCCESS;
+    }
 
   status = gsl_linalg_cholesky_rcond(state->work_JTJ, &rcond_JTJ, state->work3p);
   if (status == GSL_SUCCESS)
@@ -242,6 +250,7 @@ static int
 cholesky_covar(const gsl_matrix * JTJ, gsl_matrix * covar, void * vstate)
 {
   int status;
+  gsl_error_handler_t * err_handler;
 
   (void) vstate;
 
@@ -251,8 +260,11 @@ cholesky_covar(const gsl_matrix * JTJ, gsl_matrix * covar, void * vstate)
   /* copy lower triangle of JTJ to workspace */
   gsl_matrix_tricpy('L', 1, covar, JTJ);
 
-  /* compute Cholesky decomposition */
+  /* compute Cholesky decomposition, turning off error handler */
+  err_handler = gsl_set_error_handler_off();
   status = gsl_linalg_cholesky_decomp1(covar);
+  gsl_set_error_handler(err_handler);
+
   if (status)
     return status;
 
