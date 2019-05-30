@@ -1,6 +1,6 @@
 /* linalg/gsl_linalg.h
  * 
- * Copyright (C) 1996, 1997, 1998, 1999, 2000, 2006, 2007 Gerard Jungman, Brian Gough, Patrick Alken
+ * Copyright (C) 1996, 1997, 1998, 1999, 2000, 2006, 2007, 2019 Gerard Jungman, Brian Gough, Patrick Alken
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -48,9 +48,6 @@ typedef enum
     GSL_LINALG_MOD_CONJUGATE = 2
   }
 gsl_linalg_matrix_mod_t;
-
-/* define how a problem is split recursively */
-#define GSL_LINALG_SPLIT(n) ((n >= 16) ? ((n + 8) / 16) * 8 : n / 2)
 
 /* Note: You can now use the gsl_blas_dgemm function instead of matmult */
 

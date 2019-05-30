@@ -40,6 +40,8 @@
 #include <gsl/gsl_blas.h>
 #include <gsl/gsl_linalg.h>
 
+#include "recurse.h"
+
 static double cholesky_norm1(const gsl_matrix * LLT, gsl_vector * work);
 static int cholesky_Ainv(CBLAS_TRANSPOSE_t TransA, gsl_vector * x, void * params);
 
@@ -250,7 +252,7 @@ gsl_linalg_cholesky_decomp_L3 (gsl_matrix * A)
     {
       GSL_ERROR("Cholesky decomposition requires square matrix", GSL_ENOTSQR);
     }
-  else if (N <= 24)
+  else if (N <= CROSSOVER_CHOLESKY)
     {
       /* use unblocked Level 2 algorithm */
       return gsl_linalg_cholesky_decomp_L2(A);

@@ -28,11 +28,11 @@
 #include <gsl/gsl_blas.h>
 #include <gsl/gsl_linalg.h>
 
+#include "recurse.h"
+
 static int triangular_inverse_L2(CBLAS_UPLO_t Uplo, CBLAS_DIAG_t Diag, gsl_matrix * T);
 static int triangular_inverse_L3(CBLAS_UPLO_t Uplo, CBLAS_DIAG_t Diag, gsl_matrix * T);
 static int triangular_singular(const gsl_matrix * T);
-
-#define CROSSOVER_INVTRI       24
 
 int
 gsl_linalg_tri_upper_invert(gsl_matrix * T)

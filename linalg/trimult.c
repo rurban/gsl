@@ -28,10 +28,10 @@
 #include <gsl/gsl_blas.h>
 #include <gsl/gsl_linalg.h>
 
+#include "recurse.h"
+
 static int triangular_multiply_L2(CBLAS_UPLO_t Uplo, gsl_matrix * T);
 static int triangular_multiply_L3(CBLAS_UPLO_t Uplo, gsl_matrix * T);
-
-#define CROSSOVER_TRIMULT       24
 
 int
 gsl_linalg_tri_LTL(gsl_matrix * L)
