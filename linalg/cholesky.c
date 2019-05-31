@@ -259,7 +259,8 @@ gsl_linalg_cholesky_decomp_L3 (gsl_matrix * A)
     }
   else
     {
-      /* partition matrix:
+      /*
+       * partition matrix:
        *
        * A11 A12
        * A21 A22

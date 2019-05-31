@@ -837,22 +837,23 @@ both the scaled and unscaled systems.
    error code :macro:`GSL_EDOM`.
 
    When testing whether a matrix is positive-definite, disable the error
-   handler first to avoid triggering an error. The real-valued function
-   uses Level 3 BLAS to compute the Cholesky factorization, while the
-   complex-valued routine uses Level 2 BLAS.
+   handler first to avoid triggering an error. These functions use
+   Level 3 BLAS to compute the Cholesky factorization.
 
 .. function:: int gsl_linalg_cholesky_decomp (gsl_matrix * A)
 
    This function is now deprecated and is provided only for backward compatibility.
 
 .. function:: int gsl_linalg_cholesky_decomp_L2 (gsl_matrix * A)
+              int gsl_linalg_complex_cholesky_decomp_L2 (gsl_matrix * A)
 
-   This function computes the Cholesky factorization of the matrix :data:`A` using
+   These functions compute the Cholesky factorization of the matrix :data:`A` using
    Level 2 BLAS operations.
 
 .. function:: int gsl_linalg_cholesky_decomp_L3 (gsl_matrix * A)
+.. function:: int gsl_linalg_complex_cholesky_decomp_L3 (gsl_matrix * A)
 
-   This function computes the Cholesky factorization of the matrix :data:`A` using
+   These functions compute the Cholesky factorization of the matrix :data:`A` using
    Level 3 BLAS operations.
 
 .. function:: int gsl_linalg_cholesky_solve (const gsl_matrix * cholesky, const gsl_vector * b, gsl_vector * x)

@@ -65,6 +65,30 @@ create_symm_matrix(gsl_matrix * m, gsl_rng * r)
   return GSL_SUCCESS;
 }
 
+static int
+create_herm_matrix(gsl_matrix_complex * m, gsl_rng * r)
+{
+  const size_t N = m->size1;
+  size_t i, j;
+
+  for (i = 0; i < N; ++i)
+    {
+      for (j = 0; j <= i; ++j)
+        {
+          double re = gsl_rng_uniform(r);
+          double im = (i != j) ? gsl_rng_uniform(r) : 0.0;
+          gsl_complex z = gsl_complex_rect(re, im);
+
+          gsl_matrix_complex_set(m, i, j, z);
+
+          if (i != j)
+            gsl_matrix_complex_set(m, j, i, gsl_complex_conjugate(z));
+        }
+    }
+
+  return GSL_SUCCESS;
+}
+
 /* create symmetric banded matrix with p sub/super-diagonals */
 static int
 create_symm_band_matrix(const size_t p, gsl_matrix * m, gsl_rng * r)
@@ -106,6 +130,72 @@ create_posdef_matrix(gsl_matrix * m, gsl_rng * r)
       double mii = gsl_matrix_get(m, i, i);
       gsl_matrix_set(m, i, i, mii + alpha);
     }
+
+  return GSL_SUCCESS;
+}
+
+static int
+create_posdef_complex_matrix(gsl_matrix_complex *m, gsl_rng *r)
+{
+  const size_t N = m->size1;
+#if 1
+  const double alpha = 10.0 * N;
+  size_t i;
+
+  create_herm_matrix(m, r);
+
+  for (i = 0; i < N; ++i)
+    {
+      gsl_complex * mii = gsl_matrix_complex_ptr(m, i, i);
+      GSL_REAL(*mii) += alpha;
+    }
+
+#else
+
+  size_t i, j;
+  double x, y;
+  gsl_complex z;
+  gsl_complex tau;
+  gsl_vector_complex * work = gsl_vector_complex_alloc(N);
+
+  GSL_SET_IMAG(&z, 0.0);
+
+  /* make a positive diagonal matrix */
+  gsl_matrix_complex_set_zero(m);
+  for (i = 0; i < N; ++i)
+    {
+      x = gsl_rng_uniform(r);
+      GSL_SET_REAL(&z, x);
+      gsl_matrix_complex_set(m, i, i, z);
+    }
+
+  /* now generate random householder reflections and form P D P^H */
+  for (i = 0; i < N; ++i)
+    {
+      /* form complex vector */
+      for (j = 0; j < N; ++j)
+        {
+          x = 2.0 * gsl_rng_uniform(r) - 1.0;
+          y = 2.0 * gsl_rng_uniform(r) - 1.0;
+          GSL_SET_COMPLEX(&z, x, y);
+          gsl_vector_complex_set(work, j, z);
+        }
+
+      tau = gsl_linalg_complex_householder_transform(work);
+      gsl_linalg_complex_householder_hm(tau, work, m);
+      gsl_linalg_complex_householder_mh(gsl_complex_conjugate(tau), work, m);
+    }
+
+  /* ensure diagonal entries are real */
+  for (i = 0; i < N; ++i)
+    {
+      gsl_complex * mii = gsl_matrix_complex_ptr(m, i, i);
+      GSL_REAL(*mii) += 10.0;
+      GSL_SET_IMAG(mii, 0.0);
+    }
+
+  gsl_vector_complex_free(work);
+#endif
 
   return GSL_SUCCESS;
 }

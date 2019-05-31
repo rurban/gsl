@@ -520,6 +520,8 @@ int gsl_linalg_cholesky_rcond (const gsl_matrix * LLT, double * rcond,
 /* Complex Cholesky Decomposition */
 
 int gsl_linalg_complex_cholesky_decomp (gsl_matrix_complex * A);
+int gsl_linalg_complex_cholesky_decomp_L2 (gsl_matrix_complex * A);
+int gsl_linalg_complex_cholesky_decomp_L3 (gsl_matrix_complex * A);
 
 int gsl_linalg_complex_cholesky_solve (const gsl_matrix_complex * cholesky,
                                        const gsl_vector_complex * b,
