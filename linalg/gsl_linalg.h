@@ -770,7 +770,11 @@ int gsl_linalg_tri_lower_invert(gsl_matrix * T);
 int gsl_linalg_tri_upper_unit_invert(gsl_matrix * T);
 int gsl_linalg_tri_lower_unit_invert(gsl_matrix * T);
 
+int gsl_linalg_tri_invert(CBLAS_UPLO_t Uplo, CBLAS_DIAG_t Diag, gsl_matrix * T);
+int gsl_linalg_complex_tri_invert(CBLAS_UPLO_t Uplo, CBLAS_DIAG_t Diag, gsl_matrix_complex * T);
+
 int gsl_linalg_tri_LTL(gsl_matrix * L);
+int gsl_linalg_complex_tri_LHL(gsl_matrix_complex * L);
 
 INLINE_DECL void gsl_linalg_givens (const double a, const double b,
                                     double *c, double *s);

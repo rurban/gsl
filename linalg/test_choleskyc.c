@@ -30,6 +30,7 @@
 
 static int test_choleskyc_decomp_eps(const gsl_matrix_complex * m, const double eps, const char * desc);
 static int test_choleskyc_decomp(gsl_rng * r);
+static int test_choleskyc_invert(gsl_rng * r);
 
 static int
 test_choleskyc_decomp_eps(const gsl_matrix_complex * m, const double eps, const char * desc)
@@ -109,6 +110,68 @@ test_choleskyc_decomp(gsl_rng * r)
 
       create_posdef_complex_matrix(m, r);
       test_choleskyc_decomp_eps(m, 1.0e6 * N * GSL_DBL_EPSILON, "cholesky_complex_decomp random");
+
+      gsl_matrix_complex_free(m);
+    }
+
+  return s;
+}
+
+static int
+test_choleskyc_invert_eps(const gsl_matrix_complex * m, const double eps, const char * desc)
+{
+  int s = 0;
+  const size_t N = m->size1;
+  size_t i, j;
+  gsl_matrix_complex * v  = gsl_matrix_complex_alloc(N, N);
+  gsl_matrix_complex * c  = gsl_matrix_complex_alloc(N, N);
+
+  gsl_matrix_complex_memcpy(v, m);
+
+  s += gsl_linalg_complex_cholesky_decomp(v);
+  s += gsl_linalg_complex_cholesky_invert(v);
+
+  gsl_blas_zhemm(CblasLeft, CblasUpper, GSL_COMPLEX_ONE, m, v, GSL_COMPLEX_ZERO, c);
+
+  /* c should be the identity matrix */
+  for (i = 0; i < N; ++i)
+    {
+      for (j = 0; j < N; ++j)
+        {
+          gsl_complex cij = gsl_matrix_complex_get(c, i, j);
+          double expected = (i == j) ? 1.0 : 0.0;
+
+          /* check real part */
+          gsl_test_rel(GSL_REAL(cij), expected, eps,
+                       "%s: real (%3lu,%3lu)[%lu,%lu]: %22.18g   %22.18g\n",
+                       desc, N, N, i, j, GSL_REAL(cij), expected);
+
+          /* check imaginary part */
+          gsl_test_rel(GSL_IMAG(cij), 0.0, eps,
+                       "%s: imag (%3lu,%3lu)[%lu,%lu]: %22.18g   %22.18g\n",
+                       desc, N, N, i, j, GSL_IMAG(cij), 0.0);
+        }
+    }
+
+  gsl_matrix_complex_free(v);
+  gsl_matrix_complex_free(c);
+
+  return s;
+}
+
+static int
+test_choleskyc_invert(gsl_rng * r)
+{
+  int s = 0;
+  const size_t N_max = 50;
+  size_t N;
+
+  for (N = 1; N <= N_max; ++N)
+    {
+      gsl_matrix_complex * m = gsl_matrix_complex_alloc(N, N);
+
+      create_posdef_complex_matrix(m, r);
+      test_choleskyc_invert_eps(m, N * GSL_DBL_EPSILON, "cholesky_complex_invert random");
 
       gsl_matrix_complex_free(m);
     }

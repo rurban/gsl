@@ -1669,16 +1669,13 @@ the error code :macro:`GSL_ESING`.
 Triangular Systems
 ==================
 
-.. function:: int gsl_linalg_tri_upper_invert (gsl_matrix * T)
-              int gsl_linalg_tri_lower_invert (gsl_matrix * T)
-              int gsl_linalg_tri_upper_unit_invert (gsl_matrix * T)
-              int gsl_linalg_tri_lower_unit_invert (gsl_matrix * T)
+.. function:: int gsl_linalg_tri_invert (CBLAS_UPLO_t Uplo, CBLAS_DIAG_t Diag, gsl_matrix * T)
+              int gsl_linalg_complex_tri_invert (CBLAS_UPLO_t Uplo, CBLAS_DIAG_t Diag, gsl_matrix_complex * T)
 
-   These functions calculate the in-place inverse of the triangular matrix :data:`T`. When
-   the :code:`upper` prefix is specified, then the upper triangle of :data:`T` is used, and when
-   the :code:`lower` prefix is specified, the lower triangle is used. If the :code:`unit`
-   prefix is specified, then the diagonal elements of the matrix :data:`T` are taken as
-   unity and are not referenced. Otherwise the diagonal elements are used in the inversion.
+   These functions compute the in-place inverse of the triangular matrix :data:`T`, stored in
+   the lower triangle when :data:`Uplo` = :code:`CblasLower` and upper triangle
+   when :data:`Uplo` = :code:`CblasUpper`. The parameter :data:`Diag` = :code:`CblasUnit`, :code:`CblasNonUnit`
+   specifies whether the matrix is unit triangular.
 
 .. function:: int gsl_linalg_tri_upper_rcond (const gsl_matrix * T, double * rcond, gsl_vector * work)
               int gsl_linalg_tri_lower_rcond (const gsl_matrix * T, double * rcond, gsl_vector * work)
@@ -1689,9 +1686,10 @@ Triangular Systems
    Additional workspace of size :math:`3 N` is required in :data:`work`.
 
 .. function:: int gsl_linalg_tri_LTL (gsl_matrix * L)
+              int gsl_linalg_complex_tri_LHL (gsl_matrix_complex * L)
 
-   This function computes the product :math:`L^T L` in-place and stores it in the lower
-   triangle of :data:`L` on output.
+   This function computes the product :math:`L^T L` (or :math:`L^{\dagger} L`)
+   in-place and stores it in the lower triangle of :data:`L` on output.
 
 .. index:: banded matrices
 

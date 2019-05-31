@@ -2850,112 +2850,6 @@ test_choleskyc_solve(void)
 }
 
 int
-test_choleskyc_invert_dim(const gsl_matrix_complex * m, double eps)
-{
-  int s = 0;
-  unsigned long i, j, N = m->size1;
-  gsl_complex af, bt;
-  gsl_matrix_complex * v  = gsl_matrix_complex_alloc(N, N);
-  gsl_matrix_complex * c  = gsl_matrix_complex_alloc(N, N);
-
-  gsl_matrix_complex_memcpy(v, m);
-
-  s += gsl_linalg_complex_cholesky_decomp(v);
-  s += gsl_linalg_complex_cholesky_invert(v);
-
-  GSL_SET_COMPLEX(&af, 1.0, 0.0);
-  GSL_SET_COMPLEX(&bt, 0.0, 0.0);
-  gsl_blas_zhemm(CblasLeft, CblasUpper, af, m, v, bt, c);
-
-  /* c should be the identity matrix */
-
-  for (i = 0; i < N; ++i)
-    {
-      for (j = 0; j < N; ++j)
-        {
-          int foo;
-          gsl_complex cij = gsl_matrix_complex_get(c, i, j);
-          double expected, actual;
-
-          /* check real part */
-          if (i == j)
-            expected = 1.0;
-          else
-            expected = 0.0;
-          actual = GSL_REAL(cij);
-          foo = check(actual, expected, eps);
-          if (foo)
-            printf("REAL(%3lu,%3lu)[%lu,%lu]: %22.18g   %22.18g\n", 
-                   N, N, i,j, actual, expected);
-          s += foo;
-
-          /* check imaginary part */
-          expected = 0.0;
-          actual = GSL_IMAG(cij);
-          foo = check(actual, expected, eps);
-          if (foo)
-            printf("IMAG(%3lu,%3lu)[%lu,%lu]: %22.18g   %22.18g\n", 
-                   N, N, i,j, actual, expected);
-          s += foo;
-
-        }
-    }
-
-  gsl_matrix_complex_free(v);
-  gsl_matrix_complex_free(c);
-
-  return s;
-}
-
-int
-test_choleskyc_invert(void)
-{
-  int f;
-  int s = 0;
-
-  double dat2[] = { 
-      92.303, 0.000,    10.858, 1.798,    
-      10.858, -1.798,    89.027, 0.000 
-  }; 
-
-  double dat3[] = { 
-      59.75,0,       49.25,172.25, 66.75,-162.75,
-      49.25,-172.25, 555.5,0,      -429,-333.5,
-      66.75,162.75,  -429,333.5,   536.5,0 
-  };
-
-  double dat4[] = { 
-      102.108, 0.000,    14.721, 1.343,    -17.480, 15.591,    3.308, -2.936,    
-      14.721, -1.343,    101.970, 0.000,    11.671, -6.776,    -5.009, -2.665,    
-      -17.480, -15.591,    11.671, 6.776,    105.071, 0.000,    3.396, 6.276,    
-      3.308, 2.936,    -5.009, 2.665,    3.396, -6.276,    107.128, 0.000 
-  }; 
-
-  {
-    gsl_matrix_complex_view rv2 = gsl_matrix_complex_view_array(dat2, 2, 2);
-    f = test_choleskyc_invert_dim(&rv2.matrix, 2 * 8.0 * GSL_DBL_EPSILON);
-    gsl_test(f, "  choleskyc_invert 2x2 Hermitian");
-    s += f;
-  }
-
-  { 
-    gsl_matrix_complex_view rv3 = gsl_matrix_complex_view_array(dat3, 3, 3);
-    f = test_choleskyc_invert_dim(&rv3.matrix, 2 * 1024.0 * GSL_DBL_EPSILON);
-    gsl_test(f, "  choleskyc_invert 3x3 Hermitian");
-    s += f;
-  }
-
-  {
-    gsl_matrix_complex_view rv4 = gsl_matrix_complex_view_array(dat4, 4, 4);
-    f = test_choleskyc_invert_dim(&rv4.matrix, 2 * 64.0 * GSL_DBL_EPSILON);
-    gsl_test(f, "  choleskyc_invert 4x4 Hermitian");
-    s += f;
-  }
-
-  return s;
-}
-
-int
 test_HH_solve_dim(const gsl_matrix * m, const double * actual, double eps)
 {
   int s = 0;
@@ -3447,16 +3341,6 @@ test_tri_invert2(CBLAS_UPLO_t Uplo, CBLAS_DIAG_t Diag, gsl_rng * r, const double
   const size_t N_max = 200;
   int s = 0;
   size_t n, i, j;
-  int (*invert_func) (gsl_matrix * T) = NULL;
-
-  if (Uplo == CblasUpper && Diag == CblasNonUnit)
-    invert_func = gsl_linalg_tri_upper_invert;
-  else if (Uplo == CblasLower && Diag == CblasNonUnit)
-    invert_func = gsl_linalg_tri_lower_invert;
-  else if (Uplo == CblasUpper && Diag == CblasUnit)
-    invert_func = gsl_linalg_tri_upper_unit_invert;
-  else if (Uplo == CblasLower && Diag == CblasUnit)
-    invert_func = gsl_linalg_tri_lower_unit_invert;
 
   for (n = 1; n <= N_max; ++n)
     {
@@ -3468,7 +3352,7 @@ test_tri_invert2(CBLAS_UPLO_t Uplo, CBLAS_DIAG_t Diag, gsl_rng * r, const double
 
       /* compute B = T^{-1} */
       gsl_matrix_memcpy(B, T);
-      (invert_func)(B);
+      gsl_linalg_tri_invert(Uplo, Diag, B);
 
       /* compute B = T * T^{-1} */
       gsl_blas_dtrmm(CblasLeft, Uplo, CblasNoTrans, Diag, 1.0, T, B);
@@ -3607,7 +3491,6 @@ main(void)
   gsl_test(test_matmult_mod(),           "Matrix Multiply with Modification"); 
 #endif
 
-#if 0
   gsl_test(test_tri_invert(r),           "Triangular Inverse");
 
   gsl_test(test_bidiag_decomp(),         "Bidiagonal Decomposition");
@@ -3657,12 +3540,10 @@ main(void)
   gsl_test(test_mcholesky_decomp(r),     "Modified Cholesky Decomposition");
   gsl_test(test_mcholesky_solve(r),      "Modified Cholesky Solve");
   gsl_test(test_mcholesky_invert(r),     "Modified Cholesky Inverse");
-#endif/*XXX*/
 
   gsl_test(test_choleskyc_decomp(r),     "Complex Cholesky Decomposition");
-#if 0
   gsl_test(test_choleskyc_solve(),       "Complex Cholesky Solve");
-  gsl_test(test_choleskyc_invert(),      "Complex Cholesky Inverse");
+  gsl_test(test_choleskyc_invert(r),     "Complex Cholesky Inverse");
 
   gsl_test(test_cholesky_band_decomp(r), "Banded Cholesky Decomposition");
   gsl_test(test_cholesky_band_solve(r),  "Banded Cholesky Solve");
@@ -3679,7 +3560,6 @@ main(void)
   gsl_test(test_TDS_cyc_solve(),         "Tridiagonal symmetric cyclic solve");
   gsl_test(test_TDN_solve(),             "Tridiagonal nonsymmetric solve");
   gsl_test(test_TDN_cyc_solve(),         "Tridiagonal nonsymmetric cyclic solve");
-#endif
 
   gsl_matrix_free(m11);
   gsl_matrix_free(m35);

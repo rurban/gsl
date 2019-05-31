@@ -6,7 +6,7 @@
 
 ** implemented Level 3 BLAS versions of several linear algebra routines:
      - Triangular matrix inversion
-     - Cholesky decomposition and inversion
+     - Cholesky decomposition and inversion (real and complex)
 
 ** removed deprecated function gsl_linalg_hessenberg()
 

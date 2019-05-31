@@ -429,7 +429,7 @@ gsl_linalg_cholesky_invert(gsl_matrix * LLT)
       int status;
 
       /* invert the lower triangle of LLT */
-      status = gsl_linalg_tri_lower_invert(LLT);
+      status = gsl_linalg_tri_invert(CblasLower, CblasNonUnit, LLT);
       if (status)
         return status;
 
