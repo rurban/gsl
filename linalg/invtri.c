@@ -181,7 +181,8 @@ triangular_inverse_L3(CBLAS_UPLO_t Uplo, CBLAS_DIAG_t Diag, gsl_matrix * T)
     }
   else
     {
-      /* partition matrix:
+      /*
+       * partition matrix:
        *
        * T11 T12
        * T21 T22
