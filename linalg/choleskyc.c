@@ -1,7 +1,7 @@
 /* linalg/choleskyc.c
  * 
- * Copyright (C) 2007 Patrick Alken
- * Copyright (C) 2010 Huan Wu (gsl_linalg_complex_cholesky_invert)
+ * Copyright (C) 2007, 2019 Patrick Alken
+ * Copyright (C) 2010 Huan Wu
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

@@ -143,7 +143,7 @@ Inputs: Uplo - CblasUpper or CblasLower
 Return: success/error
 
 Notes:
-1) Based on LAPACK routine ZTRTI2 using Level 2 BLAS
+1) Based on ReLAPACK using Level 3 BLAS
 */
 
 static int
