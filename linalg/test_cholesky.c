@@ -233,7 +233,7 @@ test_cholesky_invert(gsl_rng * r)
 
       create_posdef_matrix(m, r);
 
-      test_cholesky_invert_eps(m, N * GSL_DBL_EPSILON, "cholesky_invert unscaled random");
+      test_cholesky_invert_eps(m, 1.0e2 * N * GSL_DBL_EPSILON, "cholesky_invert unscaled random");
 
       if (N <= 4)
         {
@@ -1030,7 +1030,7 @@ test_cholesky_band_solve(gsl_rng * r)
           create_random_vector(sol, r);
           gsl_blas_dsymv(CblasLower, 1.0, m, sol, 0.0, rhs);
 
-          test_cholesky_band_solve_eps(p, m, rhs, sol, 64.0 * N * GSL_DBL_EPSILON, "cholesky_band_solve random");
+          test_cholesky_band_solve_eps(p, m, rhs, sol, 1.0e3 * N * GSL_DBL_EPSILON, "cholesky_band_solve random");
         }
 
       gsl_matrix_free(m);

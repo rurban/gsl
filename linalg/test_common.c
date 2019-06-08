@@ -65,6 +65,29 @@ create_random_matrix(gsl_matrix * m, gsl_rng * r)
 }
 
 static int
+create_random_complex_matrix(gsl_matrix_complex * m, gsl_rng * r)
+{
+  const size_t M = m->size1;
+  const size_t N = m->size2;
+  size_t i, j;
+
+  for (i = 0; i < M; ++i)
+    {
+      for (j = 0; j < N; ++j)
+        {
+          gsl_complex mij;
+
+          GSL_REAL(mij) = gsl_rng_uniform(r);
+          GSL_IMAG(mij) = gsl_rng_uniform(r);
+
+          gsl_matrix_complex_set(m, i, j, mij);
+        }
+    }
+
+  return GSL_SUCCESS;
+}
+
+static int
 create_symm_matrix(gsl_matrix * m, gsl_rng * r)
 {
   const size_t N = m->size1;

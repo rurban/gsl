@@ -46,8 +46,6 @@ gsl_matrix * create_sparse_matrix(unsigned long m, unsigned long n);
 
 int test_matmult(void);
 int test_matmult_mod(void);
-int test_LU_solve_dim(const gsl_matrix * m, const double * actual, double eps);
-int test_LU_solve(void);
 int test_LUc_solve_dim(const gsl_matrix_complex * m, const double * actual, double eps);
 int test_LUc_solve(void);
 int test_QR_solve_dim(const gsl_matrix * m, const double * actual, double eps);
@@ -398,93 +396,8 @@ gsl_matrix * moler10;
 #include "test_cod.c"
 #include "test_ldlt.c"
 #include "test_lu.c"
+#include "test_luc.c"
 #include "test_lq.c"
-
-int
-test_LU_solve_dim(const gsl_matrix * m, const double * actual, double eps)
-{
-  int s = 0;
-  int signum;
-  unsigned long i, dim = m->size1;
-
-  gsl_permutation * perm = gsl_permutation_alloc(dim);
-  gsl_vector * rhs = gsl_vector_alloc(dim);
-  gsl_matrix * lu  = gsl_matrix_alloc(dim,dim);
-  gsl_vector * x = gsl_vector_alloc(dim);
-  gsl_vector * residual = gsl_vector_alloc(dim);
-  gsl_matrix_memcpy(lu,m);
-  for(i=0; i<dim; i++) gsl_vector_set(rhs, i, i+1.0);
-  s += gsl_linalg_LU_decomp(lu, perm, &signum);
-  s += gsl_linalg_LU_solve(lu, perm, rhs, x);
-
-  for(i=0; i<dim; i++) {
-    int foo = check(gsl_vector_get(x, i),actual[i],eps);
-    if(foo) {
-      printf("%3lu[%lu]: %22.18g   %22.18g\n", dim, i, gsl_vector_get(x, i), actual[i]);
-    }
-    s += foo;
-  }
-
-  s += gsl_linalg_LU_refine(m, lu, perm, rhs, x, residual);
-
-  for(i=0; i<dim; i++) {
-    int foo = check(gsl_vector_get(x, i),actual[i],eps);
-    if(foo) {
-      printf("%3lu[%lu]: %22.18g   %22.18g (improved)\n", dim, i, gsl_vector_get(x, i), actual[i]);
-    }
-    s += foo;
-  }
-
-  gsl_vector_free(residual);
-  gsl_vector_free(x);
-  gsl_matrix_free(lu);
-  gsl_vector_free(rhs);
-  gsl_permutation_free(perm);
-
-  return s;
-}
-
-
-int test_LU_solve(void)
-{
-  int f;
-  int s = 0;
-
-  f = test_LU_solve_dim(hilb2, hilb2_solution, 8.0 * GSL_DBL_EPSILON);
-  gsl_test(f, "  LU_solve hilbert(2)");
-  s += f;
-
-  f = test_LU_solve_dim(hilb3, hilb3_solution, 64.0 * GSL_DBL_EPSILON);
-  gsl_test(f, "  LU_solve hilbert(3)");
-  s += f;
-
-  f = test_LU_solve_dim(hilb4, hilb4_solution, 2048.0 * GSL_DBL_EPSILON);
-  gsl_test(f, "  LU_solve hilbert(4)");
-  s += f;
-
-  f = test_LU_solve_dim(hilb12, hilb12_solution, 0.5);
-  gsl_test(f, "  LU_solve hilbert(12)");
-  s += f;
-
-  f = test_LU_solve_dim(vander2, vander2_solution, 8.0 * GSL_DBL_EPSILON);
-  gsl_test(f, "  LU_solve vander(2)");
-  s += f;
-
-  f = test_LU_solve_dim(vander3, vander3_solution, 64.0 * GSL_DBL_EPSILON);
-  gsl_test(f, "  LU_solve vander(3)");
-  s += f;
-
-  f = test_LU_solve_dim(vander4, vander4_solution, 1024.0 * GSL_DBL_EPSILON);
-  gsl_test(f, "  LU_solve vander(4)");
-  s += f;
-
-  f = test_LU_solve_dim(vander12, vander12_solution, 0.05);
-  gsl_test(f, "  LU_solve vander(12)");
-  s += f;
-
-  return s;
-}
-
 
 int
 test_LUc_solve_dim(const gsl_matrix_complex * m, const double * actual, double eps)
@@ -3496,8 +3409,9 @@ main(void)
 
   gsl_test(test_bidiag_decomp(),         "Bidiagonal Decomposition");
   gsl_test(test_LU_decomp(r),            "LU Decomposition");
-  gsl_test(test_LU_solve(),              "LU Solve");
-  gsl_test(test_LUc_solve(),             "Complex LU Decomposition and Solve");
+  gsl_test(test_LU_solve(r),             "LU Solve");
+  gsl_test(test_LUc_decomp(r),           "Complex LU Decomposition");
+  gsl_test(test_LUc_solve(),             "Complex LU Solve");
   gsl_test(test_QR_decomp(),             "QR Decomposition");
   gsl_test(test_QR_solve(),              "QR Solve");
   gsl_test(test_LQ_solve(),              "LQ Solve");
