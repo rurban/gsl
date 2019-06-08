@@ -397,6 +397,7 @@ gsl_matrix * moler10;
 #include "test_choleskyc.c"
 #include "test_cod.c"
 #include "test_ldlt.c"
+#include "test_lu.c"
 #include "test_lq.c"
 
 int
@@ -3494,7 +3495,8 @@ main(void)
   gsl_test(test_tri_invert(r),           "Triangular Inverse");
 
   gsl_test(test_bidiag_decomp(),         "Bidiagonal Decomposition");
-  gsl_test(test_LU_solve(),              "LU Decomposition and Solve");
+  gsl_test(test_LU_decomp(r),            "LU Decomposition");
+  gsl_test(test_LU_solve(),              "LU Solve");
   gsl_test(test_LUc_solve(),             "Complex LU Decomposition and Solve");
   gsl_test(test_QR_decomp(),             "QR Decomposition");
   gsl_test(test_QR_solve(),              "QR Solve");

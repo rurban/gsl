@@ -24,14 +24,17 @@ The functions described in this chapter are declared in the header file
 LU Decomposition
 ================
 
-A general :math:`N`-by-:math:`N` square matrix :math:`A` has an :math:`LU` decomposition into
-upper and lower triangular matrices,
+A general :math:`M`-by-:math:`N` matrix :math:`A` has an :math:`LU` decomposition
 
 .. math:: P A = L U
 
-where :math:`P` is a permutation matrix, :math:`L` is unit lower
-triangular matrix and :math:`U` is upper triangular matrix. For square
-matrices this decomposition can be used to convert the linear system
+where :math:`P` is an :math:`M`-by-:math:`M` permutation matrix, :math:`L` is
+:math:`M`-by-:math:`\min(M,N)` and :math:`U` is :math:`\min(M,N)`-by-:math:`N`.
+For square matrices, :math:`L` is a lower unit triangular matrix and
+:math:`U` is upper triangular. For :math:`M > N`, :math:`L` is a unit lower
+trapezoidal matrix of size :math:`M`-by-:math:`N`. For :math:`M < N`,
+:math:`U` is upper trapezoidal of size :math:`M`-by-:math:`N`.
+For square matrices this decomposition can be used to convert the linear system
 :math:`A x = b` into a pair of triangular systems (:math:`L y = P b`,
 :math:`U x = y`), which can be solved by forward and back-substitution.
 Note that the :math:`LU` decomposition is valid for singular matrices.
@@ -39,10 +42,10 @@ Note that the :math:`LU` decomposition is valid for singular matrices.
 .. function:: int gsl_linalg_LU_decomp (gsl_matrix * A, gsl_permutation * p, int * signum)
               int gsl_linalg_complex_LU_decomp (gsl_matrix_complex * A, gsl_permutation * p, int * signum)
 
-   These functions factorize the square matrix :data:`A` into the :math:`LU`
+   These functions factorize the matrix :data:`A` into the :math:`LU`
    decomposition :math:`PA = LU`.  On output the diagonal and upper
-   triangular part of the input matrix :data:`A` contain the matrix
-   :math:`U`. The lower triangular part of the input matrix (excluding the
+   triangular (or trapezoidal) part of the input matrix :data:`A` contain the matrix
+   :math:`U`. The lower triangular (or trapezoidal) part of the input matrix (excluding the
    diagonal) contains :math:`L`.  The diagonal elements of :math:`L` are
    unity, and are not stored.
 

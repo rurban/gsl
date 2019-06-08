@@ -4,6 +4,7 @@
 
 /* matrix size for crossover to Level 2 algorithms */
 #define CROSSOVER              24
+#define CROSSOVER_LU           CROSSOVER
 #define CROSSOVER_CHOLESKY     CROSSOVER
 #define CROSSOVER_INVTRI       CROSSOVER
 #define CROSSOVER_TRIMULT      CROSSOVER

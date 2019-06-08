@@ -17,7 +17,7 @@
  * 03 May 2000: Modified for GSL by Brian Gough
  * 29 Jul 2005: Additions by Gerard Jungman
  * 04 Mar 2016: Change Cholesky algorithm to gaxpy version by Patrick Alken
- * 26 May 2019: implement block Cholesky with Level 3 BLAS by Patrick Alken
+ * 26 May 2019: implement recursive Cholesky with Level 3 BLAS by Patrick Alken
  */
 
 /*

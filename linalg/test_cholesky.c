@@ -161,7 +161,7 @@ test_cholesky_decomp(gsl_rng * r)
       gsl_matrix * m = gsl_matrix_alloc(N, N);
 
       create_posdef_matrix(m, r);
-      test_cholesky_decomp_eps(0, m, -1.0, 1.0e2 * N * GSL_DBL_EPSILON, "cholesky_decomp unscaled random");
+      test_cholesky_decomp_eps(0, m, -1.0, 1.0e3 * N * GSL_DBL_EPSILON, "cholesky_decomp unscaled random");
       test_cholesky_decomp_eps(1, m, -1.0, 1.0e3 * N * GSL_DBL_EPSILON, "cholesky_decomp scaled random");
 
       if (N <= 12)

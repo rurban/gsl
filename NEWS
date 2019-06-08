@@ -8,6 +8,7 @@
      - Triangular matrix inversion
      - Cholesky decomposition and inversion (real and complex)
      - Generalized symmetric/hermitian eigensystem reduction to standard form
+     - LU decomposition
 
 ** removed deprecated function gsl_linalg_hessenberg()
 
