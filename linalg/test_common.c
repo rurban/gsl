@@ -46,6 +46,23 @@ create_random_vector(gsl_vector * v, gsl_rng * r)
 }
 
 static int
+create_random_complex_vector(gsl_vector_complex * v, gsl_rng * r)
+{
+  const size_t N = v->size;
+  size_t i;
+
+  for (i = 0; i < N; ++i)
+    {
+      gsl_complex vi;
+      GSL_REAL(vi) = gsl_rng_uniform(r);
+      GSL_IMAG(vi) = gsl_rng_uniform(r);
+      gsl_vector_complex_set(v, i, vi);
+    }
+
+  return GSL_SUCCESS;
+}
+
+static int
 create_random_matrix(gsl_matrix * m, gsl_rng * r)
 {
   const size_t M = m->size1;

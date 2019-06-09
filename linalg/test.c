@@ -46,8 +46,6 @@ gsl_matrix * create_sparse_matrix(unsigned long m, unsigned long n);
 
 int test_matmult(void);
 int test_matmult_mod(void);
-int test_LUc_solve_dim(const gsl_matrix_complex * m, const double * actual, double eps);
-int test_LUc_solve(void);
 int test_QR_solve_dim(const gsl_matrix * m, const double * actual, double eps);
 int test_QR_solve(void);
 int test_QR_QRsolve_dim(const gsl_matrix * m, const double * actual, double eps);
@@ -398,74 +396,6 @@ gsl_matrix * moler10;
 #include "test_lu.c"
 #include "test_luc.c"
 #include "test_lq.c"
-
-int
-test_LUc_solve_dim(const gsl_matrix_complex * m, const double * actual, double eps)
-{
-  int s = 0;
-  int signum;
-  unsigned long i, dim = m->size1;
-
-  gsl_permutation * perm = gsl_permutation_alloc(dim);
-  gsl_vector_complex * rhs = gsl_vector_complex_alloc(dim);
-  gsl_matrix_complex * lu  = gsl_matrix_complex_alloc(dim,dim);
-  gsl_vector_complex * x = gsl_vector_complex_alloc(dim);
-  gsl_vector_complex * residual = gsl_vector_complex_alloc(dim);
-  gsl_matrix_complex_memcpy(lu,m);
-  for(i=0; i<dim; i++) 
-    {
-      gsl_complex z = gsl_complex_rect (2.0*i+1.0, 2.0*i+2.0);
-      gsl_vector_complex_set(rhs, i, z);
-    }
-  s += gsl_linalg_complex_LU_decomp(lu, perm, &signum);
-  s += gsl_linalg_complex_LU_solve(lu, perm, rhs, x);
-
-  for(i=0; i<dim; i++) {
-    gsl_complex z = gsl_vector_complex_get(x, i);
-    int foo_r = check(GSL_REAL(z),actual[2*i],eps);
-    int foo_i = check(GSL_IMAG(z),actual[2*i+1],eps);
-    if(foo_r || foo_i) {
-      printf("%3lu[%lu]: %22.18g   %22.18g\n", dim, i, GSL_REAL(z), actual[2*i]);
-      printf("%3lu[%lu]: %22.18g   %22.18g\n", dim, i, GSL_IMAG(z), actual[2*i+1]);
-    }
-    s += foo_r + foo_i;
-  }
-
-  s += gsl_linalg_complex_LU_refine(m, lu, perm, rhs, x, residual);
-
-  for(i=0; i<dim; i++) {
-    gsl_complex z = gsl_vector_complex_get(x, i);
-    int foo_r = check(GSL_REAL(z),actual[2*i],eps);
-    int foo_i = check(GSL_IMAG(z),actual[2*i+1],eps);
-    if(foo_r || foo_i) {
-      printf("%3lu[%lu]: %22.18g   %22.18g (improved)\n", dim, i, GSL_REAL(z), actual[2*i]);
-      printf("%3lu[%lu]: %22.18g   %22.18g (improved)\n", dim, i, GSL_IMAG(z), actual[2*i+1]);
-    }
-    s += foo_r + foo_i;
-  }
-
-  gsl_vector_complex_free(residual);
-  gsl_vector_complex_free(x);
-  gsl_matrix_complex_free(lu);
-  gsl_vector_complex_free(rhs);
-  gsl_permutation_free(perm);
-
-  return s;
-}
-
-
-int test_LUc_solve(void)
-{
-  int f;
-  int s = 0;
-
-  f = test_LUc_solve_dim(c7, c7_solution, 1024.0 * 1024.0 * GSL_DBL_EPSILON);
-  gsl_test(f, "  complex_LU_solve complex(7)");
-  s += f;
-
-  return s;
-}
-
 
 int
 test_QR_solve_dim(const gsl_matrix * m, const double * actual, double eps)
@@ -3411,7 +3341,7 @@ main(void)
   gsl_test(test_LU_decomp(r),            "LU Decomposition");
   gsl_test(test_LU_solve(r),             "LU Solve");
   gsl_test(test_LUc_decomp(r),           "Complex LU Decomposition");
-  gsl_test(test_LUc_solve(),             "Complex LU Solve");
+  gsl_test(test_LUc_solve(r),            "Complex LU Solve");
   gsl_test(test_QR_decomp(),             "QR Decomposition");
   gsl_test(test_QR_solve(),              "QR Solve");
   gsl_test(test_LQ_solve(),              "LQ Solve");

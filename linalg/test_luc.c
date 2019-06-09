@@ -149,3 +149,81 @@ test_LUc_decomp(gsl_rng * r)
 
   return s;
 }
+
+static int
+test_LUc_solve_eps(const gsl_matrix_complex * m, const gsl_vector_complex * rhs, const gsl_vector_complex * sol, const double eps, const char * desc)
+{
+  int s = 0;
+  const size_t N = m->size1;
+  int signum;
+  size_t i;
+
+  gsl_permutation * perm = gsl_permutation_alloc(N);
+  gsl_matrix_complex * lu  = gsl_matrix_complex_alloc(N, N);
+  gsl_vector_complex * x = gsl_vector_complex_alloc(N);
+  gsl_vector_complex * residual = gsl_vector_complex_alloc(N);
+
+  gsl_matrix_complex_memcpy(lu, m);
+
+  s += gsl_linalg_complex_LU_decomp(lu, perm, &signum);
+  s += gsl_linalg_complex_LU_solve(lu, perm, rhs, x);
+
+  for (i = 0; i < N; i++)
+    {
+      gsl_complex xi = gsl_vector_complex_get(x, i);
+      gsl_complex yi = gsl_vector_complex_get(sol, i);
+
+      gsl_test_rel(GSL_REAL(xi), GSL_REAL(yi), eps, "%s: real %3lu[%lu]: %22.18g    %22.18g\n",
+                   desc, N, i, GSL_REAL(xi), GSL_REAL(yi));
+
+      gsl_test_rel(GSL_IMAG(xi), GSL_IMAG(yi), eps, "%s: imag %3lu[%lu]: %22.18g    %22.18g\n",
+                   desc, N, i, GSL_IMAG(xi), GSL_IMAG(yi));
+    }
+
+  s += gsl_linalg_complex_LU_refine(m, lu, perm, rhs, x, residual);
+
+  for (i = 0; i < N; i++)
+    {
+      gsl_complex xi = gsl_vector_complex_get(x, i);
+      gsl_complex yi = gsl_vector_complex_get(sol, i);
+
+      gsl_test_rel(GSL_REAL(xi), GSL_REAL(yi), eps, "%s: improved real %3lu[%lu]: %22.18g    %22.18g\n",
+                   desc, N, i, GSL_REAL(xi), GSL_REAL(yi));
+
+      gsl_test_rel(GSL_IMAG(xi), GSL_IMAG(yi), eps, "%s: improved imag %3lu[%lu]: %22.18g    %22.18g\n",
+                   desc, N, i, GSL_IMAG(xi), GSL_IMAG(yi));
+    }
+
+  gsl_vector_complex_free(residual);
+  gsl_vector_complex_free(x);
+  gsl_matrix_complex_free(lu);
+  gsl_permutation_free(perm);
+
+  return s;
+}
+
+
+static int
+test_LUc_solve(gsl_rng * r)
+{
+  int s = 0;
+  size_t n;
+
+  for (n = 1; n <= 50; ++n)
+    {
+      gsl_matrix_complex * m = gsl_matrix_complex_alloc(n, n);
+      gsl_vector_complex * rhs = gsl_vector_complex_alloc(n);
+      gsl_vector_complex * sol = gsl_vector_complex_alloc(n);
+
+      create_random_complex_matrix(m, r);
+      create_random_complex_vector(sol, r);
+      gsl_blas_zgemv(CblasNoTrans, GSL_COMPLEX_ONE, m, sol, GSL_COMPLEX_ZERO, rhs);
+      test_LUc_solve_eps(m, rhs, sol, 1.0e5 * n * GSL_DBL_EPSILON, "complex_LU_solve random");
+
+      gsl_matrix_complex_free(m);
+      gsl_vector_complex_free(rhs);
+      gsl_vector_complex_free(sol);
+    }
+
+  return s;
+}

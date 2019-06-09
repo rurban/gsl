@@ -417,7 +417,7 @@ test_mcholesky_decomp(gsl_rng * r)
       test_mcholesky_decomp_eps(1, 0, m, -1.0, 128.0 * N * GSL_DBL_EPSILON, "mcholesky_decomp unscaled random posdef");
 
       create_symm_matrix(m, r);
-      test_mcholesky_decomp_eps(0, 0, m, -1.0, 8192.0 * N * GSL_DBL_EPSILON, "mcholesky_decomp unscaled random symm");
+      test_mcholesky_decomp_eps(0, 0, m, -1.0, 1.0e5 * N * GSL_DBL_EPSILON, "mcholesky_decomp unscaled random symm");
 
       if (N <= 8)
         {
