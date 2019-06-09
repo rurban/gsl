@@ -59,7 +59,8 @@ Note that the :math:`LU` decomposition is valid for singular matrices.
 
    The algorithm used in the decomposition is Gaussian Elimination with
    partial pivoting (Golub & Van Loan, *Matrix Computations*,
-   Algorithm 3.4.1).
+   Algorithm 3.4.1), combined with a recursive algorithm based on
+   Level 3 BLAS (Peise and Bientinesi, 2016).
 
 .. index:: linear systems, solution of
 
@@ -841,7 +842,7 @@ both the scaled and unscaled systems.
 
    When testing whether a matrix is positive-definite, disable the error
    handler first to avoid triggering an error. These functions use
-   Level 3 BLAS to compute the Cholesky factorization.
+   Level 3 BLAS to compute the Cholesky factorization (Peise and Bientinesi, 2016).
 
 .. function:: int gsl_linalg_cholesky_decomp (gsl_matrix * A)
 
@@ -1990,6 +1991,12 @@ The |lapack| library is described in the following manual,
 
 The |lapack| source code can be found at http://www.netlib.org/lapack,
 along with an online copy of the users guide.
+
+Further information on recursive Level 3 BLAS algorithms may be
+found in the following paper,
+
+* E. Peise and P. Bientinesi, "Recursive algorithms for dense linear algebra: the ReLAPACK collection",
+  http://arxiv.org/abs/1602.06763, 2016.
 
 The Modified Golub-Reinsch algorithm is described in the following paper,
 
