@@ -100,9 +100,26 @@ Note that the :math:`LU` decomposition is valid for singular matrices.
 
    These functions compute the inverse of a matrix :math:`A` from its
    :math:`LU` decomposition (:data:`LU`, :data:`p`), storing the result in the
-   matrix :data:`inverse`. The inverse is computed by solving the system
-   :math:`A x = b` for each column of the identity matrix.  It is preferable
+   matrix :data:`inverse`.  The inverse is computed by computing the inverses
+   :math:`U^{-1}`, :math:`L^{-1}` and finally forming the product
+   :math:`A^{-1} = U^{-1} L^{-1} P`. Each step is based on Level 3 BLAS calls.
+   
+   It is preferable
    to avoid direct use of the inverse whenever possible, as the linear
+   solver functions can obtain the same result more efficiently and
+   reliably (consult any introductory textbook on numerical linear algebra
+   for details).
+
+.. function:: int gsl_linalg_LU_invx (gsl_matrix * LU, const gsl_permutation * p)
+              int gsl_linalg_complex_LU_invx (gsl_matrix_complex * LU, const gsl_permutation * p)
+
+   These functions compute the inverse of a matrix :math:`A` from its
+   :math:`LU` decomposition (:data:`LU`, :data:`p`), storing the result in-place
+   in the matrix :data:`LU`. The inverse is computed by computing the inverses
+   :math:`U^{-1}`, :math:`L^{-1}` and finally forming the product
+   :math:`A^{-1} = U^{-1} L^{-1} P`. Each step is based on Level 3 BLAS calls.
+
+   It is preferable to avoid direct use of the inverse whenever possible, as the linear
    solver functions can obtain the same result more efficiently and
    reliably (consult any introductory textbook on numerical linear algebra
    for details).

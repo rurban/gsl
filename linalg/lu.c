@@ -365,7 +365,7 @@ gsl_linalg_LU_refine (const gsl_matrix * A, const gsl_matrix * LU, const gsl_per
     {
       GSL_ERROR ("matrix a must be square", GSL_ENOTSQR);
     }
-  if (LU->size1 != LU->size2)
+  else if (LU->size1 != LU->size2)
     {
       GSL_ERROR ("LU matrix must be square", GSL_ENOTSQR);
     }
@@ -412,27 +412,70 @@ gsl_linalg_LU_refine (const gsl_matrix * A, const gsl_matrix * LU, const gsl_per
 int
 gsl_linalg_LU_invert (const gsl_matrix * LU, const gsl_permutation * p, gsl_matrix * inverse)
 {
-  size_t i, n = LU->size1;
+  if (LU->size1 != LU->size2)
+    {
+      GSL_ERROR ("LU matrix must be square", GSL_ENOTSQR);
+    }
+  else if (LU->size1 != p->size)
+    {
+      GSL_ERROR ("permutation length must match matrix size", GSL_EBADLEN);
+    }
+  else if (inverse->size1 != LU->size1 || inverse->size2 != LU->size2)
+    {
+      GSL_ERROR ("inverse matrix must match LU matrix dimensions", GSL_EBADLEN);
+    }
+  else
+    {
+      gsl_matrix_memcpy(inverse, LU);
+      return gsl_linalg_LU_invx (inverse, p);
+    }
+}
 
-  int status = GSL_SUCCESS;
-
-  if (singular (LU)) 
+int
+gsl_linalg_LU_invx (gsl_matrix * LU, const gsl_permutation * p)
+{
+  if (LU->size1 != LU->size2)
+    {
+      GSL_ERROR ("LU matrix must be square", GSL_ENOTSQR);
+    }
+  else if (LU->size1 != p->size)
+    {
+      GSL_ERROR ("permutation length must match matrix size", GSL_EBADLEN);
+    }
+  else if (singular (LU)) 
     {
       GSL_ERROR ("matrix is singular", GSL_EDOM);
     }
-
-  gsl_matrix_set_identity (inverse);
-
-  for (i = 0; i < n; i++)
+  else
     {
-      gsl_vector_view c = gsl_matrix_column (inverse, i);
-      int status_i = gsl_linalg_LU_svx (LU, p, &(c.vector));
+      int status;
+      const size_t N = LU->size1;
+      size_t i;
 
-      if (status_i)
-        status = status_i;
+      /* compute U^{-1} */
+      status = gsl_linalg_tri_invert(CblasUpper, CblasNonUnit, LU);
+      if (status)
+        return status;
+
+      /* compute L^{-1} */
+      status = gsl_linalg_tri_invert(CblasLower, CblasUnit, LU);
+      if (status)
+        return status;
+
+      /* compute U^{-1} L^{-1} */
+      status = gsl_linalg_tri_UL(LU);
+      if (status)
+        return status;
+
+      /* apply permutation to columns of A^{-1} */
+      for (i = 0; i < N; ++i)
+        {
+          gsl_vector_view v = gsl_matrix_row(LU, i);
+          gsl_permute_vector_inverse(p, &v.vector);
+        }
+
+      return GSL_SUCCESS;
     }
-
-  return status;
 }
 
 double

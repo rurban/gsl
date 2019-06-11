@@ -971,7 +971,7 @@ test_cholesky_band_decomp(gsl_rng * r)
       for (p = 0; p < GSL_MIN(N, 10); ++p)
         {
           create_posdef_band_matrix(p, m, r);
-          s += test_cholesky_band_decomp_eps(p, m, 1.0e2 * N * GSL_DBL_EPSILON, "cholesky_band_decomp random");
+          s += test_cholesky_band_decomp_eps(p, m, 1.0e5 * N * GSL_DBL_EPSILON, "cholesky_band_decomp random");
         }
 
       gsl_matrix_free(m);

@@ -193,6 +193,7 @@ int gsl_linalg_LU_refine (const gsl_matrix * A,
 int gsl_linalg_LU_invert (const gsl_matrix * LU,
                           const gsl_permutation * p,
                           gsl_matrix * inverse);
+int gsl_linalg_LU_invx (gsl_matrix * LU, const gsl_permutation * p);
 
 double gsl_linalg_LU_det (gsl_matrix * LU, int signum);
 double gsl_linalg_LU_lndet (gsl_matrix * LU);
@@ -223,6 +224,7 @@ int gsl_linalg_complex_LU_refine (const gsl_matrix_complex * A,
 int gsl_linalg_complex_LU_invert (const gsl_matrix_complex * LU,
                                   const gsl_permutation * p,
                                   gsl_matrix_complex * inverse);
+int gsl_linalg_complex_LU_invx (gsl_matrix_complex * LU, const gsl_permutation * p);
 
 gsl_complex gsl_linalg_complex_LU_det (gsl_matrix_complex * LU,
                                        int signum);
@@ -774,7 +776,9 @@ int gsl_linalg_tri_invert(CBLAS_UPLO_t Uplo, CBLAS_DIAG_t Diag, gsl_matrix * T);
 int gsl_linalg_complex_tri_invert(CBLAS_UPLO_t Uplo, CBLAS_DIAG_t Diag, gsl_matrix_complex * T);
 
 int gsl_linalg_tri_LTL(gsl_matrix * L);
+int gsl_linalg_tri_UL(gsl_matrix * LU);
 int gsl_linalg_complex_tri_LHL(gsl_matrix_complex * L);
+int gsl_linalg_complex_tri_UL(gsl_matrix_complex * LU);
 
 INLINE_DECL void gsl_linalg_givens (const double a, const double b,
                                     double *c, double *s);

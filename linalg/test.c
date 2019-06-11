@@ -3340,8 +3340,10 @@ main(void)
   gsl_test(test_bidiag_decomp(),         "Bidiagonal Decomposition");
   gsl_test(test_LU_decomp(r),            "LU Decomposition");
   gsl_test(test_LU_solve(r),             "LU Solve");
+  gsl_test(test_LU_invert(r),            "LU Inverse");
   gsl_test(test_LUc_decomp(r),           "Complex LU Decomposition");
   gsl_test(test_LUc_solve(r),            "Complex LU Solve");
+  gsl_test(test_LUc_invert(r),           "Complex LU Inverse");
   gsl_test(test_QR_decomp(),             "QR Decomposition");
   gsl_test(test_QR_solve(),              "QR Solve");
   gsl_test(test_LQ_solve(),              "LQ Solve");

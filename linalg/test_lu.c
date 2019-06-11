@@ -227,3 +227,62 @@ test_LU_solve(gsl_rng * r)
 
   return s;
 }
+
+int
+test_LU_invert_eps(const gsl_matrix * m, const double eps, const char *desc)
+{
+  int s = 0;
+  size_t i, j, N = m->size1;
+
+  gsl_matrix * lu  = gsl_matrix_alloc(N, N);
+  gsl_matrix * c  = gsl_matrix_alloc(N, N);
+  gsl_permutation * perm = gsl_permutation_alloc(N);
+  int signum;
+
+  gsl_matrix_memcpy(lu, m);
+
+  s += gsl_linalg_LU_decomp(lu, perm, &signum);
+  s += gsl_linalg_LU_invx(lu, perm);
+
+  /* c = m m^{-1} */
+  gsl_blas_dgemm(CblasNoTrans, CblasNoTrans, 1.0, m, lu, 0.0, c);
+
+  /* c should be the identity matrix */
+
+  for (i = 0; i < N; ++i)
+    {
+      for (j = 0; j < N; ++j)
+        {
+          double cij = gsl_matrix_get(c, i, j);
+          double expected = (i == j) ? 1.0 : 0.0;
+
+          gsl_test_rel(cij, expected, eps, "%s (%3lu,%3lu)[%lu,%lu]: %22.18g   %22.18g\n",
+                       desc, N, N, i, j, cij, expected);
+        }
+    }
+
+  gsl_matrix_free(lu);
+  gsl_matrix_free(c);
+  gsl_permutation_free(perm);
+
+  return s;
+}
+
+static int
+test_LU_invert(gsl_rng * r)
+{
+  int s = 0;
+  size_t n;
+
+  for (n = 1; n <= 50; ++n)
+    {
+      gsl_matrix * m = gsl_matrix_alloc(n, n);
+
+      create_random_matrix(m, r);
+      test_LU_invert_eps(m, 1.0e5 * n * GSL_DBL_EPSILON, "LU_invert random");
+
+      gsl_matrix_free(m);
+    }
+
+  return s;
+}

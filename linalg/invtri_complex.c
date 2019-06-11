@@ -99,6 +99,29 @@ complex_tri_invert_L2(CBLAS_UPLO_t Uplo, CBLAS_DIAG_t Diag, gsl_matrix_complex *
 
       if (Uplo == CblasUpper)
         {
+          for (i = 0; i < N; ++i)
+            {
+              gsl_complex * Tii = gsl_matrix_complex_ptr(T, i, i);
+              gsl_complex aii;
+
+              if (Diag == CblasNonUnit)
+                {
+                  *Tii = gsl_complex_inverse(*Tii);
+                  GSL_REAL(aii) = -GSL_REAL(*Tii);
+                  GSL_IMAG(aii) = -GSL_IMAG(*Tii);
+                }
+              else
+                aii = GSL_COMPLEX_NEGONE;
+
+              if (i > 0)
+                {
+                  gsl_matrix_complex_view m = gsl_matrix_complex_submatrix(T, 0, 0, i, i);
+                  gsl_vector_complex_view v = gsl_matrix_complex_subcolumn(T, i, 0, i);
+
+                  gsl_blas_ztrmv(CblasUpper, CblasNoTrans, Diag, &m.matrix, &v.vector);
+                  gsl_blas_zscal(aii, &v.vector);
+                }
+            }
         }
       else
         {
@@ -106,15 +129,16 @@ complex_tri_invert_L2(CBLAS_UPLO_t Uplo, CBLAS_DIAG_t Diag, gsl_matrix_complex *
             {
               size_t j = N - i - 1;
               gsl_complex * Tjj = gsl_matrix_complex_ptr(T, j, j);
-              double ajj;
+              gsl_complex ajj;
 
               if (Diag == CblasNonUnit)
                 {
-                  GSL_REAL(*Tjj) = 1.0 / GSL_REAL(*Tjj);
-                  ajj = -GSL_REAL(*Tjj);
+                  *Tjj = gsl_complex_inverse(*Tjj);
+                  GSL_REAL(ajj) = -GSL_REAL(*Tjj);
+                  GSL_IMAG(ajj) = -GSL_IMAG(*Tjj);
                 }
               else
-                ajj = -1.0;
+                ajj = GSL_COMPLEX_NEGONE;
 
               if (j < N - 1)
                 {
@@ -122,7 +146,7 @@ complex_tri_invert_L2(CBLAS_UPLO_t Uplo, CBLAS_DIAG_t Diag, gsl_matrix_complex *
                   gsl_vector_complex_view v = gsl_matrix_complex_subcolumn(T, j, j + 1, N - j - 1);
 
                   gsl_blas_ztrmv(CblasLower, CblasNoTrans, Diag, &m.matrix, &v.vector);
-                  gsl_blas_zdscal(ajj, &v.vector);
+                  gsl_blas_zscal(ajj, &v.vector);
                 }
             }
         }

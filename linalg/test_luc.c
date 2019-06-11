@@ -202,7 +202,6 @@ test_LUc_solve_eps(const gsl_matrix_complex * m, const gsl_vector_complex * rhs,
   return s;
 }
 
-
 static int
 test_LUc_solve(gsl_rng * r)
 {
@@ -223,6 +222,68 @@ test_LUc_solve(gsl_rng * r)
       gsl_matrix_complex_free(m);
       gsl_vector_complex_free(rhs);
       gsl_vector_complex_free(sol);
+    }
+
+  return s;
+}
+
+int
+test_LUc_invert_eps(const gsl_matrix_complex * m, const double eps, const char *desc)
+{
+  int s = 0;
+  size_t i, j, N = m->size1;
+
+  gsl_matrix_complex * lu  = gsl_matrix_complex_alloc(N, N);
+  gsl_matrix_complex * c  = gsl_matrix_complex_alloc(N, N);
+  gsl_permutation * perm = gsl_permutation_alloc(N);
+  int signum;
+
+  gsl_matrix_complex_memcpy(lu, m);
+
+  s += gsl_linalg_complex_LU_decomp(lu, perm, &signum);
+  s += gsl_linalg_complex_LU_invx(lu, perm);
+
+  /* c = m m^{-1} */
+  gsl_blas_zgemm(CblasNoTrans, CblasNoTrans, GSL_COMPLEX_ONE, m, lu, GSL_COMPLEX_ZERO, c);
+
+  /* c should be the identity matrix */
+
+  for (i = 0; i < N; ++i)
+    {
+      for (j = 0; j < N; ++j)
+        {
+          gsl_complex cij = gsl_matrix_complex_get(c, i, j);
+          double expected = (i == j) ? 1.0 : 0.0;
+
+          gsl_test_rel(GSL_REAL(cij), expected, eps, "%s real (%3lu,%3lu)[%lu,%lu]: %22.18g   %22.18g\n",
+                       desc, N, N, i, j, GSL_REAL(cij), expected);
+
+          gsl_test_rel(GSL_IMAG(cij), 0.0, eps, "%s imag (%3lu,%3lu)[%lu,%lu]: %22.18g   %22.18g\n",
+                       desc, N, N, i, j, GSL_IMAG(cij), 0.0);
+        }
+    }
+
+  gsl_matrix_complex_free(lu);
+  gsl_matrix_complex_free(c);
+  gsl_permutation_free(perm);
+
+  return s;
+}
+
+static int
+test_LUc_invert(gsl_rng * r)
+{
+  int s = 0;
+  size_t n;
+
+  for (n = 1; n <= 50; ++n)
+    {
+      gsl_matrix_complex * m = gsl_matrix_complex_alloc(n, n);
+
+      create_random_complex_matrix(m, r);
+      test_LUc_invert_eps(m, 1.0e5 * n * GSL_DBL_EPSILON, "complex_LU_invert random");
+
+      gsl_matrix_complex_free(m);
     }
 
   return s;
