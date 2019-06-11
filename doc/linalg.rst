@@ -1709,8 +1709,16 @@ Triangular Systems
 .. function:: int gsl_linalg_tri_LTL (gsl_matrix * L)
               int gsl_linalg_complex_tri_LHL (gsl_matrix_complex * L)
 
-   This function computes the product :math:`L^T L` (or :math:`L^{\dagger} L`)
+   These functions compute the product :math:`L^T L` (or :math:`L^{\dagger} L`)
    in-place and stores it in the lower triangle of :data:`L` on output.
+
+.. function:: int gsl_linalg_tri_UL (gsl_matrix * LU)
+              int gsl_linalg_complex_tri_UL (gsl_matrix_complex * LU)
+
+   These functions compute the product :math:`U L` where :math:`U` is upper
+   triangular and :math:`L` is unit lower triangular, stored in :data:`LU`, as
+   computed by :func:`gsl_linalg_LU_decomp` or :func:`gsl_linalg_complex_LU_decomp`.
+   The product is computed in-place using Level 3 BLAS.
 
 .. index:: banded matrices
 
