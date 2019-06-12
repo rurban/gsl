@@ -30,8 +30,6 @@
 
 #include "recurse.h"
 
-#define REAL double
-
 static int LU_decomp_L2 (gsl_matrix * A, gsl_vector_uint * ipiv);
 static int LU_decomp_L3 (gsl_matrix * A, gsl_vector_uint * ipiv);
 static int singular (const gsl_matrix * LU);

@@ -865,18 +865,6 @@ both the scaled and unscaled systems.
 
    This function is now deprecated and is provided only for backward compatibility.
 
-.. function:: int gsl_linalg_cholesky_decomp_L2 (gsl_matrix * A)
-              int gsl_linalg_complex_cholesky_decomp_L2 (gsl_matrix * A)
-
-   These functions compute the Cholesky factorization of the matrix :data:`A` using
-   Level 2 BLAS operations.
-
-.. function:: int gsl_linalg_cholesky_decomp_L3 (gsl_matrix * A)
-.. function:: int gsl_linalg_complex_cholesky_decomp_L3 (gsl_matrix * A)
-
-   These functions compute the Cholesky factorization of the matrix :data:`A` using
-   Level 3 BLAS operations.
-
 .. function:: int gsl_linalg_cholesky_solve (const gsl_matrix * cholesky, const gsl_vector * b, gsl_vector * x)
               int gsl_linalg_complex_cholesky_solve (const gsl_matrix_complex * cholesky, const gsl_vector_complex * b, gsl_vector_complex * x)
 

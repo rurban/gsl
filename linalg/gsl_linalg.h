@@ -476,8 +476,6 @@ int gsl_linalg_PTLQ_update (gsl_matrix * Q, gsl_matrix * L,
 
 int gsl_linalg_cholesky_decomp (gsl_matrix * A);
 int gsl_linalg_cholesky_decomp1 (gsl_matrix * A);
-int gsl_linalg_cholesky_decomp_L2 (gsl_matrix * A);
-int gsl_linalg_cholesky_decomp_L3 (gsl_matrix * A);
 
 int gsl_linalg_cholesky_solve (const gsl_matrix * cholesky,
                                const gsl_vector * b,
@@ -522,8 +520,6 @@ int gsl_linalg_cholesky_rcond (const gsl_matrix * LLT, double * rcond,
 /* Complex Cholesky Decomposition */
 
 int gsl_linalg_complex_cholesky_decomp (gsl_matrix_complex * A);
-int gsl_linalg_complex_cholesky_decomp_L2 (gsl_matrix_complex * A);
-int gsl_linalg_complex_cholesky_decomp_L3 (gsl_matrix_complex * A);
 
 int gsl_linalg_complex_cholesky_solve (const gsl_matrix_complex * cholesky,
                                        const gsl_vector_complex * b,
