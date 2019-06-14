@@ -239,6 +239,9 @@ gsl_complex gsl_linalg_complex_LU_sgndet (gsl_matrix_complex * LU,
 int gsl_linalg_QR_decomp (gsl_matrix * A,
                           gsl_vector * tau);
 
+int gsl_linalg_QR_decomp_r (gsl_matrix * A,
+                            gsl_matrix * T);
+
 int gsl_linalg_QR_solve (const gsl_matrix * QR,
                          const gsl_vector * tau,
                          const gsl_vector * b,

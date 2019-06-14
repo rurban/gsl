@@ -193,6 +193,20 @@ columns of :math:`Q` form an orthonormal basis for the range of :math:`A`,
    The algorithm used to perform the decomposition is Householder QR (Golub
    & Van Loan, "Matrix Computations", Algorithm 5.2.1).
 
+.. function:: int gsl_linalg_QR_decomp_r (gsl_matrix * A, gsl_matrix * T)
+
+   This function factors the :math:`M`-by-:math:`N` matrix :data:`A` into
+   the :math:`QR` decomposition :math:`A = Q R` using the recursive Level 3 BLAS
+   algorithm of Elmroth and Gustavson. The :math:`N`-by-:math:`N`
+   matrix :data:`T` stores the upper triangular block reflector on output.
+   The Householder coefficients :data:`tau` are stored on the diagonal
+   of :data:`T` and can be passed to the other :math:`QR` routines. The
+   block reflector is given by :math:`H = I - V T V^T`, where the elements
+   below the diagonal of :data:`A` contain the columns of :math:`V` on output.
+
+   This algorithm requires :math:`M \ge N` and performs best for
+   "tall-skinny" matrices, i.e. :math:`M \gg N`.
+
 .. function:: int gsl_linalg_QR_solve (const gsl_matrix * QR, const gsl_vector * tau, const gsl_vector * b, gsl_vector * x)
 
    This function solves the square system :math:`A x = b` using the :math:`QR`
@@ -2010,6 +2024,12 @@ found in the following paper,
 
 * E. Peise and P. Bientinesi, "Recursive algorithms for dense linear algebra: the ReLAPACK collection",
   http://arxiv.org/abs/1602.06763, 2016.
+
+The recursive Level 3 BLAS QR decomposition is described in the following paper,
+
+* E. Elmroth and F. G. Gustavson, 2000. Applying recursion to serial and parallel QR
+  factorization leads to better performance. IBM Journal of Research and Development,
+  44(4), pp.605-624.
 
 The Modified Golub-Reinsch algorithm is described in the following paper,
 

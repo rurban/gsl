@@ -9,6 +9,7 @@
      - Cholesky decomposition and inversion (real and complex)
      - Generalized symmetric/hermitian eigensystem reduction to standard form
      - LU decomposition and inversion (real and complex)
+     - QR decomposition
 
 ** removed deprecated function gsl_linalg_hessenberg()
 

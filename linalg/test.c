@@ -52,8 +52,6 @@ int test_QR_QRsolve_dim(const gsl_matrix * m, const double * actual, double eps)
 int test_QR_QRsolve(void);
 int test_QR_lssolve_dim(const gsl_matrix * m, const double * actual, double eps);
 int test_QR_lssolve(void);
-int test_QR_decomp_dim(const gsl_matrix * m, double eps);
-int test_QR_decomp(void);
 int test_QRPT_solve_dim(const gsl_matrix * m, const double * actual, double eps);
 int test_QRPT_solve(void);
 int test_QRPT_QRsolve_dim(const gsl_matrix * m, const double * actual, double eps);
@@ -396,6 +394,7 @@ gsl_matrix * moler10;
 #include "test_lu.c"
 #include "test_luc.c"
 #include "test_lq.c"
+#include "test_qr.c"
 
 int
 test_QR_solve_dim(const gsl_matrix * m, const double * actual, double eps)
@@ -636,96 +635,6 @@ int test_QR_lssolve(void)
 
   f = test_QR_lssolve_dim(vander12, vander12_solution, 0.05);
   gsl_test(f, "  QR_lssolve vander(12)");
-  s += f;
-
-  return s;
-}
-
-
-int
-test_QR_decomp_dim(const gsl_matrix * m, double eps)
-{
-  int s = 0;
-  unsigned long i,j, M = m->size1, N = m->size2;
-
-  gsl_matrix * qr = gsl_matrix_alloc(M,N);
-  gsl_matrix * a  = gsl_matrix_alloc(M,N);
-  gsl_matrix * q  = gsl_matrix_alloc(M,M);
-  gsl_matrix * r  = gsl_matrix_alloc(M,N);
-  gsl_vector * d = gsl_vector_alloc(GSL_MIN(M,N));
-
-  gsl_matrix_memcpy(qr,m);
-
-  s += gsl_linalg_QR_decomp(qr, d);
-  s += gsl_linalg_QR_unpack(qr, d, q, r);
-  
-  /* compute a = q r */
-  gsl_blas_dgemm (CblasNoTrans, CblasNoTrans, 1.0, q, r, 0.0, a);
-
-  for(i=0; i<M; i++) {
-    for(j=0; j<N; j++) {
-      double aij = gsl_matrix_get(a, i, j);
-      double mij = gsl_matrix_get(m, i, j);
-      int foo = check(aij, mij, eps);
-      if(foo) {
-        printf("(%3lu,%3lu)[%lu,%lu]: %22.18g   %22.18g\n", M, N, i,j, aij, mij);
-      }
-      s += foo;
-    }
-  }
-
-  gsl_vector_free(d);
-  gsl_matrix_free(qr);
-  gsl_matrix_free(a);
-  gsl_matrix_free(q);
-  gsl_matrix_free(r);
-
-  return s;
-}
-
-int test_QR_decomp(void)
-{
-  int f;
-  int s = 0;
-
-  f = test_QR_decomp_dim(m35, 2 * 8.0 * GSL_DBL_EPSILON);
-  gsl_test(f, "  QR_decomp m(3,5)");
-  s += f;
-
-  f = test_QR_decomp_dim(m53, 2 * 64.0 * GSL_DBL_EPSILON);
-  gsl_test(f, "  QR_decomp m(5,3)");
-  s += f;
-
-  f = test_QR_decomp_dim(hilb2, 2 * 8.0 * GSL_DBL_EPSILON);
-  gsl_test(f, "  QR_decomp hilbert(2)");
-  s += f;
-
-  f = test_QR_decomp_dim(hilb3, 2 * 64.0 * GSL_DBL_EPSILON);
-  gsl_test(f, "  QR_decomp hilbert(3)");
-  s += f;
-
-  f = test_QR_decomp_dim(hilb4, 2 * 1024.0 * GSL_DBL_EPSILON);
-  gsl_test(f, "  QR_decomp hilbert(4)");
-  s += f;
-
-  f = test_QR_decomp_dim(hilb12, 2 * 1024.0 * GSL_DBL_EPSILON);
-  gsl_test(f, "  QR_decomp hilbert(12)");
-  s += f;
-
-  f = test_QR_decomp_dim(vander2, 8.0 * GSL_DBL_EPSILON);
-  gsl_test(f, "  QR_decomp vander(2)");
-  s += f;
-
-  f = test_QR_decomp_dim(vander3, 64.0 * GSL_DBL_EPSILON);
-  gsl_test(f, "  QR_decomp vander(3)");
-  s += f;
-
-  f = test_QR_decomp_dim(vander4, 1024.0 * GSL_DBL_EPSILON);
-  gsl_test(f, "  QR_decomp vander(4)");
-  s += f;
-
-  f = test_QR_decomp_dim(vander12, 0.0005); /* FIXME: bad accuracy */
-  gsl_test(f, "  QR_decomp vander(12)");
   s += f;
 
   return s;
@@ -3345,6 +3254,7 @@ main(void)
   gsl_test(test_LUc_solve(r),            "Complex LU Solve");
   gsl_test(test_LUc_invert(r),           "Complex LU Inverse");
   gsl_test(test_QR_decomp(),             "QR Decomposition");
+  gsl_test(test_QR_decomp_L3(r),         "QR Decomposition Level 3 BLAS");
   gsl_test(test_QR_solve(),              "QR Solve");
   gsl_test(test_LQ_solve(),              "LQ Solve");
   gsl_test(test_PTLQ_solve(),            "PTLQ Solve");

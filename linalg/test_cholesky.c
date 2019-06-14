@@ -414,7 +414,7 @@ test_mcholesky_decomp(gsl_rng * r)
       gsl_matrix * m = gsl_matrix_alloc(N, N);
 
       create_posdef_matrix(m, r);
-      test_mcholesky_decomp_eps(1, 0, m, -1.0, 128.0 * N * GSL_DBL_EPSILON, "mcholesky_decomp unscaled random posdef");
+      test_mcholesky_decomp_eps(1, 0, m, -1.0, 1.0e3 * N * GSL_DBL_EPSILON, "mcholesky_decomp unscaled random posdef");
 
       create_symm_matrix(m, r);
       test_mcholesky_decomp_eps(0, 0, m, -1.0, 1.0e5 * N * GSL_DBL_EPSILON, "mcholesky_decomp unscaled random symm");
