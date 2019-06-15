@@ -66,8 +66,6 @@ gsl_linalg_complex_LU_decomp (gsl_matrix_complex * A, gsl_permutation * p, int *
 {
   const size_t M = A->size1;
 
-  (void) signum;
-
   if (p->size != M)
     {
       GSL_ERROR ("permutation length must match matrix size1", GSL_EBADLEN);
@@ -98,13 +96,19 @@ gsl_linalg_complex_LU_decomp (gsl_matrix_complex * A, gsl_permutation * p, int *
       /* convert ipiv array to permutation */
 
       gsl_permutation_init(p);
+      *signum = 1;
 
       for (i = 0; i < minMN; ++i)
         {
           unsigned int pivi = gsl_vector_uint_get(ipiv, i);
-          size_t tmp = p->data[pivi];
-          p->data[pivi] = p->data[i];
-          p->data[i] = tmp;
+
+          if (p->data[pivi] != p->data[i])
+            {
+              size_t tmp = p->data[pivi];
+              p->data[pivi] = p->data[i];
+              p->data[i] = tmp;
+              *signum = -(*signum);
+            }
         }
 
       gsl_vector_uint_free(ipiv);
