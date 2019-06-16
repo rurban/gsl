@@ -129,17 +129,19 @@ test_QR_decomp_L3_eps(const gsl_matrix * m, const double eps, const char * desc)
   gsl_matrix * QR = gsl_matrix_alloc(M, N);
   gsl_matrix * T = gsl_matrix_alloc(N, N);
   gsl_matrix * A  = gsl_matrix_alloc(M, N);
+  gsl_matrix * R  = gsl_matrix_alloc(N, N);
   gsl_matrix * Q  = gsl_matrix_alloc(M, M);
-  gsl_matrix * R  = gsl_matrix_alloc(M, N);
+  gsl_matrix_view Q1 = gsl_matrix_submatrix(Q, 0, 0, M, N);
   gsl_vector_view tau = gsl_matrix_diagonal(T);
 
   gsl_matrix_memcpy(QR, m);
 
   s += gsl_linalg_QR_decomp_r(QR, T);
-  s += gsl_linalg_QR_unpack(QR, &tau.vector, Q, R);
+  s += gsl_linalg_QR_unpack_r(QR, T, Q, R);
   
   /* compute A = Q R */
-  gsl_blas_dgemm (CblasNoTrans, CblasNoTrans, 1.0, Q, R, 0.0, A);
+  gsl_matrix_memcpy(A, &Q1.matrix);
+  gsl_blas_dtrmm (CblasRight, CblasUpper, CblasNoTrans, CblasNonUnit, 1.0, R, A);
 
   for (i = 0; i < M; i++)
     {
@@ -162,12 +164,49 @@ test_QR_decomp_L3_eps(const gsl_matrix * m, const double eps, const char * desc)
   return s;
 }
 
+#define TIME_DIFF(a, b) ((double) b.tv_sec + b.tv_usec*1.0e-6 - (double)a.tv_sec - a.tv_usec*1.0e-6)
+
 static int
 test_QR_decomp_L3(gsl_rng * r)
 {
   int s = 0;
   size_t M, N;
 
+#if 0 /*XXX*/
+    M = 50000;
+    N = 5000;
+  {
+    gsl_matrix * A = gsl_matrix_alloc(M, N);
+    gsl_matrix * Q = gsl_matrix_alloc(M, M);
+    gsl_matrix * T = gsl_matrix_alloc(N, N);
+    gsl_vector_view tau = gsl_matrix_diagonal(T);
+    struct timeval tv0, tv1;
+    create_random_matrix(A, r);
+
+    gettimeofday(&tv0, NULL);
+    gsl_linalg_QR_decomp_r(A, T);
+    gettimeofday(&tv1, NULL);
+    fprintf(stderr, "decomp time = %f [sec]\n", TIME_DIFF(tv0,tv1));
+
+#if 1
+    {
+      gsl_matrix * R = gsl_matrix_alloc(N, N);
+      gettimeofday(&tv0, NULL);
+      gsl_linalg_QR_unpack_r(A, T, Q, R);
+      gettimeofday(&tv1, NULL);
+      fprintf(stderr, "unpack_r time = %f [sec]\n", TIME_DIFF(tv0,tv1));
+    }
+#else
+    {
+      gsl_matrix * R = gsl_matrix_alloc(M, N);
+      gettimeofday(&tv0, NULL);
+      gsl_linalg_QR_unpack(A, &tau.vector, Q, R);
+      gettimeofday(&tv1, NULL);
+      fprintf(stderr, "unpack time = %f [sec]\n", TIME_DIFF(tv0,tv1));
+    }
+#endif
+  }
+#else
   for (M = 1; M <= 50; ++M)
     {
       for (N = 1; N <= M; ++N)
@@ -189,6 +228,7 @@ test_QR_decomp_L3(gsl_rng * r)
   s += test_QR_decomp_L3_eps(vander2, 1.0e1 * GSL_DBL_EPSILON, "QR_decomp_L3 vander(2)");
   s += test_QR_decomp_L3_eps(vander3, 1.0e1 * GSL_DBL_EPSILON, "QR_decomp_L3 vander(3)");
   s += test_QR_decomp_L3_eps(vander4, 1.0e1 * GSL_DBL_EPSILON, "QR_decomp_L3 vander(4)");
+#endif
 
   return s;
 }

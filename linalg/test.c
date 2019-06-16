@@ -3244,6 +3244,7 @@ main(void)
   gsl_test(test_matmult_mod(),           "Matrix Multiply with Modification"); 
 #endif
 
+#if 0
   gsl_test(test_tri_invert(r),           "Triangular Inverse");
 
   gsl_test(test_bidiag_decomp(),         "Bidiagonal Decomposition");
@@ -3254,7 +3255,9 @@ main(void)
   gsl_test(test_LUc_solve(r),            "Complex LU Solve");
   gsl_test(test_LUc_invert(r),           "Complex LU Inverse");
   gsl_test(test_QR_decomp(),             "QR Decomposition");
+#endif
   gsl_test(test_QR_decomp_L3(r),         "QR Decomposition Level 3 BLAS");
+#if 0
   gsl_test(test_QR_solve(),              "QR Solve");
   gsl_test(test_LQ_solve(),              "LQ Solve");
   gsl_test(test_PTLQ_solve(),            "PTLQ Solve");
@@ -3318,6 +3321,7 @@ main(void)
   gsl_test(test_TDS_cyc_solve(),         "Tridiagonal symmetric cyclic solve");
   gsl_test(test_TDN_solve(),             "Tridiagonal nonsymmetric solve");
   gsl_test(test_TDN_cyc_solve(),         "Tridiagonal nonsymmetric cyclic solve");
+#endif
 
   gsl_matrix_free(m11);
   gsl_matrix_free(m35);

@@ -296,6 +296,11 @@ int gsl_linalg_QR_unpack (const gsl_matrix * QR,
                           gsl_matrix * Q,
                           gsl_matrix * R);
 
+int gsl_linalg_QR_unpack_r(const gsl_matrix * QR,
+                           const gsl_matrix * T,
+                           gsl_matrix * Q,
+                           gsl_matrix * R);
+
 int gsl_linalg_R_solve (const gsl_matrix * R,
                         const gsl_vector * b,
                         gsl_vector * x);
