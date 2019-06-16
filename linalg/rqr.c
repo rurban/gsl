@@ -28,7 +28,8 @@
 
 /*
  * this module contains routines for the QR factorization of a matrix
- * using the recursive Level 3 BLAS algorithm of Elmroth and Gustavson
+ * using the recursive Level 3 BLAS algorithm of Elmroth and Gustavson with
+ * additional modifications courtesy of Julien Langou.
  */
 
 static int unpack_Q1_r(gsl_matrix * Q, gsl_matrix * V1);
@@ -168,9 +169,9 @@ Inputs: QR - packed QR format, M-by-N
 Return: success/error
 
 Notes:
-1. Implementation provided by Julien Langou
+1) Implementation provided by Julien Langou
 
-2. Lower triangular portion of R is used as temporary workspace
+2) Lower triangular portion of R is used as temporary workspace
 */
 
 int
