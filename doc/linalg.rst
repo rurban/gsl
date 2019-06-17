@@ -169,12 +169,34 @@ an :math:`M`-by-:math:`N` right-triangular matrix :math:`R`,
 
 .. math:: A = Q R
 
-This decomposition can be used to convert the linear system :math:`A x = b`
+This decomposition can be used to convert the square linear system :math:`A x = b`
 into the triangular system :math:`R x = Q^T b`, which can be solved by
 back-substitution. Another use of the :math:`QR` decomposition is to
 compute an orthonormal basis for a set of vectors. The first :math:`N`
 columns of :math:`Q` form an orthonormal basis for the range of :math:`A`,
 :math:`ran(A)`, when :math:`A` has full column rank.
+
+When :math:`M > N`, the bottom :math:`M - N` rows of :math:`R` are zero,
+and so :math:`A` can be naturally partioned as
+
+.. only:: not texinfo
+
+   .. math:: A = \begin{pmatrix} Q_1 & Q_2 \end{pmatrix} \begin{pmatrix} R_1 \\ 0 \end{pmatrix} = Q_1 R_1
+
+.. only:: texinfo
+
+   ::
+
+     A = [ Q_1 Q_2 ] [ R_1  ] = Q_1 R_1
+                     [  0   ]
+
+where :math:`R_1` is :math:`N`-by-:math:`N` upper triangular, :math:`Q_1` is :math:`M`-by-:math:`N`, and
+:math:`Q_2` is :math:`M`-by-:math:`(M-N)`. :math:`Q_1 R_1` is sometimes called the *thin* or *reduced*
+QR decomposition. The solution of the least squares problem :math:`\min_x || b - A x ||^2` is:
+
+.. math:: x = R_1^{-1} c_1
+
+where :math:`c_1` is the first :math:`N` elements of :math:`Q^T b`.
 
 .. function:: int gsl_linalg_QR_decomp (gsl_matrix * A, gsl_vector * tau)
 
@@ -277,6 +299,14 @@ columns of :math:`Q` form an orthonormal basis for the range of :math:`A`,
    This function unpacks the encoded :math:`QR` decomposition
    (:data:`QR`, :data:`tau`) into the matrices :data:`Q` and :data:`R`, where
    :data:`Q` is :math:`M`-by-:math:`M` and :data:`R` is :math:`M`-by-:math:`N`. 
+
+.. function:: int gsl_linalg_QR_unpack_r (const gsl_matrix * QR, const gsl_matrix * T, gsl_matrix * Q, gsl_matrix * R)
+
+   This function unpacks the encoded :math:`QR` decomposition
+   (:data:`QR`, :data:`T`) as output from :func:`gsl_linalg_QR_decomp_r` into the matrices
+   :data:`Q` and :data:`R`, where :data:`Q` is :math:`M`-by-:math:`M` and :data:`R` is :math:`N`-by-:math:`N`.
+   Note that the full :math:`R` matrix is :math:`M`-by-:math:`N`, however the lower trapezoidal portion
+   is zero, so only the upper triangular factor is stored.
 
 .. function:: int gsl_linalg_QR_QRsolve (gsl_matrix * Q, gsl_matrix * R, const gsl_vector * b, gsl_vector * x)
 

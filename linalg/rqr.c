@@ -32,9 +32,10 @@
  * additional modifications courtesy of Julien Langou.
  */
 
-static int unpack_Q1_r(gsl_matrix * Q, gsl_matrix * V1);
-static int aux_ULT(gsl_matrix * L, gsl_matrix * U);
+static int unpack_Q1_r(gsl_matrix * Q);
+static int aux_ULT(const gsl_matrix * L, gsl_matrix * U);
 static int aux_mLU(gsl_matrix * A);
+static int aux_ApUBT(const gsl_matrix * U, const gsl_matrix * B, gsl_matrix * A);
 
 /*
 gsl_linalg_QR_decomp_r()
@@ -202,9 +203,6 @@ gsl_linalg_QR_unpack_r(const gsl_matrix * QR, const gsl_matrix * T, gsl_matrix *
       gsl_matrix_view Q1 = gsl_matrix_submatrix(Q, 0, 0, M, N);
       gsl_matrix_view m;
 
-      /* store V in lower triangle of R */
-      gsl_matrix_tricpy('L', 0, R, &RV.matrix);
-
       /*
        * set Q1 = [ T ]
        *          [ V ]
@@ -220,7 +218,7 @@ gsl_linalg_QR_unpack_r(const gsl_matrix * QR, const gsl_matrix * T, gsl_matrix *
           gsl_matrix_memcpy(&m.matrix, &tmp.matrix);
         }
 
-      unpack_Q1_r(&Q1.matrix, R);
+      unpack_Q1_r(&Q1.matrix);
 
       /* copy R */
       gsl_matrix_tricpy('U', 1, R, &RV.matrix);
@@ -233,58 +231,47 @@ gsl_linalg_QR_unpack_r(const gsl_matrix * QR, const gsl_matrix * T, gsl_matrix *
 unpack_Q1_r()
   Compute Q_1
 
-Inputs: Q  - on input, contains T in upper triangle and V2 in Q(n+1:m,1:n)
+Inputs: Q  - on input, contains T in upper triangle and V in lower trapezoid
              on output, contains Q_1
              M-by-N
-        V1 - on input, contains V1 in lower triangle
-             on output, destroyed
-             N-by-N
 */
 
 static int
-unpack_Q1_r(gsl_matrix * Q, gsl_matrix * V1)
+unpack_Q1_r(gsl_matrix * Q)
 {
+  int status;
+  const size_t M = Q->size1;
   const size_t N = Q->size2;
+  gsl_matrix_view T = gsl_matrix_submatrix(Q, 0, 0, N, N);
+  size_t i;
 
-  if (V1->size1 != N || V1->size2 != N)
+  /* T := T V1^T */
+  status = aux_ULT(&T.matrix, &T.matrix);
+  if (status)
+    return status;
+
+  if (M > N)
     {
-      GSL_ERROR ("V1 must be N-by-N", GSL_EBADLEN);
+      gsl_matrix_view m = gsl_matrix_submatrix(Q, N, 0, M - N, N);
+      gsl_blas_dtrmm(CblasRight, CblasUpper, CblasNoTrans, CblasNonUnit, -1.0, &T.matrix, &m.matrix);
     }
-  else
+
+  status = aux_mLU(&T.matrix);
+  if (status)
+    return status;
+
+  for (i = 0; i < N; ++i)
     {
-      int status;
-      const size_t M = Q->size1;
-      gsl_matrix_view T = gsl_matrix_submatrix(Q, 0, 0, N, N);
-      size_t i;
-
-      /* T := T V1^T */
-      status = aux_ULT(V1, &T.matrix);
-      if (status)
-        return status;
-
-      if (M > N)
-        {
-          gsl_matrix_view m = gsl_matrix_submatrix(Q, N, 0, M - N, N);
-          gsl_blas_dtrmm(CblasRight, CblasUpper, CblasNoTrans, CblasNonUnit, -1.0, &T.matrix, &m.matrix);
-        }
-
-      status = aux_mLU(&T.matrix);
-      if (status)
-        return status;
-
-      for (i = 0; i < N; ++i)
-        {
-          double * ptr = gsl_matrix_ptr(Q, i, i);
-          *ptr += 1.0;
-        }
-
-      return GSL_SUCCESS;
+      double * ptr = gsl_matrix_ptr(Q, i, i);
+      *ptr += 1.0;
     }
+
+  return GSL_SUCCESS;
 }
 
-/* U := U L^T for triangular matrices L and U; L is unit lower triangular; L is destroyed on output */
+/* U := U L^T for triangular matrices L and U; L is unit lower triangular */
 static int
-aux_ULT(gsl_matrix * L, gsl_matrix * U)
+aux_ULT(const gsl_matrix * L, gsl_matrix * U)
 {
   const size_t N = L->size1;
 
@@ -307,31 +294,21 @@ aux_ULT(gsl_matrix * L, gsl_matrix * U)
       const size_t N1 = N / 2;
       const size_t N2 = N - N1;
 
-      gsl_matrix_view L11 = gsl_matrix_submatrix(L, 0, 0, N1, N1);
-      gsl_matrix_view L21 = gsl_matrix_submatrix(L, N1, 0, N2, N1);
-      gsl_matrix_view L22 = gsl_matrix_submatrix(L, N1, N1, N2, N2);
+      gsl_matrix_const_view L11 = gsl_matrix_const_submatrix(L, 0, 0, N1, N1);
+      gsl_matrix_const_view L21 = gsl_matrix_const_submatrix(L, N1, 0, N2, N1);
+      gsl_matrix_const_view L22 = gsl_matrix_const_submatrix(L, N1, N1, N2, N2);
 
       gsl_matrix_view U11 = gsl_matrix_submatrix(U, 0, 0, N1, N1);
       gsl_matrix_view U12 = gsl_matrix_submatrix(U, 0, N1, N1, N2);
       gsl_matrix_view U22 = gsl_matrix_submatrix(U, N1, N1, N2, N2);
 
-      size_t i;
-
       /* U12 = U12 * L22^T */
       gsl_blas_dtrmm(CblasRight, CblasLower, CblasTrans, CblasUnit, 1.0, &L22.matrix, &U12.matrix);
 
       /* U12 = U12 + U11 * L21^T */
-
-      /* L21 := L21 * U11^T */
-      gsl_blas_dtrmm(CblasRight, CblasUpper, CblasTrans, CblasNonUnit, 1.0, &U11.matrix, &L21.matrix);
-
-      /* U12 := U12 + L21^T */
-      for (i = 0; i < N1; ++i)
-        {
-          gsl_vector_view u = gsl_matrix_row(&U12.matrix, i);
-          gsl_vector_view l = gsl_matrix_column(&L21.matrix, i);
-          gsl_vector_add(&u.vector, &l.vector);
-        }
+      status = aux_ApUBT(&U11.matrix, &L21.matrix, &U12.matrix);
+      if (status)
+        return status;
 
       status = aux_ULT(&L11.matrix, &U11.matrix);
       if (status)
@@ -388,6 +365,106 @@ aux_mLU(gsl_matrix * A)
 
       /* A11 = - L11 U11 */
       status = aux_mLU(&A11.matrix);
+      if (status)
+        return status;
+
+      return GSL_SUCCESS;
+    }
+}
+
+/* A := A + U B^T where U is upper triangular */
+static int
+aux_ApUBT(const gsl_matrix * U, const gsl_matrix * B, gsl_matrix * A)
+{
+  const size_t M = A->size1;
+  const size_t N = A->size2;
+
+  if (U->size1 != M || U->size2 != M)
+    {
+      GSL_ERROR ("U matrix has wrong dimensions", GSL_EBADLEN);
+    }
+  else if (B->size1 != N || B->size2 != M)
+    {
+      GSL_ERROR ("B matrix has wrong dimensions", GSL_EBADLEN);
+    }
+  else if (M == 1 && N == 1)
+    {
+      double *aptr = gsl_matrix_ptr(A, 0, 0);
+      const double *uptr = gsl_matrix_const_ptr(U, 0, 0);
+      const double *bptr = gsl_matrix_const_ptr(B, 0, 0);
+      *aptr += (*uptr) * (*bptr);
+      return GSL_SUCCESS;
+    }
+  else if (M == 1)
+    {
+      double U00 = gsl_matrix_get(U, 0, 0);
+      gsl_vector_view v = gsl_matrix_row(A, 0);
+      gsl_vector_const_view w = gsl_matrix_const_column(B, 0);
+      gsl_blas_daxpy(U00, &w.vector, &v.vector);
+      return GSL_SUCCESS;
+    }
+  else if (N == 1)
+    {
+      size_t i;
+
+      for (i = 0; i < M; ++i)
+        {
+          double * ai = gsl_matrix_ptr(A, i, 0);
+          gsl_vector_const_view u = gsl_matrix_const_subrow(U, i, i, M - i);
+          gsl_vector_const_view b = gsl_matrix_const_subrow(B, 0, i, M - i);
+          double dot;
+
+          gsl_blas_ddot(&u.vector, &b.vector, &dot);
+          *ai += dot;
+        }
+
+      return GSL_SUCCESS;
+    }
+  else
+    {
+      int status;
+      const size_t M1 = M / 2;
+      const size_t M2 = M - M1;
+      const size_t N1 = N / 2;
+      const size_t N2 = N - N1;
+
+      gsl_matrix_view A11 = gsl_matrix_submatrix(A, 0, 0, M1, N1);
+      gsl_matrix_view A12 = gsl_matrix_submatrix(A, 0, N1, M1, N2);
+      gsl_matrix_view A21 = gsl_matrix_submatrix(A, M1, 0, M2, N1);
+      gsl_matrix_view A22 = gsl_matrix_submatrix(A, M1, N1, M2, N2);
+
+      gsl_matrix_const_view U11 = gsl_matrix_const_submatrix(U, 0, 0, M1, M1);
+      gsl_matrix_const_view U12 = gsl_matrix_const_submatrix(U, 0, M1, M1, M2);
+      gsl_matrix_const_view U22 = gsl_matrix_const_submatrix(U, M1, M1, M2, M2);
+
+      gsl_matrix_const_view B11 = gsl_matrix_const_submatrix(B, 0, 0, N1, M1);
+      gsl_matrix_const_view B12 = gsl_matrix_const_submatrix(B, 0, M1, N1, M2);
+      gsl_matrix_const_view B21 = gsl_matrix_const_submatrix(B, N1, 0, N2, M1);
+      gsl_matrix_const_view B22 = gsl_matrix_const_submatrix(B, N1, M1, N2, M2);
+
+      /* A11 := A11 + U11 B11^T */
+      status = aux_ApUBT(&U11.matrix, &B11.matrix, &A11.matrix);
+      if (status)
+        return status;
+
+      /* A11 := A11 + U12 B12^T */
+      gsl_blas_dgemm(CblasNoTrans, CblasTrans, 1.0, &U12.matrix, &B12.matrix, 1.0, &A11.matrix);
+
+      /* A12 := A12 + U11 B21^T */
+      status = aux_ApUBT(&U11.matrix, &B21.matrix, &A12.matrix);
+      if (status)
+        return status;
+
+      /* A12 := A12 + U12 B22^T */
+      gsl_blas_dgemm(CblasNoTrans, CblasTrans, 1.0, &U12.matrix, &B22.matrix, 1.0, &A12.matrix);
+
+      /* A21 := A21 + U22 B12^T */
+      status = aux_ApUBT(&U22.matrix, &B12.matrix, &A21.matrix);
+      if (status)
+        return status;
+
+      /* A22 := A22 + U22 B22^T */
+      status = aux_ApUBT(&U22.matrix, &B22.matrix, &A22.matrix);
       if (status)
         return status;
 
