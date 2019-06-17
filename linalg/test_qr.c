@@ -188,7 +188,6 @@ test_QR_decomp_L3(gsl_rng * r)
     gettimeofday(&tv1, NULL);
     fprintf(stderr, "decomp time = %f [sec]\n", TIME_DIFF(tv0,tv1));
 
-#if 1
     {
       gsl_matrix * R = gsl_matrix_alloc(N, N);
       gettimeofday(&tv0, NULL);
@@ -196,15 +195,6 @@ test_QR_decomp_L3(gsl_rng * r)
       gettimeofday(&tv1, NULL);
       fprintf(stderr, "unpack_r time = %f [sec]\n", TIME_DIFF(tv0,tv1));
     }
-#else
-    {
-      gsl_matrix * R = gsl_matrix_alloc(M, N);
-      gettimeofday(&tv0, NULL);
-      gsl_linalg_QR_unpack(A, &tau.vector, Q, R);
-      gettimeofday(&tv1, NULL);
-      fprintf(stderr, "unpack time = %f [sec]\n", TIME_DIFF(tv0,tv1));
-    }
-#endif
   }
 #else
   for (M = 1; M <= 50; ++M)

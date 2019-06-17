@@ -192,11 +192,13 @@ and so :math:`A` can be naturally partioned as
 
 where :math:`R_1` is :math:`N`-by-:math:`N` upper triangular, :math:`Q_1` is :math:`M`-by-:math:`N`, and
 :math:`Q_2` is :math:`M`-by-:math:`(M-N)`. :math:`Q_1 R_1` is sometimes called the *thin* or *reduced*
-QR decomposition. The solution of the least squares problem :math:`\min_x || b - A x ||^2` is:
+QR decomposition. The solution of the least squares problem :math:`\min_x || b - A x ||^2` when :math:`A`
+has full rank is:
 
 .. math:: x = R_1^{-1} c_1
 
-where :math:`c_1` is the first :math:`N` elements of :math:`Q^T b`.
+where :math:`c_1` is the first :math:`N` elements of :math:`Q^T b`. If :math:`A` is rank deficient,
+see :ref:`linalg-qrpt` and :ref:`linalg-cod`.
 
 .. function:: int gsl_linalg_QR_decomp (gsl_matrix * A, gsl_vector * tau)
 
@@ -221,9 +223,7 @@ where :math:`c_1` is the first :math:`N` elements of :math:`Q^T b`.
    the :math:`QR` decomposition :math:`A = Q R` using the recursive Level 3 BLAS
    algorithm of Elmroth and Gustavson. The :math:`N`-by-:math:`N`
    matrix :data:`T` stores the upper triangular block reflector on output.
-   The Householder coefficients :data:`tau` are stored on the diagonal
-   of :data:`T` and can be passed to the other :math:`QR` routines. The
-   block reflector is given by :math:`H = I - V T V^T`, where the elements
+   The block reflector is given by :math:`H = I - V T V^T`, where the elements
    below the diagonal of :data:`A` contain the columns of :math:`V` on output.
 
    This algorithm requires :math:`M \ge N` and performs best for
@@ -335,6 +335,8 @@ where :math:`c_1` is the first :math:`N` elements of :math:`Q^T b`.
 
 .. index:: QR decomposition with column pivoting
 
+.. _linalg-qrpt:
+
 QR Decomposition with Column Pivoting
 =====================================
 
@@ -345,7 +347,7 @@ can be extended to the rank deficient case by introducing a column permutation :
 
 The first :math:`r` columns of :math:`Q` form an orthonormal basis
 for the range of :math:`A` for a matrix with column rank :math:`r`.  This
-decomposition can also be used to convert the linear system :math:`A x = b`
+decomposition can also be used to convert the square linear system :math:`A x = b`
 into the triangular system :math:`R y = Q^T b, x = P y`, which can be
 solved by back-substitution and permutation.  We denote the :math:`QR`
 decomposition with column pivoting by :math:`QRP^T` since :math:`A = Q R P^T`.
@@ -400,7 +402,7 @@ can be obtained as
 
 where :math:`c_1` consists of the first :math:`r` elements of :math:`Q^T b`.
 This basic solution is not guaranteed to be the minimum norm solution unless
-:math:`R_{12} = 0` (see :ref:`Complete Orthogonal Decomposition <cod>`).
+:math:`R_{12} = 0` (see :ref:`Complete Orthogonal Decomposition <linalg-cod>`).
 
 .. function:: int gsl_linalg_QRPT_decomp (gsl_matrix * A, gsl_vector * tau, gsl_permutation * p, int * signum, gsl_vector * norm)
 
@@ -584,7 +586,7 @@ an underdetermined system of equations :math:`A x = b`, where :math:`A` is
 
 .. index:: complete orthogonal decomposition
 
-.. _cod:
+.. _linalg-cod:
 
 Complete Orthogonal Decomposition
 =================================
