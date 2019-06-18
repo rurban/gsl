@@ -7,9 +7,9 @@
 ** implemented Level 3 BLAS versions of several linear algebra routines:
      - Triangular matrix inversion
      - Cholesky decomposition and inversion (real and complex)
-     - Generalized symmetric/hermitian eigensystem reduction to standard form
      - LU decomposition and inversion (real and complex)
-     - QR decomposition
+     - QR decomposition (courtesy of Julien Langou)
+     - Generalized symmetric/hermitian eigensystem reduction to standard form
 
 ** removed deprecated function gsl_linalg_hessenberg()
 

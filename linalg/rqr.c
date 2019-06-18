@@ -405,18 +405,44 @@ aux_ApUBT(const gsl_matrix * U, const gsl_matrix * B, gsl_matrix * A)
     }
   else if (N == 1)
     {
-      size_t i;
+      /*
+       * partition:
+       *
+       *         M1  M2
+       * B = 1 [ B11 B12 ]
+       *
+       *       1        M1  M2       1
+       * M1 [ A11 ] + [ U11 U12 ] [ B11^T ] M1
+       * M2 [ A21 ]   [  0  U22 ] [ B12^T ] M2
+       */
+      int status;
+      const size_t M1 = M / 2;
+      const size_t M2 = M - M1;
 
-      for (i = 0; i < M; ++i)
-        {
-          double * ai = gsl_matrix_ptr(A, i, 0);
-          gsl_vector_const_view u = gsl_matrix_const_subrow(U, i, i, M - i);
-          gsl_vector_const_view b = gsl_matrix_const_subrow(B, 0, i, M - i);
-          double dot;
+      gsl_matrix_view A11 = gsl_matrix_submatrix(A, 0, 0, M1, 1);
+      gsl_matrix_view A21 = gsl_matrix_submatrix(A, M1, 0, M2, 1);
+      gsl_vector_view a1 = gsl_matrix_subcolumn(A, 0, 0, M1);
 
-          gsl_blas_ddot(&u.vector, &b.vector, &dot);
-          *ai += dot;
-        }
+      gsl_matrix_const_view U11 = gsl_matrix_const_submatrix(U, 0, 0, M1, M1);
+      gsl_matrix_const_view U12 = gsl_matrix_const_submatrix(U, 0, M1, M1, M2);
+      gsl_matrix_const_view U22 = gsl_matrix_const_submatrix(U, M1, M1, M2, M2);
+
+      gsl_matrix_const_view B11 = gsl_matrix_const_submatrix(B, 0, 0, 1, M1);
+      gsl_matrix_const_view B12 = gsl_matrix_const_submatrix(B, 0, M1, 1, M2);
+      gsl_vector_const_view b2 = gsl_matrix_const_subrow(B, 0, M1, M2);
+
+      /* A(1:M1,1) += U12 * B12^T */
+      gsl_blas_dgemv(CblasNoTrans, 1.0, &U12.matrix, &b2.vector, 1.0, &a1.vector);
+
+      /* A11 := A11 + U11 B11^T */
+      status = aux_ApUBT(&U11.matrix, &B11.matrix, &A11.matrix);
+      if (status)
+        return status;
+
+      /* A21 := A21 + U22 B12^T */
+      status = aux_ApUBT(&U22.matrix, &B12.matrix, &A21.matrix);
+      if (status)
+        return status;
 
       return GSL_SUCCESS;
     }
