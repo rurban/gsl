@@ -1,6 +1,6 @@
 /* linalg/rqr.c
  * 
- * Copyright (C) 2019 Patrick Alken
+ * Copyright (C) 2019 Patrick Alken, Julien Langou
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -222,6 +222,79 @@ gsl_linalg_QR_unpack_r(const gsl_matrix * QR, const gsl_matrix * T, gsl_matrix *
 
       /* copy R */
       gsl_matrix_tricpy('U', 1, R, &RV.matrix);
+
+      return GSL_SUCCESS;
+    }
+}
+
+/*
+gsl_linalg_QR_QTmat_r()
+  Apply M-by-M Q^T to the M-by-K matrix B
+
+Inputs: QR   - [R; V] matrix encoded by gsl_linalg_QR_decomp_r
+        T    - block reflector matrix
+        B    - M-by-K matrix replaced by Q^T B on output
+        work - N-by-K workspace
+
+Notes:
+1) Provided by Julien Langou
+*/
+
+int
+gsl_linalg_QR_QTmat_r(const gsl_matrix * QR, const gsl_matrix * T, gsl_matrix * B, gsl_matrix * work)
+{
+  const size_t M = QR->size1;
+  const size_t N = QR->size2;
+  const size_t K = B->size2;
+
+  if (M < N)
+    {
+      GSL_ERROR ("M must be >= N", GSL_EBADLEN);
+    }
+  else if (T->size1 != N || T->size2 != N)
+    {
+      GSL_ERROR ("T matrix must be N-by-N", GSL_EBADLEN);
+    }
+  else if (B->size1 != M)
+    {
+      GSL_ERROR ("B matrix must have M rows", GSL_EBADLEN);
+    }
+  else if (work->size1 != N || work->size2 != K)
+    {
+      GSL_ERROR ("workspace must be N-by-K", GSL_EBADLEN);
+    }
+  else
+    {
+      gsl_matrix_const_view V1 = gsl_matrix_const_submatrix(QR, 0, 0, N, N);
+      gsl_matrix_view B1 = gsl_matrix_submatrix(B, 0, 0, N, K);
+      gsl_matrix_view B2;
+
+      /* work := V1^T B1 */
+      gsl_matrix_memcpy(work, &B1.matrix);
+      gsl_blas_dtrmm(CblasLeft, CblasLower, CblasTrans, CblasUnit, 1.0, &V1.matrix, work);
+
+      if (M > N)
+        {
+          gsl_matrix_const_view V2 = gsl_matrix_const_submatrix(QR, N, 0, M - N, N);
+
+          /* work = work + V2^T B2 */
+          B2 = gsl_matrix_submatrix(B, N, 0, M - N, K);
+          gsl_blas_dgemm(CblasTrans, CblasNoTrans, 1.0, &V2.matrix, &B2.matrix, 1.0, work);
+        }
+
+      /* work = T^T * work */
+      gsl_blas_dtrmm(CblasLeft, CblasUpper, CblasTrans, CblasNonUnit, 1.0, T, work);
+
+      if (M > N)
+        {
+          /* B2 = B2 - V2 * work */
+          gsl_matrix_const_view V2 = gsl_matrix_const_submatrix(QR, N, 0, M - N, N);
+          gsl_blas_dgemm(CblasNoTrans, CblasNoTrans, -1.0, &V2.matrix, work, 1.0, &B2.matrix);
+        }
+
+      /* B1 = B1 - V1 * work */
+      gsl_blas_dtrmm(CblasLeft, CblasLower, CblasNoTrans, CblasUnit, 1.0, &V1.matrix, work);
+      gsl_matrix_sub(&B1.matrix, work);
 
       return GSL_SUCCESS;
     }

@@ -272,13 +272,17 @@ see :ref:`linalg-qrpt` and :ref:`linalg-cod`.
    the encoding of the Householder vectors without needing to form the full
    matrix :math:`Q`.
 
-.. function:: int gsl_linalg_QR_QTmat (const gsl_matrix * QR, const gsl_vector * tau, gsl_matrix * A)
+.. function:: int gsl_linalg_QR_QTmat (const gsl_matrix * QR, const gsl_vector * tau, gsl_matrix * B)
+              int gsl_linalg_QR_QTmat_r (const gsl_matrix * QR, const gsl_matrix * T, gsl_matrix * B, gsl_matrix * work)
 
    This function applies the matrix :math:`Q^T` encoded in the decomposition
-   (:data:`QR`, :data:`tau`) to the matrix :data:`A`, storing the result :math:`Q^T A`
-   in :data:`A`.  The matrix multiplication is carried out directly using
-   the encoding of the Householder vectors without needing to form the full
+   (:data:`QR`, :data:`tau`) or (:data:`QR`, :data:`T`) to the :math:`M`-by-:math:`K` matrix :data:`B`,
+   storing the result :math:`Q^T B` in :data:`B`.  The matrix multiplication is carried
+   out directly using the encoding of the Householder vectors without needing to form the full
    matrix :math:`Q^T`.
+
+   The recursive variant :code:`QTmat_r` requires additional workspace of size
+   :math:`N`-by-:math:`K` in :data:`work`.
 
 .. function:: int gsl_linalg_QR_Rsolve (const gsl_matrix * QR, const gsl_vector * b, gsl_vector * x)
 

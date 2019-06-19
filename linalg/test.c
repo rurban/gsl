@@ -3254,10 +3254,12 @@ main(void)
   gsl_test(test_LUc_solve(r),            "Complex LU Solve");
   gsl_test(test_LUc_invert(r),           "Complex LU Inverse");
   gsl_test(test_QR_decomp(),             "QR Decomposition");
-  gsl_test(test_QR_decomp_L3(r),         "QR Decomposition Level 3 BLAS");
   gsl_test(test_QR_solve(),              "QR Solve");
   gsl_test(test_LQ_solve(),              "LQ Solve");
   gsl_test(test_PTLQ_solve(),            "PTLQ Solve");
+
+  gsl_test(test_QR_decomp_r(r),          "QR Decomposition (recursive)");
+  gsl_test(test_QR_QTmat_r(r),           "QR QTmat (recursive)");
 
   gsl_test(test_LQ_decomp(),             "LQ Decomposition");
   gsl_test(test_LQ_LQsolve(),            "LQ LQ Solve");
