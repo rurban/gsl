@@ -171,7 +171,7 @@ test_choleskyc_invert(gsl_rng * r)
       gsl_matrix_complex * m = gsl_matrix_complex_alloc(N, N);
 
       create_posdef_complex_matrix(m, r);
-      test_choleskyc_invert_eps(m, N * GSL_DBL_EPSILON, "cholesky_complex_invert random");
+      test_choleskyc_invert_eps(m, 32.0 * N * GSL_DBL_EPSILON, "cholesky_complex_invert random");
 
       gsl_matrix_complex_free(m);
     }

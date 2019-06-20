@@ -268,3 +268,63 @@ test_QR_QTmat_r(gsl_rng * r)
 
   return s;
 }
+
+static int
+test_QR_solve_r_eps(const gsl_matrix * A, const gsl_vector * rhs, const gsl_vector * sol,
+                    const double eps, const char * desc)
+{
+  int s = 0;
+  const size_t M = A->size1;
+  const size_t N = A->size2;
+  size_t i;
+
+  gsl_matrix * QR = gsl_matrix_alloc(M, N);
+  gsl_matrix * T = gsl_matrix_alloc(N, N);
+  gsl_vector * x  = gsl_vector_alloc(N);
+
+  gsl_matrix_memcpy(QR, A);
+
+  s += gsl_linalg_QR_decomp_r(QR, T);
+  s += gsl_linalg_QR_solve_r(QR, T, rhs, x);
+
+  for (i = 0; i < M; i++)
+    {
+      double xi = gsl_vector_get(x, i);
+      double yi = gsl_vector_get(sol, i);
+
+      gsl_test_rel(xi, yi, eps, "%s (%3lu)[%lu]: %22.18g   %22.18g\n",
+                   desc, N, i, xi, yi);
+    }
+
+  gsl_matrix_free(QR);
+  gsl_matrix_free(T);
+  gsl_vector_free(x);
+
+  return s;
+}
+
+static int
+test_QR_solve_r(gsl_rng * r)
+{
+  int s = 0;
+  size_t N;
+
+  for (N = 1; N <= 50; ++N)
+    {
+      gsl_matrix * A = gsl_matrix_alloc(N, N);
+      gsl_vector * sol = gsl_vector_alloc(N);
+      gsl_vector * rhs = gsl_vector_alloc(N);
+
+      create_random_matrix(A, r);
+      create_random_vector(sol, r);
+      gsl_blas_dgemv(CblasNoTrans, 1.0, A, sol, 0.0, rhs);
+
+      s += test_QR_solve_r_eps(A, rhs, sol, 1.0e5 * N * GSL_DBL_EPSILON, "QR_solve_r random");
+
+      gsl_matrix_free(A);
+      gsl_vector_free(sol);
+      gsl_vector_free(rhs);
+    }
+
+  return s;
+}

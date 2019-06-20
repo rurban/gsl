@@ -230,20 +230,21 @@ see :ref:`linalg-qrpt` and :ref:`linalg-cod`.
    "tall-skinny" matrices, i.e. :math:`M \gg N`.
 
 .. function:: int gsl_linalg_QR_solve (const gsl_matrix * QR, const gsl_vector * tau, const gsl_vector * b, gsl_vector * x)
+              int gsl_linalg_QR_solve_r (const gsl_matrix * QR, const gsl_matrix * T, const gsl_vector * b, gsl_vector * x)
 
-   This function solves the square system :math:`A x = b` using the :math:`QR`
-   decomposition of :math:`A` held in (:data:`QR`, :data:`tau`) which must 
-   have been computed previously with :func:`gsl_linalg_QR_decomp`. 
-   The least-squares solution for 
-   rectangular systems can be found using :func:`gsl_linalg_QR_lssolve`.
+   These functions solve the square system :math:`A x = b` using the :math:`QR`
+   decomposition of :math:`A` held in (:data:`QR`, :data:`tau`) or (:data:`QR`, :data:`T`) which must 
+   have been computed previously with :func:`gsl_linalg_QR_decomp` or
+   :func:`gsl_linalg_QR_decomp_r`.
+   The least-squares solution for rectangular systems can be found using :func:`gsl_linalg_QR_lssolve`
+   or :func:`gsl_linalg_QR_lssolve_r`.
 
 .. function:: int gsl_linalg_QR_svx (const gsl_matrix * QR, const gsl_vector * tau, gsl_vector * x)
 
    This function solves the square system :math:`A x = b` in-place using
    the :math:`QR` decomposition of :math:`A` held in (:data:`QR`, :data:`tau`)
-   which must have been computed previously by
-   :func:`gsl_linalg_QR_decomp`.  On input :data:`x` should contain the
-   right-hand side :math:`b`, which is replaced by the solution on output.
+   which must have been computed previously by :func:`gsl_linalg_QR_decomp`.
+   On input :data:`x` should contain the right-hand side :math:`b`, which is replaced by the solution on output.
 
 .. function:: int gsl_linalg_QR_lssolve (const gsl_matrix * QR, const gsl_vector * tau, const gsl_vector * b, gsl_vector * x, gsl_vector * residual)
 
@@ -257,12 +258,16 @@ see :ref:`linalg-qrpt` and :ref:`linalg-cod`.
    residual is computed as a by-product and stored in :data:`residual`.
 
 .. function:: int gsl_linalg_QR_QTvec (const gsl_matrix * QR, const gsl_vector * tau, gsl_vector * v)
+              int gsl_linalg_QR_QTvec_r (const gsl_matrix * QR, const gsl_matrix * T, gsl_vector * v, gsl_vector * work)
 
-   This function applies the matrix :math:`Q^T` encoded in the decomposition
-   (:data:`QR`, :data:`tau`) to the vector :data:`v`, storing the result :math:`Q^T v`
-   in :data:`v`.  The matrix multiplication is carried out directly using
-   the encoding of the Householder vectors without needing to form the full
+   These functions apply the matrix :math:`Q^T` encoded in the decomposition
+   (:data:`QR`, :data:`tau`) or (:data:`QR`, :data:`T`) to the vector :data:`v`,
+   storing the result :math:`Q^T v` in :data:`v`.  The matrix multiplication is carried
+   out directly using the encoding of the Householder vectors without needing to form the full
    matrix :math:`Q^T`.
+
+   The recursive variant :code:`QTvec_r` requires additional workspace of size
+   :math:`N` in :data:`work`.
 
 .. function:: int gsl_linalg_QR_Qvec (const gsl_matrix * QR, const gsl_vector * tau, gsl_vector * v)
 

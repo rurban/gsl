@@ -707,10 +707,10 @@ cholesky_decomp_L3 (gsl_matrix * A)
       if (status)
         return status;
 
-      /* A21 = A21 * A11^{-1} */
+      /* A21 = A21 * L11^{-T} */
       gsl_blas_dtrsm(CblasRight, CblasLower, CblasTrans, CblasNonUnit, 1.0, &A11.matrix, &A21.matrix);
 
-      /* A22 -= A21 A21^T */
+      /* A22 -= L21 L21^T */
       gsl_blas_dsyrk(CblasLower, CblasNoTrans, -1.0, &A21.matrix, 1.0, &A22.matrix);
 
       /* recursion on A22 */

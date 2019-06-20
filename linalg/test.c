@@ -3260,6 +3260,7 @@ main(void)
 
   gsl_test(test_QR_decomp_r(r),          "QR Decomposition (recursive)");
   gsl_test(test_QR_QTmat_r(r),           "QR QTmat (recursive)");
+  gsl_test(test_QR_solve_r(r),           "QR Solve (recursive)");
 
   gsl_test(test_LQ_decomp(),             "LQ Decomposition");
   gsl_test(test_LQ_LQsolve(),            "LQ LQ Solve");
