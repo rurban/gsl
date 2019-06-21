@@ -222,8 +222,8 @@ see :ref:`linalg-qrpt` and :ref:`linalg-cod`.
    This function factors the :math:`M`-by-:math:`N` matrix :data:`A` into
    the :math:`QR` decomposition :math:`A = Q R` using the recursive Level 3 BLAS
    algorithm of Elmroth and Gustavson. The :math:`N`-by-:math:`N`
-   matrix :data:`T` stores the upper triangular block reflector on output.
-   The block reflector is given by :math:`H = I - V T V^T`, where the elements
+   matrix :data:`T` stores the upper triangular factor appearing in :math:`Q`.
+   The matrix :math:`Q` is given by :math:`Q = I - V T V^T`, where the elements
    below the diagonal of :data:`A` contain the columns of :math:`V` on output.
 
    This algorithm requires :math:`M \ge N` and performs best for
@@ -256,6 +256,21 @@ see :ref:`linalg-qrpt` and :ref:`linalg-cod`.
    of :math:`A` into (:data:`QR`, :data:`tau`) given by
    :func:`gsl_linalg_QR_decomp`.  The solution is returned in :data:`x`.  The
    residual is computed as a by-product and stored in :data:`residual`.
+
+.. function:: int gsl_linalg_QR_lssolve_r (const gsl_matrix * QR, const gsl_matrix * T, const gsl_vector * b, gsl_vector * x, gsl_vector * work)
+
+   This function finds the least squares solution to the overdetermined
+   system :math:`A x = b` where the matrix :data:`A` has more rows than
+   columns.  The least squares solution minimizes the Euclidean norm of the
+   residual, :math:`||b - Ax||`.The routine requires as input 
+   the :math:`QR` decomposition
+   of :math:`A` into (:data:`QR`, :data:`T`) given by
+   :func:`gsl_linalg_QR_decomp_r`. The parameter :data:`x` is of length :math:`M`.
+   The solution :math:`x` is returned in the first :math:`N` rows of :data:`x`,
+   i.e. :math:`x =` :code:`x[0], x[1], ..., x[N-1]`. The last :math:`M - N` rows
+   of :data:`x` contain a vector whose norm is equal to the residual norm
+   :math:`|| b - A x ||`. This similar to the behavior of LAPACK DGELS.
+   Additional workspace of length :math:`N` is required in :data:`work`.
 
 .. function:: int gsl_linalg_QR_QTvec (const gsl_matrix * QR, const gsl_vector * tau, gsl_vector * v)
               int gsl_linalg_QR_QTvec_r (const gsl_matrix * QR, const gsl_matrix * T, gsl_vector * v, gsl_vector * work)

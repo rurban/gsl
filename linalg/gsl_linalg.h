@@ -249,6 +249,9 @@ int gsl_linalg_QR_svx (const gsl_matrix * QR, const gsl_vector * tau, gsl_vector
 int gsl_linalg_QR_lssolve (const gsl_matrix * QR, const gsl_vector * tau, const gsl_vector * b, 
                            gsl_vector * x, gsl_vector * residual);
 
+int gsl_linalg_QR_lssolve_r (const gsl_matrix * QR, const gsl_matrix * T, const gsl_vector * b,
+                             gsl_vector * x, gsl_vector * work);
+
 int gsl_linalg_QR_QRsolve (gsl_matrix * Q, gsl_matrix * R, const gsl_vector * b, gsl_vector * x);
 
 int gsl_linalg_QR_Rsolve (const gsl_matrix * QR, const gsl_vector * b, gsl_vector * x);

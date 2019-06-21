@@ -158,10 +158,11 @@ gsl_linalg_QR_decomp_r (gsl_matrix * A, gsl_matrix * T)
     }
 }
 
-/* Solves the system A x = b using the QR factorisation,
+/* Solves the square system A x = b for x using the QR factorisation,
+ *
  *  R x = Q^T b
  *
- * to obtain x.
+ * where Q = I - V T V^T
  */
 
 int
@@ -189,19 +190,19 @@ gsl_linalg_QR_solve_r (const gsl_matrix * QR, const gsl_matrix * T, const gsl_ve
     {
       size_t i;
 
-      /* compute Q^T b = [I - V1 T V1^T]^T b = [I - V1 T^T V1^T] b */
+      /* compute Q^T b = [I - V T^T V^T] b */
 
-      /* x := V1^T b */
+      /* x := V^T b */
       gsl_vector_memcpy(x, b);
       gsl_blas_dtrmv(CblasLower, CblasTrans, CblasUnit, QR, x);
 
       /* x = T^T * x */
       gsl_blas_dtrmv(CblasUpper, CblasTrans, CblasNonUnit, T, x);
 
-      /* x = V1 * x */
+      /* x = V * x */
       gsl_blas_dtrmv(CblasLower, CblasNoTrans, CblasUnit, QR, x);
 
-      /* x = b - V1 * x */
+      /* x = b - V * x */
       for (i = 0; i < N; ++i)
         {
           double * xi = gsl_vector_ptr(x, i);
@@ -211,6 +212,63 @@ gsl_linalg_QR_solve_r (const gsl_matrix * QR, const gsl_matrix * T, const gsl_ve
 
       /* Solve R x = Q^T b, storing x in-place */
       gsl_blas_dtrsv (CblasUpper, CblasNoTrans, CblasNonUnit, QR, x);
+
+      return GSL_SUCCESS;
+    }
+}
+
+/* Find the least squares solution to the overdetermined system 
+ *
+ *   A x = b 
+ *  
+ * for M >= N using the QR factorization A = Q R. 
+ *
+ * Inputs: QR   - [R; V] matrix, M-by-N
+ *         T    - upper triangular block reflector, N-by-N
+ *         b    - right hand side, size M
+ *         x    - (output) solution, size M
+ *                x(1:N) = least squares solution vector
+ *                x(N+1:M) = vector whose norm equals ||b - Ax||
+ *         work - workspace, size N
+ */
+
+int
+gsl_linalg_QR_lssolve_r (const gsl_matrix * QR, const gsl_matrix * T, const gsl_vector * b, gsl_vector * x, gsl_vector * work)
+{
+  const size_t M = QR->size1;
+  const size_t N = QR->size2;
+
+  if (M < N)
+    {
+      GSL_ERROR ("QR matrix must have M >= N", GSL_EBADLEN);
+    }
+  else if (T->size1 != N || T->size2 != N)
+    {
+      GSL_ERROR ("T matrix must be N-by-N", GSL_EBADLEN);
+    }
+  else if (M != b->size)
+    {
+      GSL_ERROR ("matrix size must match b size", GSL_EBADLEN);
+    }
+  else if (M != x->size)
+    {
+      GSL_ERROR ("matrix size must match solution size", GSL_EBADLEN);
+    }
+  else if (N != work->size)
+    {
+      GSL_ERROR ("matrix size must match work size", GSL_EBADLEN);
+    }
+  else
+    {
+      gsl_matrix_const_view R = gsl_matrix_const_submatrix (QR, 0, 0, N, N);
+      gsl_vector_view x1 = gsl_vector_subvector(x, 0, N);
+
+      /* compute x = Q^T b */
+      gsl_vector_memcpy(x, b);
+      gsl_linalg_QR_QTvec_r (QR, T, x, work);
+
+      /* Solve R x = Q^T b */
+      gsl_blas_dtrsv (CblasUpper, CblasNoTrans, CblasNonUnit, &R.matrix, &x1.vector);
 
       return GSL_SUCCESS;
     }
@@ -291,6 +349,16 @@ Inputs: QR   - [R; V] matrix encoded by gsl_linalg_QR_decomp_r
         T    - block reflector matrix
         b    - M-by-1 matrix replaced by Q^T b on output
         work - workspace, length N
+
+Notes:
+1) Q^T b = (I - V T^T V^T) b
+         = b - V T^T [ V1^T V2^T ] [ b1 ]
+                                   [ b2 ]
+         = b - V T^T [ V1^T b1 + V2^T b2 ]
+         = [ b1 ] - [ V1 w ]
+           [ b2 ]   [ V2 w ]
+
+where w = T^T ( V1^T b1 + V2^T b2 )
 */
 
 int
