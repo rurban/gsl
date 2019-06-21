@@ -154,6 +154,31 @@ test_QR_decomp_r_eps(const gsl_matrix * m, const double eps, const char * desc)
         }
     }
 
+  if (M > N)
+    {
+      gsl_matrix * R_alt  = gsl_matrix_alloc(M, N);
+      gsl_matrix * Q_alt  = gsl_matrix_alloc(M, M);
+      gsl_vector_view tau = gsl_matrix_diagonal(T);
+
+      /* test that Q2 was computed correctly by comparing with Level 2 algorithm */
+      gsl_linalg_QR_unpack(QR, &tau.vector, Q_alt, R_alt);
+
+      for (i = 0; i < M; i++)
+        {
+          for (j = 0; j < M; j++)
+            {
+              double aij = gsl_matrix_get(Q, i, j);
+              double bij = gsl_matrix_get(Q_alt, i, j);
+
+              gsl_test_rel(aij, bij, eps, "%s Q (%3lu,%3lu)[%lu,%lu]: %22.18g   %22.18g\n",
+                           desc, M, N, i, j, aij, bij);
+            }
+        }
+
+      gsl_matrix_free(R_alt);
+      gsl_matrix_free(Q_alt);
+    }
+
   gsl_matrix_free(QR);
   gsl_matrix_free(T);
   gsl_matrix_free(A);

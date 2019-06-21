@@ -32,7 +32,8 @@
  * additional modifications courtesy of Julien Langou.
  */
 
-static int unpack_Q1_r(gsl_matrix * Q);
+static int unpack_Q1(gsl_matrix * Q);
+static int unpack_Q2(const gsl_matrix * QR, const gsl_matrix * T, gsl_matrix * Q);
 static int aux_ULT(const gsl_matrix * L, gsl_matrix * U);
 static int aux_mLU(gsl_matrix * A);
 static int aux_ApUBT(const gsl_matrix * U, const gsl_matrix * B, gsl_matrix * A);
@@ -332,7 +333,13 @@ gsl_linalg_QR_unpack_r(const gsl_matrix * QR, const gsl_matrix * T, gsl_matrix *
           gsl_matrix_memcpy(&m.matrix, &tmp.matrix);
         }
 
-      unpack_Q1_r(&Q1.matrix);
+      unpack_Q1(&Q1.matrix);
+
+      if (M > N)
+        {
+          gsl_matrix_view Q2 = gsl_matrix_submatrix(Q, 0, N, M, M - N);
+          unpack_Q2(QR, T, &Q2.matrix);
+        }
 
       /* copy R */
       gsl_matrix_tricpy('U', 1, R, &RV.matrix);
@@ -494,7 +501,7 @@ gsl_linalg_QR_QTmat_r(const gsl_matrix * QR, const gsl_matrix * T, gsl_matrix * 
 }
 
 /*
-unpack_Q1_r()
+unpack_Q1()
   Compute Q_1
 
 Inputs: Q  - on input, contains T in upper triangle and V in lower trapezoid
@@ -503,7 +510,7 @@ Inputs: Q  - on input, contains T in upper triangle and V in lower trapezoid
 */
 
 static int
-unpack_Q1_r(gsl_matrix * Q)
+unpack_Q1(gsl_matrix * Q)
 {
   int status;
   const size_t M = Q->size1;
@@ -533,6 +540,72 @@ unpack_Q1_r(gsl_matrix * Q)
     }
 
   return GSL_SUCCESS;
+}
+
+/*
+unpack_Q2()
+  Compute Q_2
+
+Inputs: QR - [R; V] from QR_decomp_r, M-by-N
+        T  - upper triangular T factor, N-by-N
+        Q  - (output) Q_2 factor, M-by-(M-N)
+
+Return: success/error
+
+Notes:                         N   M-N
+1) Since Q = I - V T V^T = M [ Q1  Q2  ], we have
+
+           M-N
+Q2 = Q [    0    ] N
+       [ I_{M-N} ] M-N
+
+So, Q2 = Q [ 0; I ] = (I - V T V^T) [ 0; I ] = [   - V1 T V2^T ]
+                                               [ I - V2 T V2^T ]
+*/
+
+static int
+unpack_Q2(const gsl_matrix * QR, const gsl_matrix * T, gsl_matrix * Q)
+{
+  const size_t M = QR->size1;
+  const size_t N = QR->size2;
+
+  if (M <= N)
+    {
+      GSL_ERROR ("M must be > N", GSL_EBADLEN);
+    }
+  else if (T->size1 != N || T->size2 != N)
+    {
+      GSL_ERROR ("T matrix must be N-by-N", GSL_EBADLEN);
+    }
+  else if (Q->size1 != M || Q->size2 != (M - N))
+    {
+      GSL_ERROR ("Q matrix must be M-by-(M-N)", GSL_EBADLEN);
+    }
+  else
+    {
+      gsl_matrix_const_view V1 = gsl_matrix_const_submatrix(QR, 0, 0, N, N);
+      gsl_matrix_const_view V2 = gsl_matrix_const_submatrix(QR, N, 0, M - N, N);
+      gsl_matrix_view Q1 = gsl_matrix_submatrix(Q, 0, 0, N, M - N);
+      gsl_matrix_view Q2 = gsl_matrix_submatrix(Q, N, 0, M - N, M - N);
+      gsl_vector_view diag = gsl_matrix_diagonal(&Q2.matrix);
+
+      /* Q1 := V2^T */
+      gsl_matrix_transpose_memcpy(&Q1.matrix, &V2.matrix);
+
+      /* Q1 := - T V2^T */
+      gsl_blas_dtrmm(CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, -1.0, T, &Q1.matrix);
+
+      /* Q2 := - V2 T V2^T */
+      gsl_blas_dgemm(CblasNoTrans, CblasNoTrans, 1.0, &V2.matrix, &Q1.matrix, 0.0, &Q2.matrix);
+
+      /* Q2 := I - V2 T V2^T */
+      gsl_vector_add_constant(&diag.vector, 1.0);
+
+      /* Q1 := - V1 T V2^T */
+      gsl_blas_dtrmm(CblasLeft, CblasLower, CblasNoTrans, CblasUnit, 1.0, &V1.matrix, &Q1.matrix);
+
+      return GSL_SUCCESS;
+    }
 }
 
 /* U := U L^T for triangular matrices L and U; L is unit lower triangular */

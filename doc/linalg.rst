@@ -200,6 +200,31 @@ has full rank is:
 where :math:`c_1` is the first :math:`N` elements of :math:`Q^T b`. If :math:`A` is rank deficient,
 see :ref:`linalg-qrpt` and :ref:`linalg-cod`.
 
+GSL offers two interfaces for the :math:`QR` decomposition. The first proceeds by zeroing
+out columns below the diagonal of :math:`A`, one column at a time using Householder transforms.
+In this method, the factor :math:`Q` is represented as a product of Householder reflectors:
+
+.. math:: Q = H_n \cdots H_2 H_1
+
+where each :math:`H_i = I - \tau_i v_i v_i^T` for a scalar :math:`\tau_i` and column vector
+:math:`v_i`. In this method, functions which compute the full matrix :math:`Q` or apply
+:math:`Q^T` to a right hand side vector operate by applying the Householder matrices one
+at a time using Level 2 BLAS.
+
+The second interface is based on a Level 3 BLAS block recursive algorithm developed by
+Elmroth and Gustavson. In this case, :math:`Q` is written in block form as
+
+.. math:: Q = I - V T V^T
+
+where :math:`V` is an :math:`M`-by-:math:`N` matrix of the column vectors :math:`v_i`
+and :math:`T` is an :math:`N`-by-:math:`N` upper triangular matrix, whose diagonal elements
+are the :math:`\tau_i`. Computing the full :math:`T`, while requiring more flops than
+the Level 2 approach, offers the advantage that all standard operations can take advantage
+of cache efficient Level 3 BLAS operations, and so this method often performs far better
+than the Level 2 approach. The functions for the recursive block algorithm have a
+:code:`_r` suffix, and it is recommended to use this interface for performance
+critical applications.
+
 .. function:: int gsl_linalg_QR_decomp (gsl_matrix * A, gsl_vector * tau)
 
    This function factorizes the :math:`M`-by-:math:`N` matrix :data:`A` into
@@ -209,13 +234,15 @@ see :ref:`linalg-qrpt` and :ref:`linalg-cod`.
    part of the matrix :data:`A` contain the Householder coefficients and
    Householder vectors which encode the orthogonal matrix :data:`Q`.  The
    vector :data:`tau` must be of length :math:`k=\min(M,N)`. The matrix
-   :math:`Q` is related to these components by, :math:`Q = Q_k ... Q_2 Q_1`
-   where :math:`Q_i = I - \tau_i v_i v_i^T` and :math:`v_i` is the
+   :math:`Q` is related to these components by, :math:`Q = H_k ... H_2 H_1`
+   where :math:`H_i = I - \tau_i v_i v_i^T` and :math:`v_i` is the
    Householder vector :math:`v_i = (0,...,1,A(i+1,i),A(i+2,i),...,A(m,i))`.
    This is the same storage scheme as used by |lapack|.
 
    The algorithm used to perform the decomposition is Householder QR (Golub
-   & Van Loan, "Matrix Computations", Algorithm 5.2.1).
+   & Van Loan, "Matrix Computations", Algorithm 5.2.1). It is recommended to
+   use this function only for small to modest sized matrices, or if
+   :math:`M < N`.
 
 .. function:: int gsl_linalg_QR_decomp_r (gsl_matrix * A, gsl_matrix * T)
 
