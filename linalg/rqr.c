@@ -52,14 +52,14 @@ Inputs: A - matrix to be factored, M-by-N with M >= N
 Return: success/error
 
 Notes:
-1) on output, diag(T) contains tau vector
+1) on output, upper triangle of A contains R; elements below the diagonal
+are columns of V. The matrix Q is
 
-2) on output, upper triangle of A contains R; elements below the diagonal
-are columns of V, where the block reflector H is:
+Q = I - V T V^T
 
-H = I - V T V^T
+where T is upper triangular. Note that diag(T) = tau
 
-3) implementation provided by Julien Langou
+2) implementation provided by Julien Langou
 */
 
 int
@@ -507,6 +507,13 @@ unpack_Q1()
 Inputs: Q  - on input, contains T in upper triangle and V in lower trapezoid
              on output, contains Q_1
              M-by-N
+
+Return: success/error
+
+Notes:
+1)                                                         N
+Q1 = [ Q1 Q2 ] [ I_n ] = (I - V T V^T) [ I; 0 ] = [ I - V1 T V1^T ] N
+               [  0  ]                            [   - V2 T V1^T ] M - N
 */
 
 static int
@@ -515,29 +522,28 @@ unpack_Q1(gsl_matrix * Q)
   int status;
   const size_t M = Q->size1;
   const size_t N = Q->size2;
-  gsl_matrix_view T = gsl_matrix_submatrix(Q, 0, 0, N, N);
-  size_t i;
+  gsl_matrix_view Q1 = gsl_matrix_submatrix(Q, 0, 0, N, N);
+  gsl_vector_view diag = gsl_matrix_diagonal(&Q1.matrix);
 
-  /* T := T V1^T */
-  status = aux_ULT(&T.matrix, &T.matrix);
+  /* Q1 := T V1^T */
+  status = aux_ULT(&Q1.matrix, &Q1.matrix);
   if (status)
     return status;
 
   if (M > N)
     {
-      gsl_matrix_view m = gsl_matrix_submatrix(Q, N, 0, M - N, N);
-      gsl_blas_dtrmm(CblasRight, CblasUpper, CblasNoTrans, CblasNonUnit, -1.0, &T.matrix, &m.matrix);
+      /* compute Q2 := - V2 T V1^T */
+      gsl_matrix_view V2 = gsl_matrix_submatrix(Q, N, 0, M - N, N);
+      gsl_blas_dtrmm(CblasRight, CblasUpper, CblasNoTrans, CblasNonUnit, -1.0, &Q1.matrix, &V2.matrix);
     }
 
-  status = aux_mLU(&T.matrix);
+  /* Q1 := - V1 T V1^T */
+  status = aux_mLU(&Q1.matrix);
   if (status)
     return status;
 
-  for (i = 0; i < N; ++i)
-    {
-      double * ptr = gsl_matrix_ptr(Q, i, i);
-      *ptr += 1.0;
-    }
+  /* Q1 := I - V1 T V1^T */
+  gsl_vector_add_constant(&diag.vector, 1.0);
 
   return GSL_SUCCESS;
 }

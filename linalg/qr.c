@@ -476,9 +476,7 @@ gsl_linalg_QR_unpack (const gsl_matrix * QR, const gsl_vector * tau, gsl_matrix 
 
       for (i = GSL_MIN (M, N); i-- > 0;)
         {
-          gsl_vector_const_view c = gsl_matrix_const_column (QR, i);
-          gsl_vector_const_view h = gsl_vector_const_subvector (&c.vector,
-                                                                i, M - i);
+          gsl_vector_const_view h = gsl_matrix_const_subcolumn (QR, i, i, M - i);
           gsl_matrix_view m = gsl_matrix_submatrix (Q, i, i, M - i, M - i);
           double ti = gsl_vector_get (tau, i);
           gsl_linalg_householder_hm (ti, &h.vector, &m.matrix);

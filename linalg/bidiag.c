@@ -105,8 +105,7 @@ gsl_linalg_bidiag_decomp (gsl_matrix * A, gsl_vector * tau_U, gsl_vector * tau_V
             
             if (i + 1 < N)
               {
-                gsl_matrix_view m = 
-                  gsl_matrix_submatrix (A, i, i + 1, M - i, N - (i + 1));
+                gsl_matrix_view m = gsl_matrix_submatrix (A, i, i + 1, M - i, N - (i + 1));
                 gsl_linalg_householder_hm (tau_i, &v.vector, &m.matrix);
               }
 

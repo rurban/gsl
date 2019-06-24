@@ -220,7 +220,7 @@ where :math:`V` is an :math:`M`-by-:math:`N` matrix of the column vectors :math:
 and :math:`T` is an :math:`N`-by-:math:`N` upper triangular matrix, whose diagonal elements
 are the :math:`\tau_i`. Computing the full :math:`T`, while requiring more flops than
 the Level 2 approach, offers the advantage that all standard operations can take advantage
-of cache efficient Level 3 BLAS operations, and so this method often performs far better
+of cache efficient Level 3 BLAS operations, and so this method often performs faster
 than the Level 2 approach. The functions for the recursive block algorithm have a
 :code:`_r` suffix, and it is recommended to use this interface for performance
 critical applications.
@@ -248,7 +248,9 @@ critical applications.
 
    This function factors the :math:`M`-by-:math:`N` matrix :data:`A` into
    the :math:`QR` decomposition :math:`A = Q R` using the recursive Level 3 BLAS
-   algorithm of Elmroth and Gustavson. The :math:`N`-by-:math:`N`
+   algorithm of Elmroth and Gustavson.  On output the diagonal and
+   upper triangular part of :data:`A` contain the matrix
+   :math:`R`.  The :math:`N`-by-:math:`N`
    matrix :data:`T` stores the upper triangular factor appearing in :math:`Q`.
    The matrix :math:`Q` is given by :math:`Q = I - V T V^T`, where the elements
    below the diagonal of :data:`A` contain the columns of :math:`V` on output.
@@ -1561,9 +1563,9 @@ Householder Transformations
 
 A Householder transformation is a rank-1 modification of the identity
 matrix which can be used to zero out selected elements of a vector.  A
-Householder matrix :math:`P` takes the form,
+Householder matrix :math:`H` takes the form,
 
-.. math:: P = I - \tau v v^T
+.. math:: H = I - \tau v v^T
 
 where :math:`v` is a vector (called the *Householder vector*) and
 :math:`\tau = 2/(v^T v)`. The functions described in this section use the
@@ -1573,36 +1575,36 @@ Householder transformations efficiently.
 .. function:: double gsl_linalg_householder_transform (gsl_vector * w)
               gsl_complex gsl_linalg_complex_householder_transform (gsl_vector_complex * w)
 
-   This function prepares a Householder transformation :math:`P = I - \tau v v^T`
+   This function prepares a Householder transformation :math:`H = I - \tau v v^T`
    which can be used to zero all the elements of the input vector :data:`w`
    except the first. On output the Householder vector :data:`v` is stored in
    :data:`w` and the scalar :math:`\tau` is returned. The householder vector
    :data:`v` is normalized so that :code:`v[0] = 1`, however this 1 is not
    stored in the output vector. Instead, :code:`w[0]` is set to
    the first element of the transformed vector, so that if
-   :math:`u = P w`, :code:`w[0] = u[0]` on output and the remainder
+   :math:`u = H w`, :code:`w[0] = u[0]` on output and the remainder
    of :math:`u` is zero.
 
 .. function:: int gsl_linalg_householder_hm (double tau, const gsl_vector * v, gsl_matrix * A)
               int gsl_linalg_complex_householder_hm (gsl_complex tau, const gsl_vector_complex * v, gsl_matrix_complex * A)
 
-   This function applies the Householder matrix :math:`P` defined by the
+   This function applies the Householder matrix :math:`H` defined by the
    scalar :data:`tau` and the vector :data:`v` to the left-hand side of the
-   matrix :data:`A`. On output the result :math:`P A` is stored in :data:`A`.
+   matrix :data:`A`. On output the result :math:`H A` is stored in :data:`A`.
 
 .. function:: int gsl_linalg_householder_mh (double tau, const gsl_vector * v, gsl_matrix * A)
               int gsl_linalg_complex_householder_mh (gsl_complex tau, const gsl_vector_complex * v, gsl_matrix_complex * A)
 
-   This function applies the Householder matrix :math:`P` defined by the
+   This function applies the Householder matrix :math:`H` defined by the
    scalar :data:`tau` and the vector :data:`v` to the right-hand side of the
-   matrix :data:`A`. On output the result :math:`A P` is stored in :data:`A`.
+   matrix :data:`A`. On output the result :math:`A H` is stored in :data:`A`.
 
 .. function:: int gsl_linalg_householder_hv (double tau, const gsl_vector * v, gsl_vector * w)
               int gsl_linalg_complex_householder_hv (gsl_complex tau, const gsl_vector_complex * v, gsl_vector_complex * w)
 
-   This function applies the Householder transformation :math:`P` defined by
+   This function applies the Householder transformation :math:`H` defined by
    the scalar :data:`tau` and the vector :data:`v` to the vector :data:`w`.  On
-   output the result :math:`P w` is stored in :data:`w`.
+   output the result :math:`H w` is stored in :data:`w`.
 
 .. @deftypefun int gsl_linalg_householder_hm1 (double tau, gsl_matrix * A)
 .. This function applies the Householder transform, defined by the scalar

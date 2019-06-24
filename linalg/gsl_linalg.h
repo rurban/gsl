@@ -105,6 +105,16 @@ int gsl_linalg_householder_hv (double tau,
                                const gsl_vector * v, 
                                gsl_vector * w);
 
+int gsl_linalg_householder_left(const double tau,
+                                const gsl_vector * v,
+                                gsl_matrix * A,
+                                gsl_vector * work);
+
+int gsl_linalg_householder_right(const double tau,
+                                 const gsl_vector * v,
+                                 gsl_matrix * A,
+                                 gsl_vector * work);
+
 int gsl_linalg_householder_hm1 (double tau, 
                                 gsl_matrix * A);
 
