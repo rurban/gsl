@@ -116,32 +116,49 @@ gsl_linalg_QR_decomp_r (gsl_matrix * A, gsl_matrix * T)
 
           gsl_matrix_view m;
 
-          /* recursion on (A(1:m,1:N1), T11) */
+          /*
+           * Eq. 2: recursively factor
+           *
+           * [ A11 ] = Q1 [ R11 ]
+           * [ A21 ]      [  0  ]
+           */
           m = gsl_matrix_submatrix(A, 0, 0, M, N1);
           status = gsl_linalg_QR_decomp_r(&m.matrix, &T11.matrix);
           if (status)
             return status;
 
+          /*
+           * Eq. 3:
+           *
+           * [ R12 ] := Q1^T [ A12 ] = [ A12 ] - [ V1 W ]
+           * [ A22 ]         [ A22 ]   [ A22 ]   [ V2 W ]
+           *
+           * where W = T^T (V1^T A12 + V2^T A22), and using T12 as temporary storage
+           */
           gsl_matrix_memcpy(&T12.matrix, &A12.matrix);
+          gsl_blas_dtrmm(CblasLeft, CblasLower, CblasTrans, CblasUnit, 1.0, &A11.matrix, &T12.matrix);       /* W := V1^T * A12 */
+          gsl_blas_dgemm(CblasTrans, CblasNoTrans, 1.0, &A21.matrix, &A22.matrix, 1.0, &T12.matrix);         /* W := W + V2^T * A22 */
+          gsl_blas_dtrmm(CblasLeft, CblasUpper, CblasTrans, CblasNonUnit, 1.0, &T11.matrix, &T12.matrix);    /* W := T11^T * W */
+          gsl_blas_dgemm(CblasNoTrans, CblasNoTrans, -1.0, &A21.matrix, &T12.matrix, 1.0, &A22.matrix);      /* A22 = A22 - V2 * W */
+          gsl_blas_dtrmm(CblasLeft, CblasLower, CblasNoTrans, CblasUnit, 1.0, &A11.matrix, &T12.matrix);     /* tmp = V1 * W */
+          gsl_matrix_sub(&A12.matrix, &T12.matrix);                                                          /* A12 := A12 - V1 * W */
 
-          gsl_blas_dtrmm(CblasLeft, CblasLower, CblasTrans, CblasUnit, 1.0, &A11.matrix, &T12.matrix);       /* T12 = lower(A11)' * T12 */
-          gsl_blas_dgemm(CblasTrans, CblasNoTrans, 1.0, &A21.matrix, &A22.matrix, 1.0, &T12.matrix);         /* T12 = T12 + A21' * A22 */
-          gsl_blas_dtrmm(CblasLeft, CblasUpper, CblasTrans, CblasNonUnit, 1.0, &T11.matrix, &T12.matrix);    /* T12 = T11' * T12 */
-          gsl_blas_dgemm(CblasNoTrans, CblasNoTrans, -1.0, &A21.matrix, &T12.matrix, 1.0, &A22.matrix);      /* A22 = A22 - A21 * T12 */
-          gsl_blas_dtrmm(CblasLeft, CblasLower, CblasNoTrans, CblasUnit, 1.0, &A11.matrix, &T12.matrix);     /* T12 = lower(A11) * T12 */
-
-          gsl_matrix_sub(&A12.matrix, &T12.matrix);
-
-          /* recursion on (A22, T22) */
+          /*
+           * Eq. 4: recursively factor
+           *
+           * A22 = Q2 R22
+           */
           status = gsl_linalg_QR_decomp_r(&A22.matrix, &T22.matrix);
           if (status)
             return status;
+
+          /* Eq. 13: update T12 := -T11 * V1^T * V2 * T22 */
 
           m = gsl_matrix_submatrix(&A21.matrix, 0, 0, N2, N1);
           gsl_matrix_transpose_memcpy(&T12.matrix, &m.matrix);
 
           A22 = gsl_matrix_submatrix(A, N1, N1, N2, N2);
-          gsl_blas_dtrmm(CblasRight, CblasLower, CblasNoTrans, CblasUnit, 1.0, &A22.matrix, &T12.matrix);    /* T12 = T12 * lower(A22) */
+          gsl_blas_dtrmm(CblasRight, CblasLower, CblasNoTrans, CblasUnit, 1.0, &A22.matrix, &T12.matrix);    /* T12 := A21^T * V1 */
 
           if (M > N)
             {
