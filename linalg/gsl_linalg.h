@@ -290,6 +290,8 @@ int gsl_linalg_R_solve (const gsl_matrix * R, const gsl_vector * b, gsl_vector *
 
 int gsl_linalg_R_svx (const gsl_matrix * R, gsl_vector * x);
 
+int gsl_linalg_QR_rcond(const gsl_matrix * QR, double * rcond, gsl_vector * work);
+
 /* Q R P^T decomposition */
 
 int gsl_linalg_QRPT_decomp (gsl_matrix * A,
@@ -744,6 +746,7 @@ int gsl_linalg_balance_columns (gsl_matrix * A, gsl_vector * D);
 
 /* condition estimation */
 
+int gsl_linalg_tri_rcond(CBLAS_UPLO_t Uplo, const gsl_matrix * A, double * rcond, gsl_vector * work);
 int gsl_linalg_tri_upper_rcond(const gsl_matrix * A, double * rcond, gsl_vector * work);
 int gsl_linalg_tri_lower_rcond(const gsl_matrix * A, double * rcond, gsl_vector * work);
 int gsl_linalg_invnorm1(const size_t N,

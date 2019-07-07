@@ -606,3 +606,28 @@ gsl_linalg_QR_QRsolve (gsl_matrix * Q, gsl_matrix * R, const gsl_vector * b, gsl
       return GSL_SUCCESS;
     }
 }
+
+int
+gsl_linalg_QR_rcond(const gsl_matrix * QR, double * rcond, gsl_vector * work)
+{
+  const size_t M = QR->size1;
+  const size_t N = QR->size2;
+
+  if (M < N)
+    {
+      GSL_ERROR ("M must be >= N", GSL_EBADLEN);
+    }
+  else if (work->size != 3 * N)
+    {
+      GSL_ERROR ("work vector must have length 3*N", GSL_EBADLEN);
+    }
+  else
+    {
+      gsl_matrix_const_view R = gsl_matrix_const_submatrix (QR, 0, 0, N, N);
+      int status;
+
+      status = gsl_linalg_tri_rcond(CblasUpper, &R.matrix, rcond, work);
+
+      return status;
+    }
+}
