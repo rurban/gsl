@@ -358,6 +358,10 @@ size_t gsl_linalg_QRPT_rank (const gsl_matrix * QR, const double tol);
 
 int gsl_linalg_QRPT_rcond(const gsl_matrix * QR, double * rcond, gsl_vector * work);
 
+/* triangle on top of rectangle QR decomposition */
+
+int gsl_linalg_QR_TR_decomp (gsl_matrix * S, gsl_matrix * A, gsl_matrix * T);
+
 /* COD decomposition */
 
 int gsl_linalg_COD_decomp(gsl_matrix * A, gsl_vector * tau_Q, gsl_vector * tau_Z,
