@@ -26,7 +26,7 @@
    gsl_sf_hermite_func_fast() which uses the faster Cauchy integral
    algorithm in the same paper by Bunck
 
-** add gsl_vector_memcpy_scale()
+** add gsl_vector_daxpby()
 
 ** add un-pivoted LDLT decomposition and its banded
    variant (gsl_linalg_ldlt_* and gsl_linalg_ldlt_band_*)

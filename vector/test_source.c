@@ -354,17 +354,18 @@ FUNCTION (test, func) (size_t stride, size_t N)
     for (i = 0; i < N; i++)
       {
         FUNCTION (gsl_vector, set) (v, i, (ATOMIC) i);
+        FUNCTION (gsl_vector, set) (w, i, (ATOMIC) i);
       }
 
-    FUNCTION (gsl_vector, memcpy_scale) (w, v, 2.0);
+    FUNCTION (gsl_vector, daxpby) ((ATOMIC)2.0, v, (ATOMIC)3.0, w);
 
     for (i = 0; i < N; i++)
       {
-        if (FUNCTION (gsl_vector, get) (w, i) != (ATOMIC) ((ATOMIC)i*(ATOMIC)2.0))
+        if (FUNCTION (gsl_vector, get) (w, i) != (ATOMIC) ((ATOMIC)i*(ATOMIC)2.0 + (ATOMIC)i*(ATOMIC)3.0))
           status = 1;
       }
 
-    TEST (status, "_memcpy_scale" DESC " by 2") ;
+    TEST (status, "_daxpby" DESC " by (2,3)") ;
 
     FUNCTION (gsl_vector, free) (w0);
   }
@@ -377,7 +378,7 @@ FUNCTION (test, func) (size_t stride, size_t N)
         FUNCTION (gsl_vector, set) (v, i, (ATOMIC) i);
       }
 
-    FUNCTION (gsl_vector, scale) (v, 2.0);
+    FUNCTION (gsl_vector, scale) (v, (ATOMIC)2.0);
 
     for (i = 0; i < N; i++)
       {
