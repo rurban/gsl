@@ -394,6 +394,7 @@ gsl_matrix * moler10;
 #include "test_lu.c"
 #include "test_luc.c"
 #include "test_lq.c"
+#include "test_tri.c"
 #include "test_qr.c"
 
 int
@@ -3318,6 +3319,9 @@ main(void)
 
   gsl_test(test_ldlt_band_decomp(r),     "Banded LDLT Decomposition");
   gsl_test(test_ldlt_band_solve(r),      "Banded LDLT Solve");
+
+  gsl_test(test_symmtd_decomp(r),        "Symmetric Tridiagonal Decomposition");
+  gsl_test(test_hermtd_decomp(r),        "Hermitian Tridiagonal Decomposition");
 
   gsl_test(test_HH_solve(),              "Householder solve");
   gsl_test(test_TDS_solve(),             "Tridiagonal symmetric solve");

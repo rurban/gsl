@@ -130,6 +130,11 @@ int gsl_linalg_complex_householder_hv (gsl_complex tau,
                                        const gsl_vector_complex * v, 
                                        gsl_vector_complex * w);
 
+int gsl_linalg_complex_householder_left (const gsl_complex tau,
+                                         const gsl_vector_complex * v,
+                                         gsl_matrix_complex * A,
+                                         gsl_vector_complex * work);
+
 /* Hessenberg reduction */
 
 int gsl_linalg_hessenberg_decomp(gsl_matrix *A, gsl_vector *tau);

@@ -1,5 +1,10 @@
 * What is new in gsl-2.6:
 
+** deprecated functions gsl_linalg_complex_householder_hm and
+   gsl_linalg_complex_householder_mh
+
+** add unit tests for gsl_linalg_symmtd and gsl_linalg_hermtd
+
 ** multilarge TSQR algorithm has been converted to use the new Level 3 QR decomposition
 
 ** nonlinear least squares Cholesky solver now uses the new Level 3 BLAS
