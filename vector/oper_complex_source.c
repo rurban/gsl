@@ -194,10 +194,10 @@ FUNCTION(gsl_vector, add_constant) (TYPE(gsl_vector) * a, const BASE x)
 }
 
 int
-FUNCTION (gsl_vector, daxpby) (const BASE alpha,
-                               const TYPE (gsl_vector) * x,
-                               const BASE beta,
-                               TYPE (gsl_vector) * y)
+FUNCTION (gsl_vector, axpby) (const BASE alpha,
+                              const TYPE (gsl_vector) * x,
+                              const BASE beta,
+                              TYPE (gsl_vector) * y)
 {
   const size_t x_size = x->size;
 

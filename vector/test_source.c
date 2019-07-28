@@ -357,7 +357,7 @@ FUNCTION (test, func) (size_t stride, size_t N)
         FUNCTION (gsl_vector, set) (w, i, (ATOMIC) i);
       }
 
-    FUNCTION (gsl_vector, daxpby) ((ATOMIC)2.0, v, (ATOMIC)3.0, w);
+    FUNCTION (gsl_vector, axpby) ((ATOMIC)2.0, v, (ATOMIC)3.0, w);
 
     for (i = 0; i < N; i++)
       {
@@ -365,7 +365,7 @@ FUNCTION (test, func) (size_t stride, size_t N)
           status = 1;
       }
 
-    TEST (status, "_daxpby" DESC " by (2,3)") ;
+    TEST (status, "_axpby" DESC " by (2,3)") ;
 
     FUNCTION (gsl_vector, free) (w0);
   }

@@ -633,7 +633,7 @@ FUNCTION (test, ops) (size_t stride1, size_t stride2, size_t N)
     GSL_REAL(beta) = (ATOMIC) 3;
     GSL_IMAG(beta) = (ATOMIC) 4;
     FUNCTION(gsl_vector, memcpy) (v, a);
-    FUNCTION(gsl_vector, daxpby) (alpha, b, beta, v);
+    FUNCTION(gsl_vector, axpby) (alpha, b, beta, v);
   }
   
   {
@@ -649,7 +649,7 @@ FUNCTION (test, ops) (size_t stride1, size_t stride2, size_t N)
           status = 1;
       }
 
-    TEST2 (status, "_daxpby");
+    TEST2 (status, "_axpby");
   }
 
   FUNCTION(gsl_vector, free) (a);

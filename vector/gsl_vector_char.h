@@ -154,7 +154,7 @@ int gsl_vector_char_mul (gsl_vector_char * a, const gsl_vector_char * b);
 int gsl_vector_char_div (gsl_vector_char * a, const gsl_vector_char * b);
 int gsl_vector_char_scale (gsl_vector_char * a, const char x);
 int gsl_vector_char_add_constant (gsl_vector_char * a, const double x);
-int gsl_vector_char_daxpby (const char alpha, const gsl_vector_char * x, const char beta, gsl_vector_char * y);
+int gsl_vector_char_axpby (const char alpha, const gsl_vector_char * x, const char beta, gsl_vector_char * y);
 
 int gsl_vector_char_equal (const gsl_vector_char * u, 
                             const gsl_vector_char * v);
