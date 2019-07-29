@@ -71,7 +71,7 @@ gsl_linalg_symmtd_decomp (gsl_matrix * A, gsl_vector * tau)
     }
   else if (tau->size + 1 != A->size1)
     {
-      GSL_ERROR ("size of tau must be N or (N-1)", GSL_EBADLEN);
+      GSL_ERROR ("size of tau must be N-1", GSL_EBADLEN);
     }
   else
     {

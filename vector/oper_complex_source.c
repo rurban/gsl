@@ -219,7 +219,7 @@ FUNCTION (gsl_vector, axpby) (const BASE alpha,
           ATOMIC xi = x->data[2 * j * x_stride + 1];
 
           y->data[2 * j * y_stride] = ar * xr - ai * xi;
-          y->data[2 * j * y_stride + 1] = ai * xr + ar;
+          y->data[2 * j * y_stride + 1] = ai * xr + ar * xi;
         }
 
       return GSL_SUCCESS;
