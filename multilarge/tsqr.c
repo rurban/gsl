@@ -256,7 +256,7 @@ tsqr_accumulate(gsl_matrix * A, gsl_vector * b, void * vstate)
         return status;
 
       /* store upper triangular R factor in state->R */
-      gsl_matrix_tricpy('U', 1, state->R, &R.matrix);
+      gsl_matrix_tricpy(CblasUpper, CblasNonUnit, state->R, &R.matrix);
 
       /* compute Q^T b and keep the first p elements */
       gsl_linalg_QR_QTvec_r(A, state->T, b, state->work);

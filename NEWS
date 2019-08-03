@@ -1,5 +1,13 @@
 * What is new in gsl-2.6:
 
+** add BLAS calls for the following functions:
+     - gsl_vector_memcpy
+     - gsl_vector_scale
+     - gsl_matrix_memcpy
+     - gsl_matrix_transpose_memcpy
+     - gsl_matrix_tricpy
+     - gsl_matrix_transpose_tricpy
+
 ** deprecated functions gsl_linalg_complex_householder_hm and
    gsl_linalg_complex_householder_mh
 

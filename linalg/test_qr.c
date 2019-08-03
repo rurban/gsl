@@ -459,7 +459,7 @@ test_QR_TR_decomp_eps(const gsl_matrix * S, const gsl_matrix * A, const double e
   gsl_matrix * B1  = gsl_matrix_calloc(N, N);
   gsl_matrix * B2  = gsl_matrix_alloc(M, N);
 
-  gsl_matrix_tricpy('U', 1, R, S);
+  gsl_matrix_tricpy(CblasUpper, CblasNonUnit, R, S);
   gsl_matrix_memcpy(V, A);
 
   s += gsl_linalg_QR_TR_decomp(R, V, T);
@@ -469,7 +469,7 @@ test_QR_TR_decomp_eps(const gsl_matrix * S, const gsl_matrix * A, const double e
    *                   [ -V~ T R ]
    */
 
-  gsl_matrix_tricpy('U', 1, B1, T);
+  gsl_matrix_tricpy(CblasUpper, CblasNonUnit, B1, T);
   gsl_matrix_memcpy(B2, V);
 
   gsl_blas_dtrmm (CblasRight, CblasUpper, CblasNoTrans, CblasNonUnit, 1.0, R, B1);   /* B1 = T R */

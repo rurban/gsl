@@ -29,6 +29,14 @@ FUNCTION (gsl_vector, memcpy) (TYPE (gsl_vector) * dest,
 
   gsl_blas_scopy(src, dest);
 
+#elif defined(BASE_GSL_COMPLEX)
+
+  gsl_blas_zcopy(src, dest);
+
+#elif defined(BASE_GSL_COMPLEX_FLOAT)
+
+  gsl_blas_ccopy(src, dest);
+
 #else
 
   const size_t src_size = src->size;
