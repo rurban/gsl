@@ -1,6 +1,6 @@
 /* specfunc/hermite.c
  * 
- * Copyright (C) 2011, 2012, 2013, 2014 Konrad Griessinger (konradg(at)gmx.net)
+ * Copyright (C) 2011, 2012, 2013, 2014, 2019 Konrad Griessinger (konradg(at)gmx.net)
  * Copyright (C) 2019 Patrick Alken
  * 
  * This program is free software; you can redistribute it and/or modify
