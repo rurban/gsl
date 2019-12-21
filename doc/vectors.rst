@@ -1450,6 +1450,28 @@ The following operations are defined for real and complex matrices.
    constant factor :data:`x`.  The result :math:`a(i,j) \leftarrow x a(i,j)`
    is stored in :data:`a`.
 
+.. function:: int gsl_matrix_scale_columns (gsl_matrix * A, const gsl_vector * x)
+
+   This function scales the columns of the :math:`M`-by-:math:`N` matrix
+   :data:`A` by the elements of the vector :data:`x`, of length :math:`N`. The
+   :math:`j`-th column of :data:`A` is multiplied by :math:`x_j`. This is equivalent to
+   forming
+
+   .. math:: A \rightarrow A X
+
+   where :math:`X = \textrm{diag}(x)`.
+
+.. function:: int gsl_matrix_scale_rows (gsl_matrix * A, const gsl_vector * x)
+
+   This function scales the rows of the :math:`M`-by-:math:`N` matrix
+   :data:`A` by the elements of the vector :data:`x`, of length :math:`M`. The
+   :math:`i`-th row of :data:`A` is multiplied by :math:`x_i`. This is equivalent to
+   forming
+
+   .. math:: A \rightarrow X A
+
+   where :math:`X = \textrm{diag}(x)`.
+
 .. function:: int gsl_matrix_add_constant (gsl_matrix * a, const double x)
 
    This function adds the constant value :data:`x` to the elements of the

@@ -1,5 +1,7 @@
 * What is new in gsl-2.7:
 
+** added gsl_matrix_scale_rows and gsl_matrix_scale_columns
+
 ** added gsl_linalg_QL_decomp and gsl_linalg_QL_unpack
 
 ** bug fix in checking vector lengths in gsl_vector_memcpy (dieggsy@pm.me)
