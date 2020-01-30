@@ -678,6 +678,10 @@ Vector operations
    vector :data:`a`.  The result :math:`a_i \leftarrow a_i + x` is stored in
    :data:`a`.
 
+.. function:: double gsl_vector_sum (const gsl_vector * a)
+
+   This function returns the sum of the elements of :data:`a`, defined as :math:`\sum_{i=1}^n a_i`
+
 .. function:: int gsl_vector_axpby (const double alpha, const gsl_vector * x, const double beta, gsl_vector * y)
 
    This function performs the operation :math:`y \leftarrow \alpha x + \beta y`. The

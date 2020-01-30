@@ -1,5 +1,7 @@
 * What is new in gsl-2.7:
 
+** added gsl_vector_sum
+
 ** added gsl_matrix_scale_rows and gsl_matrix_scale_columns
 
 ** added gsl_linalg_QL_decomp and gsl_linalg_QL_unpack
