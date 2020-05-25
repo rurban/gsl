@@ -6,6 +6,8 @@
       - gsl_vector_sum
       - gsl_matrix_scale_rows
       - gsl_matrix_scale_columns
+      - gsl_multilarge_linear_matrix_ptr
+      - gsl_multilarge_linear_rhs_ptr
       - gsl_spmatrix_dense_add (renamed from gsl_spmatrix_add_to_dense)
       - gsl_spmatrix_dense_sub
 
