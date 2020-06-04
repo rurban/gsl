@@ -226,16 +226,18 @@ than the Level 2 approach. The functions for the recursive block algorithm have 
 critical applications.
 
 .. function:: int gsl_linalg_QR_decomp (gsl_matrix * A, gsl_vector * tau)
+              int gsl_linalg_complex_QR_decomp (gsl_matrix_complex * A, gsl_vector_complex * tau)
 
-   This function factorizes the :math:`M`-by-:math:`N` matrix :data:`A` into
+   These functions factor the :math:`M`-by-:math:`N` matrix :data:`A` into
    the :math:`QR` decomposition :math:`A = Q R`.  On output the diagonal and
    upper triangular part of the input matrix contain the matrix
    :math:`R`. The vector :data:`tau` and the columns of the lower triangular
    part of the matrix :data:`A` contain the Householder coefficients and
-   Householder vectors which encode the orthogonal matrix :data:`Q`.  The
-   vector :data:`tau` must be of length :math:`k=\min(M,N)`. The matrix
-   :math:`Q` is related to these components by, :math:`Q = H_k ... H_2 H_1`
-   where :math:`H_i = I - \tau_i v_i v_i^T` and :math:`v_i` is the
+   Householder vectors which encode the orthogonal matrix :data:`Q`. The
+   vector :data:`tau` must be of length :math:`N`. The matrix
+   :math:`Q` is related to these components by the product of
+   :math:`k=min(M,N)` reflector matrices, :math:`Q = H_k ... H_2 H_1`
+   where :math:`H_i = I - \tau_i v_i v_i^{\dagger}` and :math:`v_i` is the
    Householder vector :math:`v_i = (0,...,1,A(i+1,i),A(i+2,i),...,A(m,i))`.
    This is the same storage scheme as used by |lapack|.
 
@@ -259,31 +261,31 @@ critical applications.
    "tall-skinny" matrices, i.e. :math:`M \gg N`.
 
 .. function:: int gsl_linalg_QR_solve (const gsl_matrix * QR, const gsl_vector * tau, const gsl_vector * b, gsl_vector * x)
+              int gsl_linalg_complex_QR_solve (const gsl_matrix_complex * QR, const gsl_vector_complex * tau, const gsl_vector_complex * b, gsl_vector_complex * x)
               int gsl_linalg_QR_solve_r (const gsl_matrix * QR, const gsl_matrix * T, const gsl_vector * b, gsl_vector * x)
 
    These functions solve the square system :math:`A x = b` using the :math:`QR`
-   decomposition of :math:`A` held in (:data:`QR`, :data:`tau`) or (:data:`QR`, :data:`T`) which must 
-   have been computed previously with :func:`gsl_linalg_QR_decomp` or
-   :func:`gsl_linalg_QR_decomp_r`.
+   decomposition of :math:`A` held in (:data:`QR`, :data:`tau`) or (:data:`QR`, :data:`T`).
    The least-squares solution for rectangular systems can be found using :func:`gsl_linalg_QR_lssolve`
    or :func:`gsl_linalg_QR_lssolve_r`.
 
 .. function:: int gsl_linalg_QR_svx (const gsl_matrix * QR, const gsl_vector * tau, gsl_vector * x)
+              int gsl_linalg_complex_QR_svx (const gsl_matrix_complex * QR, const gsl_vector_complex * tau, gsl_vector_complex * x)
 
-   This function solves the square system :math:`A x = b` in-place using
-   the :math:`QR` decomposition of :math:`A` held in (:data:`QR`, :data:`tau`)
-   which must have been computed previously by :func:`gsl_linalg_QR_decomp`.
+   These functions solve the square system :math:`A x = b` in-place using
+   the :math:`QR` decomposition of :math:`A` held in (:data:`QR`, :data:`tau`).
    On input :data:`x` should contain the right-hand side :math:`b`, which is replaced by the solution on output.
 
 .. function:: int gsl_linalg_QR_lssolve (const gsl_matrix * QR, const gsl_vector * tau, const gsl_vector * b, gsl_vector * x, gsl_vector * residual)
+              int gsl_linalg_complex_QR_lssolve (const gsl_matrix_complex * QR, const gsl_vector_complex * tau, const gsl_vector_complex * b, gsl_vector_complex * x, gsl_vector_complex * residual)
 
-   This function finds the least squares solution to the overdetermined
+   These functions find the least squares solution to the overdetermined
    system :math:`A x = b` where the matrix :data:`A` has more rows than
    columns.  The least squares solution minimizes the Euclidean norm of the
    residual, :math:`||Ax - b||`.The routine requires as input 
    the :math:`QR` decomposition
    of :math:`A` into (:data:`QR`, :data:`tau`) given by
-   :func:`gsl_linalg_QR_decomp`.  The solution is returned in :data:`x`.  The
+   :func:`gsl_linalg_QR_decomp` or :func:`gsl_linalg_complex_QR_decomp`.  The solution is returned in :data:`x`.  The
    residual is computed as a by-product and stored in :data:`residual`.
 
 .. function:: int gsl_linalg_QR_lssolve_r (const gsl_matrix * QR, const gsl_matrix * T, const gsl_vector * b, gsl_vector * x, gsl_vector * work)
@@ -302,20 +304,22 @@ critical applications.
    Additional workspace of length :math:`N` is required in :data:`work`.
 
 .. function:: int gsl_linalg_QR_QTvec (const gsl_matrix * QR, const gsl_vector * tau, gsl_vector * v)
+              int gsl_linalg_complex_QR_QHvec (const gsl_matrix_complex * QR, const gsl_vector_complex * tau, gsl_vector_complex * v)
               int gsl_linalg_QR_QTvec_r (const gsl_matrix * QR, const gsl_matrix * T, gsl_vector * v, gsl_vector * work)
 
-   These functions apply the matrix :math:`Q^T` encoded in the decomposition
+   These functions apply the matrix :math:`Q^T` (or :math:`Q^{\dagger}`) encoded in the decomposition
    (:data:`QR`, :data:`tau`) or (:data:`QR`, :data:`T`) to the vector :data:`v`,
-   storing the result :math:`Q^T v` in :data:`v`.  The matrix multiplication is carried
+   storing the result :math:`Q^T v` (or :math:`Q^{\dagger} v`) in :data:`v`.  The matrix multiplication is carried
    out directly using the encoding of the Householder vectors without needing to form the full
-   matrix :math:`Q^T`.
+   matrix :math:`Q^T` (or :math:`Q^{\dagger}`).
 
    The recursive variant :code:`QTvec_r` requires additional workspace of size
    :math:`N` in :data:`work`.
 
 .. function:: int gsl_linalg_QR_Qvec (const gsl_matrix * QR, const gsl_vector * tau, gsl_vector * v)
+              int gsl_linalg_complex_QR_Qvec (const gsl_matrix_complex * QR, const gsl_vector_complex * tau, gsl_vector_complex * v)
 
-   This function applies the matrix :math:`Q` encoded in the decomposition
+   These functions apply the matrix :math:`Q` encoded in the decomposition
    (:data:`QR`, :data:`tau`) to the vector :data:`v`, storing the result :math:`Q v`
    in :data:`v`.  The matrix multiplication is carried out directly using
    the encoding of the Householder vectors without needing to form the full

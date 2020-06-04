@@ -3,6 +3,7 @@
 ** New functions added to the library:
       - gsl_linalg_QL_decomp
       - gsl_linalg_QL_unpack
+      - gsl_linalg_complex_QR_* (Christian Krueger)
       - gsl_vector_sum
       - gsl_matrix_scale_rows
       - gsl_matrix_scale_columns
