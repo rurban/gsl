@@ -184,7 +184,8 @@ Notes:
 */
 
 int
-gsl_linalg_complex_householder_left(const gsl_complex tau, const gsl_vector_complex * v, gsl_matrix_complex * A, gsl_vector_complex * work)
+gsl_linalg_complex_householder_left(const gsl_complex tau, const gsl_vector_complex * v,
+                                    gsl_matrix_complex * A, gsl_vector_complex * work)
 {
   const size_t M = A->size1;
   const size_t N = A->size2;

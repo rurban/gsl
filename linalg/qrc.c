@@ -320,8 +320,10 @@ gsl_linalg_complex_QR_unpack (const gsl_matrix_complex * QR, const gsl_vector_co
           gsl_vector_complex_const_view h = gsl_vector_complex_const_subvector (&c.vector, i, M - i);
           gsl_matrix_complex_view m = gsl_matrix_complex_submatrix (Q, i, i, M - i, M - i);
           gsl_complex ti = gsl_vector_complex_get (tau, i);
+          gsl_vector_complex_view work = gsl_matrix_complex_subcolumn(R, 0, 0, M - i);
+
           /* we do not need the conjugate of ti here */
-          gsl_linalg_complex_householder_hm (ti, &h.vector, &m.matrix);
+          gsl_linalg_complex_householder_left (ti, &h.vector, &m.matrix, &work.vector);
         }
 
       /* form the right triangular matrix R from a packed QR matrix */
