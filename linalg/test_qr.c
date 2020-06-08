@@ -529,7 +529,7 @@ test_QR_TR_decomp(gsl_rng * r)
 
           create_random_matrix(A, r);
           create_random_matrix(S, r);
-          s += test_QR_TR_decomp_eps(S, A, 1.0e5 * M * GSL_DBL_EPSILON, "QR_TR_decomp random");
+          s += test_QR_TR_decomp_eps(S, A, 1.0e6 * M * GSL_DBL_EPSILON, "QR_TR_decomp random");
 
           gsl_matrix_free(S);
           gsl_matrix_free(A);

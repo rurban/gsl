@@ -51,7 +51,7 @@ gsl_linalg_complex_householder_transform (gsl_vector_complex * v)
   /* replace v[0:n-1] with a householder vector (v[0:n-1]) and
      coefficient tau that annihilate v[1:n-1] */
 
-  const size_t n = v->size ;
+  const size_t n = v->size;
   
   if (n == 1)
     {
