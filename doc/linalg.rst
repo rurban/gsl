@@ -2044,7 +2044,15 @@ The packed symmetric banded :math:`6 \times 3` matrix will look like:
         \end{pmatrix}
 
 The entries marked by :math:`*` are not referenced by the symmetric banded
-routines.
+routines. The relationship between the packed format and original matrix is,
+
+.. math:: AB(i,j) = A(i, i + j) = A(i + j, i)
+
+for :math:`i = 0, \dots, N - 1, j = 0, \dots, p`. Conversely,
+
+.. math:: A(i,j) = AB(j, i - j)
+
+for :math:`i = 0, \dots, N - 1, j = \textrm{max}(0,i-p), \dots, i`.
 
 .. warning::
 
