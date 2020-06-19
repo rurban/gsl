@@ -1,7 +1,8 @@
 * What is new in gsl-2.7:
 
 ** New functions added to the library:
-      - gsl_matrix_conjtrans_memcpy
+      - gsl_matrix_norm1
+      - gsl_matrix_complex_conjtrans_memcpy
       - gsl_linalg_QL_decomp
       - gsl_linalg_QL_unpack
       - gsl_linalg_complex_QR_* (thanks to Christian Krueger)
