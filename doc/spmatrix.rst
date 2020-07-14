@@ -540,6 +540,8 @@ Matrix Properties
 
    .. math:: ||A||_1 = \textrm{max}_{1 \le j \le n} \sum_{i=1}^m |A_{ij}|
 
+   Input matrix formats supported: :ref:`COO <sec_spmatrix-coo>`, :ref:`CSC <sec_spmatrix-csc>`, :ref:`CSR <sec_spmatrix-csr>`
+
 .. index::
    single: sparse matrices, min/max elements
 
