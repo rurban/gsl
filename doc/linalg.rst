@@ -2183,18 +2183,20 @@ algorithm which overwrites the original matrix with the
    handler first to avoid triggering an error.
 
 .. function:: int gsl_linalg_cholesky_band_solve (const gsl_matrix * LLT, const gsl_vector * b, gsl_vector * x)
+              int gsl_linalg_cholesky_band_solvem (const gsl_matrix * LLT, const gsl_matrix * B, gsl_matrix * X)
 
-   This function solves the symmetric banded system :math:`A x = b` using the Cholesky
+   This function solves the symmetric banded system :math:`A x = b` (or :math:`A X = B`) using the Cholesky
    decomposition of :math:`A` held in the matrix :data:`LLT` which must
    have been previously computed by :func:`gsl_linalg_cholesky_band_decomp`.
 
 .. function:: int gsl_linalg_cholesky_band_svx (const gsl_matrix * LLT, gsl_vector * x)
+              int gsl_linalg_cholesky_band_svxm (const gsl_matrix * LLT, gsl_matrix * X)
 
-   This function solves the symmetric banded system :math:`A x = b` in-place using the
+   This function solves the symmetric banded system :math:`A x = b` (or :math:`A X = B`) in-place using the
    Cholesky decomposition of :math:`A` held in the matrix :data:`LLT`
    which must have been previously computed by :func:`gsl_linalg_cholesky_band_decomp`.
-   On input :data:`x` should contain the right-hand side :math:`b`, which is replaced by the
-   solution on output.
+   On input :data:`x` (or :data:`X`) should contain the right-hand side :math:`b` (or :math:`B`),
+   which is replaced by the solution on output.
 
 .. function:: int gsl_linalg_cholesky_band_invert (const gsl_matrix * LLT, gsl_matrix * Ainv)
 
