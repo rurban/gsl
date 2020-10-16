@@ -1336,29 +1336,77 @@ The seed specifies the initial value,
 @comment ./benchmark > tmp; cat tmp | perl -n -e '($n,$s) = split(" ",$_); printf("%17s ",$n); print "-" x ($s/1e5), "\n";'
 @comment
 
-The following table shows the relative performance of a selection the
-available random number generators.  The fastest simulation quality
-generators are @code{taus}, @code{gfsr4} and @code{mt19937}.  The
-generators which offer the best mathematically-proven quality are those
-based on the @sc{ranlux} algorithm.
+The following table shows the relative performance of all available
+random number generators.  The fastest simulation quality generators
+are @code{taus}, @code{gfsr4} and @code{mt19937}.  The generators
+which offer the best mathematically-proven quality are those based on
+the @sc{ranlux} algorithm.
 
 @comment The large number of generators based on single linear congruences are
 @comment represented by the @code{random} generator below.  These generators are
 @comment fast but have the lowest statistical quality.
 
 @example
-1754 k ints/sec,    870 k doubles/sec, taus
-1613 k ints/sec,    855 k doubles/sec, gfsr4
-1370 k ints/sec,    769 k doubles/sec, mt19937
- 565 k ints/sec,    571 k doubles/sec, ranlxs0
- 400 k ints/sec,    405 k doubles/sec, ranlxs1
- 490 k ints/sec,    389 k doubles/sec, mrg
- 407 k ints/sec,    297 k doubles/sec, ranlux
- 243 k ints/sec,    254 k doubles/sec, ranlxd1
- 251 k ints/sec,    253 k doubles/sec, ranlxs2
- 238 k ints/sec,    215 k doubles/sec, cmrg
- 247 k ints/sec,    198 k doubles/sec, ranlux389
- 141 k ints/sec,    140 k doubles/sec, ranlxd2
+  328964 k ints/sec, 309224 k doubles/sec, transputer
+  328636 k ints/sec, 309094 k doubles/sec, waterman14
+  319741 k ints/sec, 297242 k doubles/sec, borosh13
+  319059 k ints/sec, 271855 k doubles/sec, ran3
+  314252 k ints/sec, 281049 k doubles/sec, r250
+  310345 k ints/sec, 293818 k doubles/sec, jsf
+  298077 k ints/sec, 298469 k doubles/sec, jsf64
+  295887 k ints/sec, 299276 k doubles/sec, coveyou
+  295145 k ints/sec, 298620 k doubles/sec, vax
+  293844 k ints/sec, 136665 k doubles/sec, ranmar
+  293525 k ints/sec, 289265 k doubles/sec, random-glibc2
+  293315 k ints/sec, 297062 k doubles/sec, randu
+  293195 k ints/sec, 288070 k doubles/sec, random64-glibc2
+  293123 k ints/sec, 288626 k doubles/sec, random-bsd
+  292932 k ints/sec, 289939 k doubles/sec, random128-bsd
+  291894 k ints/sec, 288411 k doubles/sec, random-libc5
+  291792 k ints/sec, 287893 k doubles/sec, random64-libc5
+  291670 k ints/sec, 272732 k doubles/sec, random32-libc5
+  291389 k ints/sec, 288216 k doubles/sec, random32-glibc2
+  290627 k ints/sec, 277519 k doubles/sec, uni
+  289957 k ints/sec, 276028 k doubles/sec, random256-glibc2
+  289719 k ints/sec, 278012 k doubles/sec, random256-bsd
+  286205 k ints/sec, 278385 k doubles/sec, random256-libc5
+  284937 k ints/sec, 282090 k doubles/sec, random128-glibc2
+  284853 k ints/sec, 267730 k doubles/sec, random64-bsd
+  284797 k ints/sec, 269101 k doubles/sec, uni32
+  283980 k ints/sec, 285506 k doubles/sec, random8-glibc2
+  283802 k ints/sec, 280524 k doubles/sec, random8-bsd
+  283015 k ints/sec, 285540 k doubles/sec, random8-libc5
+  282902 k ints/sec, 285138 k doubles/sec, rand
+  282296 k ints/sec, 282613 k doubles/sec, random32-bsd
+  278943 k ints/sec, 261021 k doubles/sec, mt19937
+  271239 k ints/sec,  55285 k doubles/sec, ranf
+  265568 k ints/sec, 263181 k doubles/sec, gfsr4
+  264719 k ints/sec, 251332 k doubles/sec, taus
+  262505 k ints/sec,  52593 k doubles/sec, rand48
+  261220 k ints/sec, 245894 k doubles/sec, tt800
+  247667 k ints/sec, 257275 k doubles/sec, random128-libc5
+  233522 k ints/sec, 225526 k doubles/sec, taus113
+  198365 k ints/sec, 199142 k doubles/sec, knuthran
+  177301 k ints/sec, 175731 k doubles/sec, slatec
+  155473 k ints/sec, 155889 k doubles/sec, fishman20
+  152459 k ints/sec, 153368 k doubles/sec, minstd
+  150635 k ints/sec, 150672 k doubles/sec, ran1
+  148195 k ints/sec, 139760 k doubles/sec, fishman2x
+  146463 k ints/sec, 151964 k doubles/sec, ran0
+  137318 k ints/sec, 140146 k doubles/sec, lecuyer21
+  119559 k ints/sec, 118447 k doubles/sec, ran2
+  106604 k ints/sec,  97263 k doubles/sec, zuf
+   85861 k ints/sec,  82312 k doubles/sec, mrg
+   69997 k ints/sec,  71964 k doubles/sec, fishman18
+   53427 k ints/sec,  53351 k doubles/sec, cmrg
+   37676 k ints/sec,  40992 k doubles/sec, knuthran2
+   35773 k ints/sec,  35799 k doubles/sec, ranlxs0
+   23627 k ints/sec,  23611 k doubles/sec, ranlxs1
+   20209 k ints/sec,  20051 k doubles/sec, ranlux
+   13674 k ints/sec,  13634 k doubles/sec, ranlxs2
+   13671 k ints/sec,  13614 k doubles/sec, ranlxd1
+   11852 k ints/sec,  11536 k doubles/sec, ranlux389
+    7430 k ints/sec,   7427 k doubles/sec, ranlxd2
 @end example
 
 @node Random Number Generator Examples
