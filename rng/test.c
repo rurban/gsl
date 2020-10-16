@@ -197,6 +197,10 @@ main (void)
   rng_test (gsl_rng_xoshiro256_ss, 1, 10000, 5864433267201140791UL);
   rng_test (gsl_rng_xoshiro256_p, 1, 10000, 4624912334093259206UL);
 
+  rng_test (gsl_rng_pcg32, 1, 10000, 3719039950UL);
+  //rng_test (gsl_rng_pcg64, 1, 10000, 0UL);
+  //rng_test (gsl_rng_pcg64_cm, 1, 10000, 0UL);
+
   /* Test constant relationship between int and double functions */
 
   for (r = rngs ; *r != 0; r++)

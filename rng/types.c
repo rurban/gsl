@@ -107,6 +107,9 @@ gsl_rng_types_setup (void)
   ADD(gsl_rng_xoshiro256_pp);
   ADD(gsl_rng_xoshiro256_ss);
   ADD(gsl_rng_xoshiro256_p);
+  ADD(gsl_rng_pcg32);
+  //ADD(gsl_rng_pcg64);
+  //ADD(gsl_rng_pcg64_cmdxsm);
   ADD(0);
 
   return gsl_rng_generator_types;

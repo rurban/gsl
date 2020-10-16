@@ -104,6 +104,9 @@ main (void)
   benchmark(gsl_rng_xoshiro256_pp);
   benchmark(gsl_rng_xoshiro256_ss);
   benchmark(gsl_rng_xoshiro256_p);
+  benchmark(gsl_rng_pcg32);
+  //benchmark(gsl_rng_pcg64);
+  //benchmark(gsl_rng_pcg64_cmdxsm);
 
   return 0;
 }

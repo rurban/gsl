@@ -1146,6 +1146,12 @@ significant bits.
    :math:`2^{128}` for xoroshift128,
    :math:`2^{256}` for xoshift256
 
+.. index:: PCG random number generators
+
+.. var:: gsl_rng_pcg32
+         gsl_rng_pcg64
+         gsl_rng_pcg64_cmdxsm
+
 Performance
 ===========
 
@@ -1168,6 +1174,7 @@ based on the RANLUX algorithm::
   319059 k ints/sec, 271855 k doubles/sec, ran3
   314252 k ints/sec, 281049 k doubles/sec, r250
   310345 k ints/sec, 293818 k doubles/sec, jsf
+  306436 k ints/sec, 278123 k doubles/sec, pcg32
   306351 k ints/sec, 295357 k doubles/sec, xoroshiro64**
   306348 k ints/sec, 294652 k doubles/sec, xoshiro256+
   298077 k ints/sec, 298469 k doubles/sec, jsf64
