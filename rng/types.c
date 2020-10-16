@@ -94,6 +94,8 @@ gsl_rng_types_setup (void)
   ADD(gsl_rng_vax);
   ADD(gsl_rng_waterman14);
   ADD(gsl_rng_zuf);
+  ADD(gsl_rng_jsf);
+  ADD(gsl_rng_jsf64);
   ADD(0);
 
   return gsl_rng_generator_types;
