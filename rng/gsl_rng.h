@@ -121,6 +121,8 @@ GSL_VAR const gsl_rng_type *gsl_rng_uni32;
 GSL_VAR const gsl_rng_type *gsl_rng_vax;
 GSL_VAR const gsl_rng_type *gsl_rng_waterman14;
 GSL_VAR const gsl_rng_type *gsl_rng_zuf;
+GSL_VAR const gsl_rng_type *gsl_rng_jsf;
+GSL_VAR const gsl_rng_type *gsl_rng_jsf64;
 
 const gsl_rng_type ** gsl_rng_types_setup(void);
 

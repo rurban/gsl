@@ -1064,6 +1064,31 @@ significant bits.
    The seed specifies the initial value, 
    :math:`x_1`.
 
+.. index:: JSF random number generator
+
+.. var:: gsl_rng_jsf
+
+   This is Bob Jenkin's small pseudo-random number generator (2007)
+   from https://burtleburtle.net/bob/rand/smallprng.html
+
+   The state needs to contain 4 random 32-bit words, with those
+   forbidden fixpoints:
+
+       { 0x00000000, 0x00000000, 0x00000000, 0x00000000 },
+       { 0x77777777, 0x55555555, 0x11111111, 0x44444444 },
+       { 0x5591F2E3, 0x69EBA6CD, 0x2A171E3D, 0x3FD48890 },
+       { 0x47CB8D56, 0xAE9B35A7, 0x5C78F4A8, 0x522240FF }
+       { 0x71AAC8F9, 0x66B4F5D3, 0x1E950B8F, 0x481FEA44 },
+       { 0xAB23E5C6, 0xD3D74D9A, 0x542E3C7A, 0x7FA91120 }
+
+   The given set function avoids forbidden states for all given seeds.
+   
+   The period of this generator is about :math:`2^{126}`, with a shortest
+   cycle of :math:`2^{94}` and it uses 4 words of state per generator.
+   The 32bit variant passes all DIEHARDER tests, the 64bit variant
+   `gsl_rng_jsf64` fails some.
+
+
 Performance
 ===========
 
@@ -1141,6 +1166,11 @@ available online,
 
 * DIEHARD source code, G. Marsaglia, http://stat.fsu.edu/pub/diehard/
 
+The source code for the DIEHARDER random number generator tests is
+available online,
+  
+* DIEHARDER source code, Robert G. Brown, https://webhome.phy.duke.edu/~rgb/General/dieharder.php
+  
 A comprehensive set of random number generator tests is available from
 NIST,
 

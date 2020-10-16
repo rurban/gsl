@@ -181,6 +181,9 @@ main (void)
   rng_test (gsl_rng_ranf, 0, 10000, 2152890433UL);
   rng_test (gsl_rng_ranf, 2, 10000, 339327233);
 
+  rng_test (gsl_rng_jsf, 1, 10000, 210975159);
+  rng_test (gsl_rng_jsf64, 1, 10000, 10988883387291576526UL);
+
   /* Test constant relationship between int and double functions */
 
   for (r = rngs ; *r != 0; r++)
@@ -221,6 +224,8 @@ main (void)
   rng_seed_test (gsl_rng_taus2);
 
   rng_seed_test (gsl_rng_gfsr4);
+  rng_seed_test (gsl_rng_jsf);
+  rng_seed_test (gsl_rng_jsf64);
 #endif
 
   exit (gsl_test_summary ());
@@ -247,7 +252,7 @@ rng_test (const gsl_rng_type * T, unsigned long int seed, unsigned int n,
     }
 
   status = (k != result);
-  gsl_test (status, "%s, %u steps (%u observed vs %u expected)",
+  gsl_test (status, "%s, %u steps (%lu observed vs %lu expected)",
             gsl_rng_name (r), n, k, result);
 
   gsl_rng_free (r);

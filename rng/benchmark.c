@@ -91,6 +91,8 @@ main (void)
   benchmark(gsl_rng_vax);
   benchmark(gsl_rng_waterman14);
   benchmark(gsl_rng_zuf);
+  benchmark(gsl_rng_jsf);
+  benchmark(gsl_rng_jsf64);
 
   return 0;
 }
