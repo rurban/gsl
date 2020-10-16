@@ -511,3 +511,5 @@ evaluation and ode improvements
 
 * Raymond Rogers <raymond.rogers72@gmail.com> - bug fixes for confluent
   hypergeometric functions
+
+* Reini Urban <rurban@cpan.org> - added the jsf and xoshori* rng's

@@ -1,3 +1,7 @@
+2012-10-16  Reini Urban <rurban@cpan.org>
+
+	* jsf.c, xoshiro32bit.c, xoroshiro64bit.c: Added.
+
 2012-09-10  Rhys Ulerich <rhys.ulerich@gmail.com>
 
 	* ranf.c Add include for gsl_sys.h to fix MSVC build.
