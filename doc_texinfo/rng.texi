@@ -1353,8 +1353,12 @@ the @sc{ranlux} algorithm.
   319059 k ints/sec, 271855 k doubles/sec, ran3
   314252 k ints/sec, 281049 k doubles/sec, r250
   310345 k ints/sec, 293818 k doubles/sec, jsf
+  306351 k ints/sec, 295357 k doubles/sec, xoroshiro64**
+  306348 k ints/sec, 294652 k doubles/sec, xoshiro256+
   298077 k ints/sec, 298469 k doubles/sec, jsf64
+  296997 k ints/sec, 268763 k doubles/sec, xoroshiro64*
   295887 k ints/sec, 299276 k doubles/sec, coveyou
+  295622 k ints/sec, 297637 k doubles/sec, xoroshiro128+
   295145 k ints/sec, 298620 k doubles/sec, vax
   293844 k ints/sec, 136665 k doubles/sec, ranmar
   293525 k ints/sec, 289265 k doubles/sec, random-glibc2
@@ -1369,21 +1373,28 @@ the @sc{ranlux} algorithm.
   290627 k ints/sec, 277519 k doubles/sec, uni
   289957 k ints/sec, 276028 k doubles/sec, random256-glibc2
   289719 k ints/sec, 278012 k doubles/sec, random256-bsd
+  286423 k ints/sec, 274391 k doubles/sec, xoshiro256++
   286205 k ints/sec, 278385 k doubles/sec, random256-libc5
+  285164 k ints/sec, 279405 k doubles/sec, xoshiro128+
   284937 k ints/sec, 282090 k doubles/sec, random128-glibc2
   284853 k ints/sec, 267730 k doubles/sec, random64-bsd
   284797 k ints/sec, 269101 k doubles/sec, uni32
   283980 k ints/sec, 285506 k doubles/sec, random8-glibc2
   283802 k ints/sec, 280524 k doubles/sec, random8-bsd
+  283488 k ints/sec, 283380 k doubles/sec, xoroshiro128**
   283015 k ints/sec, 285540 k doubles/sec, random8-libc5
   282902 k ints/sec, 285138 k doubles/sec, rand
   282296 k ints/sec, 282613 k doubles/sec, random32-bsd
+  280662 k ints/sec, 289208 k doubles/sec, xoshiro256**
   278943 k ints/sec, 261021 k doubles/sec, mt19937
+  272474 k ints/sec, 271866 k doubles/sec, xoroshiro128++
   271239 k ints/sec,  55285 k doubles/sec, ranf
+  269604 k ints/sec, 247058 k doubles/sec, xoshiro128++
   265568 k ints/sec, 263181 k doubles/sec, gfsr4
   264719 k ints/sec, 251332 k doubles/sec, taus
   262505 k ints/sec,  52593 k doubles/sec, rand48
   261220 k ints/sec, 245894 k doubles/sec, tt800
+  260970 k ints/sec, 254503 k doubles/sec, xoshiro128**
   247667 k ints/sec, 257275 k doubles/sec, random128-libc5
   233522 k ints/sec, 225526 k doubles/sec, taus113
   198365 k ints/sec, 199142 k doubles/sec, knuthran

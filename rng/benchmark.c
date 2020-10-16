@@ -93,6 +93,17 @@ main (void)
   benchmark(gsl_rng_zuf);
   benchmark(gsl_rng_jsf);
   benchmark(gsl_rng_jsf64);
+  benchmark(gsl_rng_xoshiro128_pp);
+  benchmark(gsl_rng_xoshiro128_ss);
+  benchmark(gsl_rng_xoshiro128_p);
+  benchmark(gsl_rng_xoroshiro64_ss);
+  benchmark(gsl_rng_xoroshiro64_s);
+  benchmark(gsl_rng_xoroshiro128_pp);
+  benchmark(gsl_rng_xoroshiro128_ss);
+  benchmark(gsl_rng_xoroshiro128_p);
+  benchmark(gsl_rng_xoshiro256_pp);
+  benchmark(gsl_rng_xoshiro256_ss);
+  benchmark(gsl_rng_xoshiro256_p);
 
   return 0;
 }

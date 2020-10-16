@@ -96,6 +96,17 @@ gsl_rng_types_setup (void)
   ADD(gsl_rng_zuf);
   ADD(gsl_rng_jsf);
   ADD(gsl_rng_jsf64);
+  ADD(gsl_rng_xoshiro128_pp);
+  ADD(gsl_rng_xoshiro128_ss);
+  ADD(gsl_rng_xoshiro128_p);
+  ADD(gsl_rng_xoroshiro64_ss);
+  ADD(gsl_rng_xoroshiro64_s);
+  ADD(gsl_rng_xoroshiro128_pp);
+  ADD(gsl_rng_xoroshiro128_ss);
+  ADD(gsl_rng_xoroshiro128_p);
+  ADD(gsl_rng_xoshiro256_pp);
+  ADD(gsl_rng_xoshiro256_ss);
+  ADD(gsl_rng_xoshiro256_p);
   ADD(0);
 
   return gsl_rng_generator_types;
