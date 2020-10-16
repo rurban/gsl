@@ -181,8 +181,21 @@ main (void)
   rng_test (gsl_rng_ranf, 0, 10000, 2152890433UL);
   rng_test (gsl_rng_ranf, 2, 10000, 339327233);
 
+  // 0 seed disallowed!
   rng_test (gsl_rng_jsf, 1, 10000, 210975159);
   rng_test (gsl_rng_jsf64, 1, 10000, 10988883387291576526UL);
+
+  rng_test (gsl_rng_xoshiro128_pp, 1, 10000, 3171859155UL);
+  rng_test (gsl_rng_xoshiro128_ss, 1, 10000, 1566019434UL);
+  rng_test (gsl_rng_xoshiro128_p, 1, 10000, 2752886404UL);
+  rng_test (gsl_rng_xoroshiro64_ss, 1, 10000, 786513473UL);
+  rng_test (gsl_rng_xoroshiro64_s, 1, 10000, 1803433264UL);
+  rng_test (gsl_rng_xoroshiro128_pp, 1, 10000, 6396584900321662142UL);
+  rng_test (gsl_rng_xoroshiro128_ss, 1, 10000, 2916662311688245179UL);
+  rng_test (gsl_rng_xoroshiro128_p, 1, 10000, 15011876659380427599UL);
+  rng_test (gsl_rng_xoshiro256_pp, 1, 10000, 13241388721673015269UL);
+  rng_test (gsl_rng_xoshiro256_ss, 1, 10000, 5864433267201140791UL);
+  rng_test (gsl_rng_xoshiro256_p, 1, 10000, 4624912334093259206UL);
 
   /* Test constant relationship between int and double functions */
 
@@ -226,6 +239,17 @@ main (void)
   rng_seed_test (gsl_rng_gfsr4);
   rng_seed_test (gsl_rng_jsf);
   rng_seed_test (gsl_rng_jsf64);
+  rng_seed_test (gsl_rng_xoshiro128_pp);
+  rng_seed_test (gsl_rng_xoshiro128_ss);
+  rng_seed_test (gsl_rng_xoshiro128_p);
+  rng_seed_test (gsl_rng_xoroshiro64_ss);
+  rng_seed_test (gsl_rng_xoroshiro64_s);
+  rng_seed_test (gsl_rng_xoroshiro128_pp);
+  rng_seed_test (gsl_rng_xoroshiro128_ss);
+  rng_seed_test (gsl_rng_xoroshiro128_p);
+  rng_seed_test (gsl_rng_xoshiro256_pp);
+  rng_seed_test (gsl_rng_xoshiro256_ss);
+  rng_seed_test (gsl_rng_xoshiro256_p);
 #endif
 
   exit (gsl_test_summary ());

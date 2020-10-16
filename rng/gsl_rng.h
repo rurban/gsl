@@ -123,6 +123,17 @@ GSL_VAR const gsl_rng_type *gsl_rng_waterman14;
 GSL_VAR const gsl_rng_type *gsl_rng_zuf;
 GSL_VAR const gsl_rng_type *gsl_rng_jsf;
 GSL_VAR const gsl_rng_type *gsl_rng_jsf64;
+GSL_VAR const gsl_rng_type *gsl_rng_xoshiro128_pp;
+GSL_VAR const gsl_rng_type *gsl_rng_xoshiro128_ss;
+GSL_VAR const gsl_rng_type *gsl_rng_xoshiro128_p;
+GSL_VAR const gsl_rng_type *gsl_rng_xoroshiro64_ss;
+GSL_VAR const gsl_rng_type *gsl_rng_xoroshiro64_s;
+GSL_VAR const gsl_rng_type *gsl_rng_xoroshiro128_pp;
+GSL_VAR const gsl_rng_type *gsl_rng_xoroshiro128_ss;
+GSL_VAR const gsl_rng_type *gsl_rng_xoroshiro128_p;
+GSL_VAR const gsl_rng_type *gsl_rng_xoshiro256_pp;
+GSL_VAR const gsl_rng_type *gsl_rng_xoshiro256_ss;
+GSL_VAR const gsl_rng_type *gsl_rng_xoshiro256_p;
 
 const gsl_rng_type ** gsl_rng_types_setup(void);
 
