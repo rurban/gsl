@@ -1088,6 +1088,63 @@ significant bits.
    The 32bit variant passes all DIEHARDER tests, the 64bit variant
    `gsl_rng_jsf64` fails some.
 
+.. index:: xoshiro random number generators
+
+.. var:: gsl_rng_xoshiro128_pp
+         gsl_rng_xoshiro128_ss
+         gsl_rng_xoshiro128_p
+         gsl_rng_xoroshiro64_ss
+         gsl_rng_xoroshiro64_s
+         gsl_rng_xoshiro256_pp
+         gsl_rng_xoshiro256_ss
+         gsl_rng_xoshiro256_p
+         gsl_rng_xoroshiro128_pp
+         gsl_rng_xoroshiro128_ss
+         gsl_rng_xoroshiro128_p
+
+   These are the Xor/Shift/Rotate variants by David Blackman and Sebastiano Vigna
+   from http://prng.di.unimi.it/
+
+   The state needs to contain 4 random words, so that not all words are zero.
+   The given set function avoids forbidden states for all given seeds.
+
+   The xoshiro128* variants are a 32-bit all-purpose, rock-solid generators.
+   It have excellent speed, a state size (128 bits) that is
+   large enough for mild parallelism, and it passes all tests we are aware
+   of. xoshiro128_p is the best and fastest for 32bit floats, but its lowest 4 bits
+   are weak.
+
+   The xoroshiro64* variants are 32-bit small-state generators for 32bit floats,
+   its lowest 6 bits are weak. xoroshiro64_ss has its state space not large
+   enough for any parallel application.
+
+   xoroshiro128_pp and xoroshiro128_ss are all-purpose, rock-solid,
+   64bit small-state generator.  It is extremely (sub-ns) fast and it
+   passes all tests we are aware of, but its state space is large
+   enough only for mild parallelism.
+
+   xoroshiro128_p is the best and fastest small-state generator for
+   floating-point numbers from the xoshiro family.  We suggest to use
+   its upper bits for floating-point generation, as it is slightly
+   faster than xoroshiro128++/xoroshiro128**. It passes all tests we
+   are aware of except for the four lower bits, which might fail
+   linearity tests (and just those), so if low linear complexity is
+   not considered an issue (as it is usually the case) it can be used
+   to generate 64-bit outputs, too; moreover, this generator has a
+   very mild Hamming-weight dependency making our test
+   (http://prng.di.unimi.it/hwd.php) fail after 5 TB of output; we
+   believe this slight bias cannot affect any application. If you are
+   concerned, use xoroshiro128++, xoroshiro128** or xoshiro256+.
+
+   xoshiro256_pp is an all-purpose, rock-solid 64bit generator.
+   It has excellent (sub-ns) speed, a state (256 bits) that is large
+   enough for any parallel application, and it passes all tests we are
+   aware of. For generating just floating-point numbers, xoshiro256_p
+   is even faster, but has weaker lower 3 bits.
+
+   The period of these generators are about
+   :math:`2^{128}` for xoroshift128,
+   :math:`2^{256}` for xoshift256
 
 Performance
 ===========
