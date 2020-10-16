@@ -1,3 +1,8 @@
+2012-10-16  Reini Urban <rurban@cpan.org>
+
+	* rng.texi: All benchmarks numbers for all rng's, also the
+        new jsf and xoshiro* ones. Calculated with a Ryzen 3.
+
 2017-01-07  Rhys Ulerich  <rhys.ulerich@gmail.com>
 
 	* vectors.texi: Document zero-length block/vector/matrix

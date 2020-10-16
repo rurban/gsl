@@ -30,3 +30,4 @@ Patrick Alken <patrick.alken@colorado.edu> - nonsymmetric and generalized
 Rhys Ulerich (rhys.ulerich@gmail.com) - multisets
 Pavel Holoborodko <pavel@holoborodko.com> - fixed order Gauss-Legendre quadrature
 Pedro Gonnet <gonnet@maths.ox.ac.uk> - CQUAD integration routines.
+Reini Urban <rurban@cpan.org> - jsf and xoshori* rng's
