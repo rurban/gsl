@@ -2222,7 +2222,7 @@ algorithm which overwrites the original matrix with the
    For any :math:`A_{ii} \le 0`, the corresponding scale factor :math:`S_i`
    is set to :math:`1`.
 
-.. function:: int gsl_linalg_cholesky_band_scale (gsl_matrix * A, const gsl_vector * S)
+.. function:: int gsl_linalg_cholesky_band_scale_apply (gsl_matrix * A, const gsl_vector * S)
 
    This function applies the scaling transformation :data:`S` to the banded symmetric
    positive definite matrix :data:`A`. On output,
