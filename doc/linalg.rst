@@ -2211,6 +2211,23 @@ algorithm which overwrites the original matrix with the
    it in the lower triangular portion of the :math:`N`-by-:math:`N` matrix :data:`L`. The
    upper triangular portion of :data:`L` is not referenced.
 
+.. function:: int gsl_linalg_cholesky_band_scale (const gsl_matrix * A, gsl_vector * S)
+
+   This function calculates a diagonal scaling transformation of the
+   symmetric, positive definite banded matrix :data:`A`, such that
+   :math:`S A S` has a condition number within a factor of :math:`N`
+   of the matrix of smallest possible condition number over all
+   possible diagonal scalings. On output, :data:`S` contains the
+   scale factors, given by :math:`S_i = 1/\sqrt{A_{ii}}`.
+   For any :math:`A_{ii} \le 0`, the corresponding scale factor :math:`S_i`
+   is set to :math:`1`.
+
+.. function:: int gsl_linalg_cholesky_band_scale (gsl_matrix * A, const gsl_vector * S)
+
+   This function applies the scaling transformation :data:`S` to the banded symmetric
+   positive definite matrix :data:`A`. On output,
+   :data:`A` is replaced by :math:`S A S`.
+
 .. function:: int gsl_linalg_cholesky_band_rcond (const gsl_matrix * LLT, double * rcond, gsl_vector * work)
 
    This function estimates the reciprocal condition number (using the 1-norm) of the symmetric banded positive

@@ -665,6 +665,10 @@ int gsl_linalg_cholesky_band_invert (const gsl_matrix * LLT, gsl_matrix * Ainv);
 
 int gsl_linalg_cholesky_band_unpack (const gsl_matrix * LLT, gsl_matrix * L);
 
+int gsl_linalg_cholesky_band_scale(const gsl_matrix * A, gsl_vector * S);
+
+int gsl_linalg_cholesky_band_scale_apply(gsl_matrix * A, const gsl_vector * S);
+
 int gsl_linalg_cholesky_band_rcond (const gsl_matrix * LLT, double * rcond, gsl_vector * work);
 
 /* L D L^T decomposition */
