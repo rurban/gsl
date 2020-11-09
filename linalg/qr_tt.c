@@ -198,6 +198,141 @@ gsl_linalg_QR_TT_decomp (gsl_matrix * U, gsl_matrix * S, gsl_matrix * T)
     }
 }
 
+/* Find the least squares solution to the overdetermined system 
+ *
+ *   [ U ] x = b
+ *   [ S ]
+ *  
+ * using the QR factorization [ U; S ] = Q R. 
+ *
+ * Inputs: R    - upper triangular R matrix, N-by-N
+ *         Y    - upper triangular Y matrix, N-by-N
+ *         T    - upper triangular block reflector, N-by-N
+ *         b    - right hand side, size 2*N
+ *         x    - (output) solution, size 2*N
+ *                x(1:N) = least squares solution vector
+ *                x(N+1:2*N) = vector whose norm equals ||b - Ax||
+ *         work - workspace, size N
+ */
+
+int
+gsl_linalg_QR_TT_lssolve (const gsl_matrix * R, const gsl_matrix * Y, const gsl_matrix * T,
+                          const gsl_vector * b, gsl_vector * x, gsl_vector * work)
+{
+  const size_t N = R->size1;
+  const size_t M = 2 * N;
+
+  if (R->size2 != N)
+    {
+      GSL_ERROR ("R matrix must be square", GSL_ENOTSQR);
+    }
+  else if (Y->size1 != Y->size2)
+    {
+      GSL_ERROR ("Y matrix must be square", GSL_ENOTSQR);
+    }
+  else if (Y->size1 != N)
+    {
+      GSL_ERROR ("Y and R must have same dimensions", GSL_EBADLEN);
+    }
+  else if (T->size1 != N || T->size2 != N)
+    {
+      GSL_ERROR ("T matrix must be N-by-N", GSL_EBADLEN);
+    }
+  else if (M != b->size)
+    {
+      GSL_ERROR ("matrix size must match b size", GSL_EBADLEN);
+    }
+  else if (M != x->size)
+    {
+      GSL_ERROR ("matrix size must match solution size", GSL_EBADLEN);
+    }
+  else if (N != work->size)
+    {
+      GSL_ERROR ("workspace must be length N", GSL_EBADLEN);
+    }
+  else
+    {
+      gsl_vector_view x1 = gsl_vector_subvector(x, 0, N);
+
+      /* compute x = Q^T b */
+      gsl_vector_memcpy(x, b);
+      gsl_linalg_QR_TT_QTvec (Y, T, x, work);
+
+      /* Solve R x = Q^T b */
+      gsl_blas_dtrsv (CblasUpper, CblasNoTrans, CblasNonUnit, R, &x1.vector);
+
+      return GSL_SUCCESS;
+    }
+}
+
+/*
+gsl_linalg_QR_TT_QTvec()
+  Apply 2N-by-2N Q^T to the 2N-by-1 vector b
+
+Inputs: Y    - upper triangular Y matrix encoded by gsl_linalg_QR_TT_decomp, N-by-N
+        T    - block reflector matrix, N-by-N
+        b    - 2N-by-1 vector replaced by Q^T b on output
+        work - workspace, length N
+
+Notes:
+1) Q^T b = (I - V T^T V^T) b
+         = b - V T^T [ I Y^T ] [ b1 ]
+                                   [ b2 ]
+         = b - V T^T [ b1 + Y^T b2 ]
+         = [ b1 ] - [  w  ]
+           [ b2 ]   [ Y w ]
+
+where w = T^T ( b1 + Y^T b2 )
+*/
+
+int
+gsl_linalg_QR_TT_QTvec(const gsl_matrix * Y, const gsl_matrix * T, gsl_vector * b, gsl_vector * work)
+{
+  const size_t N = Y->size1;
+  const size_t M = 2 * N;
+
+  if (Y->size2 != N)
+    {
+      GSL_ERROR ("Y matrix must be square", GSL_ENOTSQR);
+    }
+  else if (T->size1 != N || T->size2 != N)
+    {
+      GSL_ERROR ("T matrix must be N-by-N", GSL_EBADLEN);
+    }
+  else if (b->size != M)
+    {
+      GSL_ERROR ("b vector must have length M", GSL_EBADLEN);
+    }
+  else if (work->size != N)
+    {
+      GSL_ERROR ("workspace must be length N", GSL_EBADLEN);
+    }
+  else
+    {
+      gsl_vector_view b1 = gsl_vector_subvector(b, 0, N);
+      gsl_vector_view b2 = gsl_vector_subvector(b, N, N);
+
+      /* work := YT b2 */
+      gsl_vector_memcpy(work, &b2.vector);
+      gsl_blas_dtrmv(CblasUpper, CblasTrans, CblasNonUnit, Y, work);
+
+      /* work = b1 + YT b2 */
+      gsl_vector_add(work, &b1.vector);
+
+      /* work = T^T * work */
+      gsl_blas_dtrmv(CblasUpper, CblasTrans, CblasNonUnit, T, work);
+
+      /* b1 := b1 - work */
+      gsl_vector_sub(&b1.vector, work);
+
+      /* b2 := b2 - Y w */
+      gsl_blas_dtrmv(CblasUpper, CblasNoTrans, CblasNonUnit, Y, work);
+      gsl_vector_sub(&b2.vector, work);
+
+      return GSL_SUCCESS;
+    }
+}
+
 /*
 qrtt_householder_transform()
   This routine is an optimized version of

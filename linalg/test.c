@@ -3284,6 +3284,8 @@ main(void)
   gsl_test(test_QR_TZ_decomp(r),         "QR_TZ Decomposition");
   gsl_test(test_QR_TT_decomp(r),         "QR_TT Decomposition");
 
+  gsl_test(test_QR_TT_lssolve(r),        "QR_TT LS Solve");
+
   gsl_test(test_QL_decomp(r),            "QL Decomposition");
 
   gsl_test(test_LQ_decomp(),             "LQ Decomposition");
