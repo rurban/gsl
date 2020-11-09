@@ -517,6 +517,26 @@ and :math:`Y` is :math:`N`-by-:math:`N` upper triangular.
    is replaced by the :math:`R` factor, and :data:`U2` is replaced by :math:`Y`. The
    :math:`N`-by-:math:`N` upper triangular block reflector is stored in :data:`T` on output.
 
+.. function:: int gsl_linalg_QR_TT_lssolve (const gsl_matrix * R, const gsl_matrix * Y, const gsl_matrix * T, const gsl_vector * b, gsl_vector * x, gsl_vector * work)
+
+   This function find the least squares solution to the overdetermined
+   system,
+   
+   .. math:: \begin{pmatrix} U \\ S \end{pmatrix} x = b
+      
+   where :math:`U,S` are :math:`N`-by-:math:`N` upper triangular matrices.
+   least squares solution minimizes the Euclidean norm of the
+   residual, :math:`||b - Ax||`. The routine requires as input 
+   the :math:`QR` decomposition
+   of :math:`(U; S)` into (:data:`R`, :data:`Y`) given by
+   :func:`gsl_linalg_QR_TT_decomp`.
+   The parameter :data:`x` is of length :math:`2N`.
+   The solution :math:`x` is returned in the first :math:`N` rows of :data:`x`,
+   i.e. :math:`x =` :code:`x[0], x[1], ..., x[N-1]`. The last :math:`N` rows
+   of :data:`x` contain a vector whose norm is equal to the residual norm
+   :math:`|| b - A x ||`. This similar to the behavior of LAPACK DGELS.
+   Additional workspace of length :math:`N` is required in :data:`work`.
+
 Triangle on Top of Trapezoidal
 ------------------------------
 
