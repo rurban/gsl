@@ -522,20 +522,27 @@ and :math:`Y` is :math:`N`-by-:math:`N` upper triangular.
    This function find the least squares solution to the overdetermined
    system,
    
-   .. math:: \begin{pmatrix} U \\ S \end{pmatrix} x = b
+   .. math:: \begin{pmatrix} U_1 \\ U_2 \end{pmatrix} x = b
       
-   where :math:`U,S` are :math:`N`-by-:math:`N` upper triangular matrices.
-   least squares solution minimizes the Euclidean norm of the
-   residual, :math:`||b - Ax||`. The routine requires as input 
+   where :math:`U_1,U_2` are :math:`N`-by-:math:`N` upper triangular matrices.
+   The least squares solution minimizes the Euclidean norm of the
+   residual, :math:`||b - (U_1; U_2) x||`. The routine requires as input 
    the :math:`QR` decomposition
-   of :math:`(U; S)` into (:data:`R`, :data:`Y`) given by
+   of :math:`(U_1; U_2)` into (:data:`R`, :data:`Y`) given by
    :func:`gsl_linalg_QR_TT_decomp`.
    The parameter :data:`x` is of length :math:`2N`.
    The solution :math:`x` is returned in the first :math:`N` rows of :data:`x`,
    i.e. :math:`x =` :code:`x[0], x[1], ..., x[N-1]`. The last :math:`N` rows
    of :data:`x` contain a vector whose norm is equal to the residual norm
-   :math:`|| b - A x ||`. This similar to the behavior of LAPACK DGELS.
+   :math:`|| b - (U_1; U_2) x ||`. This similar to the behavior of LAPACK DGELS.
    Additional workspace of length :math:`N` is required in :data:`work`.
+
+.. function:: int gsl_linalg_QR_TT_QTec (const gsl_matrix * Y, const gsl_matrix * T, gsl_vector * b, gsl_vector * work)
+
+   This function computes :math:`Q^T b` using the decomposition
+   (:data:`Y`, :data:`T`) previously computed by :func:`gsl_linalg_QR_TT_decomp`.
+   On input, :data:`b` contains the vector :math:`b`, and on output it will contain
+   :math:`Q^T b`. Additional workspace of length :math:`N` is required in :data:`work`.
 
 Triangle on Top of Trapezoidal
 ------------------------------
