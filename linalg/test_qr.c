@@ -1,6 +1,6 @@
 /* linalg/test_qr.c
  *
- * Copyright (C) 2019 Patrick Alken
+ * Copyright (C) 2019-2020 Patrick Alken
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -535,6 +535,218 @@ test_QR_TR_decomp(gsl_rng * r)
           gsl_matrix_free(A);
         }
     }
+
+  return s;
+}
+
+static int
+test_QR_TZ_decomp_eps(const gsl_matrix * S, const gsl_matrix * A, const double eps, const char * desc)
+{
+  int s = 0;
+  const size_t M = A->size1;
+  const size_t N = A->size2;
+  size_t i, j;
+
+  gsl_matrix * R = gsl_matrix_calloc(N, N);
+  gsl_matrix * V = gsl_matrix_alloc(M, N);
+  gsl_matrix * T = gsl_matrix_alloc(N, N);
+  gsl_matrix * B1  = gsl_matrix_calloc(N, N);
+  gsl_matrix * B2  = gsl_matrix_alloc(M, N);
+
+  gsl_matrix_tricpy(CblasUpper, CblasNonUnit, R, S);
+  gsl_matrix_memcpy(V, A);
+
+  s += gsl_linalg_QR_TZ_decomp(R, V, T);
+
+  /*
+   * compute B = Q R = [ R - T R ]
+   *                   [ -V~ T R ]
+   */
+
+  gsl_matrix_tricpy(CblasUpper, CblasNonUnit, B1, T);
+
+  gsl_blas_dtrmm (CblasRight, CblasUpper, CblasNoTrans, CblasNonUnit, 1.0, R, B1);   /* B1 = T R */
+  gsl_blas_dgemm (CblasNoTrans, CblasNoTrans, -1.0, V, B1, 0.0, B2);                 /* B2 = -V~ T R */
+  gsl_matrix_sub (B1, R);                                                            /* B1 = T R - R */
+  gsl_matrix_scale (B1, -1.0);                                                       /* B1 = R - T R */
+
+  /* test S = B1 */
+  for (i = 0; i < N; i++)
+    {
+      for (j = i; j < N; j++)
+        {
+          double aij = gsl_matrix_get(B1, i, j);
+          double mij = gsl_matrix_get(S, i, j);
+
+          gsl_test_rel(aij, mij, eps, "%s B1 (%3lu,%3lu)[%lu,%lu]: %22.18g   %22.18g\n",
+                       desc, M, N, i,j, aij, mij);
+        }
+    }
+
+  /* test A = B2 */
+  for (i = 0; i < M; i++)
+    {
+      for (j = 0; j < N; j++)
+        {
+          double aij = gsl_matrix_get(B2, i, j);
+          double mij = gsl_matrix_get(A, i, j);
+
+          gsl_test_rel(aij, mij, eps, "%s B2 (%3lu,%3lu)[%lu,%lu]: %22.18g   %22.18g\n",
+                       desc, M, N, i,j, aij, mij);
+        }
+    }
+
+  gsl_matrix_free(R);
+  gsl_matrix_free(V);
+  gsl_matrix_free(T);
+  gsl_matrix_free(B1);
+  gsl_matrix_free(B2);
+
+  return s;
+}
+
+static int
+test_QR_TZ_decomp(gsl_rng * r)
+{
+  int s = 0;
+  const size_t N_max = 20;
+  const size_t M_max = 2*N_max;
+  gsl_matrix * U1 = gsl_matrix_alloc(N_max, N_max);
+  gsl_matrix * U2 = gsl_matrix_alloc(N_max, N_max);
+  gsl_matrix * A = gsl_matrix_alloc(M_max, N_max);
+  size_t M, N;
+
+  for (N = 1; N <= N_max; ++N)
+    {
+      gsl_matrix_view S = gsl_matrix_submatrix(U1, 0, 0, N, N);
+      gsl_matrix_view T = gsl_matrix_submatrix(U2, 0, 0, N, N);
+
+      for (M = N; M <= 2*N_max; ++M)
+        {
+          gsl_matrix_view B = gsl_matrix_submatrix(A, 0, 0, M, N);
+          gsl_matrix_view Bu = gsl_matrix_submatrix(&B.matrix, M - N, 0, N, N);
+
+          gsl_matrix_set_zero(&B.matrix);
+
+          if (M > N)
+            {
+              gsl_matrix_view Bd = gsl_matrix_submatrix(&B.matrix, 0, 0, M - N, N);
+              create_random_matrix(&Bd.matrix, r);
+            }
+
+          create_random_matrix(&S.matrix, r);
+          create_random_matrix(&T.matrix, r);
+          gsl_matrix_tricpy(CblasUpper, CblasNonUnit, &Bu.matrix, &T.matrix);
+
+          s += test_QR_TZ_decomp_eps(&S.matrix, &B.matrix, 1.0e6 * M * GSL_DBL_EPSILON,
+                                     "QR_TZ_decomp random");
+        }
+    }
+
+  gsl_matrix_free(U1);
+  gsl_matrix_free(U2);
+  gsl_matrix_free(A);
+
+  return s;
+}
+
+static int
+test_QR_TT_decomp_eps(const gsl_matrix * U, const gsl_matrix * S, const double eps, const char * desc)
+{
+  int s = 0;
+  const size_t N = U->size2;
+  size_t i, j;
+
+  gsl_matrix * R = gsl_matrix_calloc(N, N);
+  gsl_matrix * V = gsl_matrix_calloc(N, N);
+  gsl_matrix * T = gsl_matrix_alloc(N, N);
+  gsl_matrix * B1  = gsl_matrix_calloc(N, N);
+  gsl_matrix * B2  = gsl_matrix_calloc(N, N);
+
+  gsl_matrix_tricpy(CblasUpper, CblasNonUnit, R, U);
+  gsl_matrix_tricpy(CblasUpper, CblasNonUnit, V, S);
+
+  s += gsl_linalg_QR_TT_decomp(R, V, T);
+
+  /*
+   * compute B = Q R = [ R - T R ]
+   *                   [ -V~ T R ]
+   */
+
+  gsl_matrix_tricpy(CblasUpper, CblasNonUnit, B1, T);
+
+  gsl_blas_dtrmm (CblasRight, CblasUpper, CblasNoTrans, CblasNonUnit, 1.0, R, B1);   /* B1 = T R */
+  gsl_matrix_tricpy(CblasUpper, CblasNonUnit, B2, B1);                               /* B2 := T R */
+  gsl_blas_dtrmm (CblasLeft, CblasUpper, CblasNoTrans, CblasNonUnit, -1.0, V, B2);   /* B2 = -V~ T R */
+  gsl_matrix_sub (B1, R);                                                            /* B1 = T R - R */
+  gsl_matrix_scale (B1, -1.0);                                                       /* B1 = R - T R */
+
+  /* test U = B1 */
+  for (i = 0; i < N; i++)
+    {
+      for (j = i; j < N; j++)
+        {
+          double aij = gsl_matrix_get(B1, i, j);
+          double mij = gsl_matrix_get(U, i, j);
+
+          gsl_test_rel(aij, mij, eps, "%s B1 (%3lu)[%lu,%lu]: %22.18g   %22.18g\n",
+                       desc, N, i, j, aij, mij);
+        }
+    }
+
+  /* test S = B2 */
+  for (i = 0; i < N; i++)
+    {
+      for (j = 0; j < N; j++)
+        {
+          double aij = gsl_matrix_get(B2, i, j);
+          double mij = gsl_matrix_get(S, i, j);
+
+          gsl_test_rel(aij, mij, eps, "%s B2 (%3lu)[%lu,%lu]: %22.18g   %22.18g\n",
+                       desc, N, i,j, aij, mij);
+        }
+    }
+
+  gsl_matrix_free(R);
+  gsl_matrix_free(V);
+  gsl_matrix_free(T);
+  gsl_matrix_free(B1);
+  gsl_matrix_free(B2);
+
+  return s;
+}
+
+static int
+test_QR_TT_decomp(gsl_rng * r)
+{
+  int s = 0;
+  const size_t N_max = 50;
+  gsl_matrix * U = gsl_matrix_alloc(N_max, N_max);
+  gsl_matrix * S = gsl_matrix_alloc(N_max, N_max);
+  gsl_matrix * T = gsl_matrix_alloc(N_max, N_max);
+  size_t N;
+
+  for (N = 1; N <= N_max; ++N)
+    {
+      gsl_matrix_view a = gsl_matrix_submatrix(U, 0, 0, N, N);
+      gsl_matrix_view b = gsl_matrix_submatrix(S, 0, 0, N, N);
+      gsl_matrix_view c = gsl_matrix_submatrix(T, 0, 0, N, N);
+
+      create_random_matrix(&c.matrix, r);
+      gsl_matrix_set_zero(&a.matrix);
+      gsl_matrix_tricpy(CblasUpper, CblasNonUnit, &a.matrix, &c.matrix);
+
+      create_random_matrix(&c.matrix, r);
+      gsl_matrix_set_zero(&b.matrix);
+      gsl_matrix_tricpy(CblasUpper, CblasNonUnit, &b.matrix, &c.matrix);
+
+      s += test_QR_TT_decomp_eps(&a.matrix, &b.matrix, 1.0e6 * N * GSL_DBL_EPSILON,
+                                 "QR_TT_decomp random");
+    }
+
+  gsl_matrix_free(U);
+  gsl_matrix_free(S);
+  gsl_matrix_free(T);
 
   return s;
 }

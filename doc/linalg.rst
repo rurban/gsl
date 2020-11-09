@@ -432,16 +432,16 @@ specialized matrix
 
 .. only:: not texinfo
 
-   .. math:: \begin{pmatrix} S \\ A \end{pmatrix} = Q R
+   .. math:: \begin{pmatrix} U \\ A \end{pmatrix} = Q R
 
 .. only:: texinfo
 
    ::
 
-     [ S ] = Q R
+     [ U ] = Q R
      [ A ]
 
-where :math:`S` is an :math:`N`-by-:math:`N` upper triangular matrix, and :math:`A` is
+where :math:`U` is an :math:`N`-by-:math:`N` upper triangular matrix, and :math:`A` is
 an :math:`M`-by-:math:`N` dense matrix. This type of matrix arises, for example,
 in the sequential TSQR algorithm. The Elmroth and Gustavson algorithm is used to
 efficiently factor this matrix. Due to the upper triangular factor, the :math:`Q`
@@ -464,12 +464,120 @@ with
 
 and :math:`Y` is dense and of the same dimensions as :math:`A`.
 
-.. function:: int gsl_linalg_QR_TR_decomp (gsl_matrix * S, gsl_matrix * A, gsl_matrix * T)
+.. function:: int gsl_linalg_QR_TR_decomp (gsl_matrix * U, gsl_matrix * A, gsl_matrix * T)
 
-   This function computes the :math:`QR` decomposition of the matrix :math:`(S ; A)`, where
-   :math:`S` is :math:`N`-by-:math:`N` upper triangular and :math:`A` is :math:`M`-by-:math:`N`
-   dense. On output, :math:`S` is replaced by the :math:`R` factor, and :math:`A` is replaced
-   by :math:`Y`.
+   This function computes the :math:`QR` decomposition of the matrix :math:`(U ; A)`, where
+   :math:`U` is :math:`N`-by-:math:`N` upper triangular and :math:`A` is :math:`M`-by-:math:`N`
+   dense. On output, :math:`U` is replaced by the :math:`R` factor, and :math:`A` is replaced
+   by :math:`Y`.  The :math:`N`-by-:math:`N` upper triangular block reflector is
+   stored in :data:`T` on output.
+
+Triangle on Top of Triangle
+---------------------------
+
+This section provides routines for computing the :math:`QR` decomposition of the
+specialized matrix
+
+.. only:: not texinfo
+
+   .. math:: \begin{pmatrix} U_1 \\ U_2 \end{pmatrix} = Q R
+
+.. only:: texinfo
+
+   ::
+
+     [ U_1 ] = Q R
+     [ U_2 ]
+
+where :math:`U_1,U_2` are :math:`N`-by-:math:`N` upper triangular matrices.
+The Elmroth and Gustavson algorithm is used to efficiently factor this matrix.
+The :math:`Q` matrix takes the form
+
+.. math:: Q = I - V T V^T
+
+with
+
+.. only:: not texinfo
+
+   .. math:: V = \begin{pmatrix} I \\ Y \end{pmatrix}
+
+.. only:: texinfo
+
+   ::
+
+     V = [ I ]
+         [ Y ]
+
+and :math:`Y` is :math:`N`-by-:math:`N` upper triangular.
+
+.. function:: int gsl_linalg_QR_TT_decomp (gsl_matrix * U1, gsl_matrix * U2, gsl_matrix * T)
+
+   This function computes the :math:`QR` decomposition of the matrix :math:`(U_1 ; U_2)`, where
+   :math:`U_1,U_2` are :math:`N`-by-:math:`N` upper triangular. On output, :data:`U1`
+   is replaced by the :math:`R` factor, and :data:`U2` is replaced by :math:`Y`. The
+   :math:`N`-by-:math:`N` upper triangular block reflector is stored in :data:`T` on output.
+
+Triangle on Top of Trapezoidal
+------------------------------
+
+This section provides routines for computing the :math:`QR` decomposition of the
+specialized matrix
+
+.. only:: not texinfo
+
+   .. math:: \begin{pmatrix} U \\ A \end{pmatrix} = Q R
+
+.. only:: texinfo
+
+   ::
+
+     [ U ] = Q R
+     [ A ]
+
+where :math:`U` is an :math:`N`-by-:math:`N` upper triangular matrix, and :math:`A` is
+an :math:`M`-by-:math:`N` upper trapezoidal matrix with :math:`M \ge N`. :math:`A` has
+the structure,
+
+.. only:: not texinfo
+
+   .. math:: A = \begin{pmatrix} A_d \\ A_u \end{pmatrix}
+
+.. only:: texinfo
+
+   ::
+
+     A = [ A_d ]
+         [ A_u ]
+
+where :math:`A_d` is :math:`(M-N)`-by-:math:`N` dense, and :math:`A_u` is
+:math:`N`-by-:math:`N` upper triangular.
+The Elmroth and Gustavson algorithm is used to efficiently factor this matrix.
+The :math:`Q` matrix takes the form
+
+.. math:: Q = I - V T V^T
+
+with
+
+.. only:: not texinfo
+
+   .. math:: V = \begin{pmatrix} I \\ Y \end{pmatrix}
+
+.. only:: texinfo
+
+   ::
+
+     V = [ I ]
+         [ Y ]
+
+and :math:`Y` is upper trapezoidal and of the same dimensions as :math:`A`.
+
+.. function:: int gsl_linalg_QR_TZ_decomp (gsl_matrix * U, gsl_matrix * A, gsl_matrix * T)
+
+   This function computes the :math:`QR` decomposition of the matrix :math:`(U ; A)`, where
+   :math:`U` is :math:`N`-by-:math:`N` upper triangular and :math:`A` is :math:`M`-by-:math:`N`
+   upper trapezoidal. On output, :math:`U` is replaced by the :math:`R` factor, and :math:`A`
+   is replaced by :math:`Y`. The :math:`N`-by-:math:`N` upper triangular block reflector is
+   stored in :data:`T` on output.
 
 .. index:: QR decomposition with column pivoting
 

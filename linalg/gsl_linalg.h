@@ -425,6 +425,14 @@ int gsl_linalg_QRPT_rcond(const gsl_matrix * QR, double * rcond, gsl_vector * wo
 
 int gsl_linalg_QR_TR_decomp (gsl_matrix * S, gsl_matrix * A, gsl_matrix * T);
 
+/* triangle on top of triangle QR decomposition */
+
+int gsl_linalg_QR_TT_decomp (gsl_matrix * U, gsl_matrix * S, gsl_matrix * T);
+
+/* triangle on top of trapezoidal QR decomposition */
+
+int gsl_linalg_QR_TZ_decomp (gsl_matrix * S, gsl_matrix * A, gsl_matrix * T);
+
 /* QL decomposition */
 
 int gsl_linalg_QL_decomp (gsl_matrix * A, gsl_vector * tau);

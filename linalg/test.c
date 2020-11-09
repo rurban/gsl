@@ -3281,6 +3281,8 @@ main(void)
   gsl_test(test_QR_band_decomp(r),       "Banded QR Decomposition");
 
   gsl_test(test_QR_TR_decomp(r),         "QR_TR Decomposition");
+  gsl_test(test_QR_TZ_decomp(r),         "QR_TZ Decomposition");
+  gsl_test(test_QR_TT_decomp(r),         "QR_TT Decomposition");
 
   gsl_test(test_QL_decomp(r),            "QL Decomposition");
 
