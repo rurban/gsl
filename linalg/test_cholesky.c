@@ -876,7 +876,7 @@ test_pcholesky_invert(gsl_rng * r)
       gsl_matrix * m = gsl_matrix_alloc(N, N);
 
       create_posdef_matrix(m, r);
-      test_pcholesky_invert_eps(m, N * GSL_DBL_EPSILON, "pcholesky_invert unscaled random");
+      test_pcholesky_invert_eps(m, 1.0e2 * N * GSL_DBL_EPSILON, "pcholesky_invert unscaled random");
 
       if (N <= 4)
         {
