@@ -606,6 +606,75 @@ and :math:`Y` is upper trapezoidal and of the same dimensions as :math:`A`.
    is replaced by :math:`Y`. The :math:`N`-by-:math:`N` upper triangular block reflector is
    stored in :data:`T` on output.
 
+Triangle on Top of Diagonal
+---------------------------
+
+This section provides routines for computing the :math:`QR` decomposition of the
+specialized matrix
+
+.. only:: not texinfo
+
+   .. math:: \begin{pmatrix} U \\ D \end{pmatrix} = Q R
+
+.. only:: texinfo
+
+   ::
+
+     [ U ] = Q R
+     [ D ]
+
+where :math:`U` is an :math:`N`-by-:math:`N` upper triangular matrix and
+:math:`D` is an :math:`N`-by-:math:`N` diagonal matrix. This type of matrix
+arises in regularized least squares problems.
+The Elmroth and Gustavson algorithm is used to efficiently factor this matrix.
+The :math:`Q` matrix takes the form
+
+.. math:: Q = I - V T V^T
+
+with
+
+.. only:: not texinfo
+
+   .. math:: V = \begin{pmatrix} I \\ Y \end{pmatrix}
+
+.. only:: texinfo
+
+   ::
+
+     V = [ I ]
+         [ Y ]
+
+and :math:`Y` is :math:`N`-by-:math:`N` upper triangular.
+
+.. function:: int gsl_linalg_QR_TD_decomp (gsl_matrix * U, const gsl_vector * D, gsl_matrix * Y, gsl_matrix * T)
+
+   This function computes the :math:`QR` decomposition of the matrix :math:`(U ; D)`, where
+   :math:`U` is :math:`N`-by-:math:`N` upper triangular and :math:`D` is
+   :math:`N`-by-:math:`N` diagonal. On output, :data:`U`
+   is replaced by the :math:`R` factor and :math:`Y` is stored in :data:`Y`. The
+   :math:`N`-by-:math:`N` upper triangular block reflector is stored in :data:`T` on output.
+
+.. function:: int gsl_linalg_QR_TD_lssolve (const gsl_matrix * R, const gsl_matrix * Y, const gsl_matrix * T, const gsl_vector * b, gsl_vector * x, gsl_vector * work)
+
+   This function find the least squares solution to the overdetermined
+   system,
+   
+   .. math:: \begin{pmatrix} U \\ D \end{pmatrix} x = b
+      
+   where :math:`U` is :math:`N`-by-:math:`N` upper triangular and :math:`D` is
+   :math:`N`-by-:math:`N` diagonal.
+   The least squares solution minimizes the Euclidean norm of the
+   residual, :math:`||b - (U; D) x||`. The routine requires as input 
+   the :math:`QR` decomposition
+   of :math:`(U; D)` into (:data:`R`, :data:`Y`) given by
+   :func:`gsl_linalg_QR_TD_decomp`.
+   The parameter :data:`x` is of length :math:`2N`.
+   The solution :math:`x` is returned in the first :math:`N` rows of :data:`x`,
+   i.e. :math:`x =` :code:`x[0], x[1], ..., x[N-1]`. The last :math:`N` rows
+   of :data:`x` contain a vector whose norm is equal to the residual norm
+   :math:`|| b - (U; D) x ||`. This similar to the behavior of LAPACK DGELS.
+   Additional workspace of length :math:`N` is required in :data:`work`.
+
 .. index:: QR decomposition with column pivoting
 
 .. _linalg-qrpt:
