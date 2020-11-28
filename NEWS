@@ -19,6 +19,7 @@
       - gsl_linalg_QR_UD: decomp, lssolve
       - gsl_linalg_QR_UU: decomp, lssolve, QTvec
       - gsl_linalg_QR_UZ: decomp
+      - gsl_multifit_linear_lcurvature
 
 ** bug fix in checking vector lengths in gsl_vector_memcpy (dieggsy@pm.me)
 
