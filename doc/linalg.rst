@@ -522,13 +522,11 @@ and :math:`Y` is :math:`N`-by-:math:`N` upper triangular.
    This function find the least squares solution to the overdetermined
    system,
    
-   .. math:: \begin{pmatrix} U_1 \\ U_2 \end{pmatrix} x = b
+   .. math:: \min_x \left| \left| b - \begin{pmatrix} U_1 \\ U_2 \end{pmatrix} x \right| \right|^2
       
    where :math:`U_1,U_2` are :math:`N`-by-:math:`N` upper triangular matrices.
-   The least squares solution minimizes the Euclidean norm of the
-   residual, :math:`||b - (U_1; U_2) x||`. The routine requires as input 
-   the :math:`QR` decomposition
-   of :math:`(U_1; U_2)` into (:data:`R`, :data:`Y`) given by
+   The routine requires as input the :math:`QR` decomposition
+   of :math:`(U_1; U_2)` into (:data:`R`, :data:`Y`, :data:`T`) given by
    :func:`gsl_linalg_QR_UU_decomp`.
    The parameter :data:`x` is of length :math:`2N`.
    The solution :math:`x` is returned in the first :math:`N` rows of :data:`x`,
@@ -659,15 +657,12 @@ and :math:`Y` is :math:`N`-by-:math:`N` upper triangular.
    This function find the least squares solution to the overdetermined
    system,
    
-   .. math:: \begin{pmatrix} U \\ D \end{pmatrix} x = b
+   .. math:: \min_x \left| \left| b - \begin{pmatrix} U \\ D \end{pmatrix} x \right| \right|^2
       
    where :math:`U` is :math:`N`-by-:math:`N` upper triangular and :math:`D` is
-   :math:`N`-by-:math:`N` diagonal.
-   The least squares solution minimizes the Euclidean norm of the
-   residual, :math:`||b - (U; D) x||`. The routine requires as input 
-   the :math:`QR` decomposition
-   of :math:`(U; D)` into (:data:`R`, :data:`Y`) given by
-   :func:`gsl_linalg_QR_UD_decomp`.
+   :math:`N`-by-:math:`N` diagonal.  The routine requires as input 
+   the :math:`QR` decomposition of :math:`(U; D)` into (:data:`R`, :data:`Y`, :data:`T`)
+   given by :func:`gsl_linalg_QR_UD_decomp`.
    The parameter :data:`x` is of length :math:`2N`.
    The solution :math:`x` is returned in the first :math:`N` rows of :data:`x`,
    i.e. :math:`x =` :code:`x[0], x[1], ..., x[N-1]`. The last :math:`N` rows
