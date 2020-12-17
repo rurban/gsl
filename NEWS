@@ -1,5 +1,7 @@
 * What is new in gsl-2.7:
 
+** updated exponential fitting example for nonlinear least squares
+
 ** added banded LU decomposition and solver (gsl_linalg_LU_band)
 
 ** New functions added to the library:
