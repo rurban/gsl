@@ -1,4 +1,4 @@
-/* complex/test.c
+/* complex/test_new.c
  * 
  * Copyright (C) 1996, 1997, 1998, 1999, 2000, 2007 Brian Gough
  * Copyright (C) 2020 Patrick Alken
@@ -21,6 +21,11 @@
 #include <config.h>
 #include <stdlib.h>
 #include <stdio.h>
+
+#ifdef HAVE_COMPLEX_H
+#include <complex.h>
+#endif
+
 #include <gsl/gsl_ieee_utils.h>
 #include <gsl/gsl_test.h>
 #include <gsl/gsl_math.h>

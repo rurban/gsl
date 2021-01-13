@@ -66,35 +66,52 @@ typedef const double *       gsl_const_complex_packed_ptr ;
 typedef const float *        gsl_const_complex_packed_float_ptr  ;
 typedef const long double *  gsl_const_complex_packed_long_double_ptr ;
 
+/* If <complex.h> is included, use the C99 complex type.  Otherwise
+   define a type bit-compatible with C99 complex */
+#if !defined(GSL_COMPLEX_LEGACY) && defined(_Complex_I) && defined(complex) && defined(I)
 
-typedef struct
-  {
-    long double dat[2];
-  }
-gsl_complex_long_double;
+#  define GSL_COMPLEX_DEFINE(R, C) typedef R _Complex C
 
-typedef struct
-  {
-    double dat[2];
-  }
-gsl_complex;
+#  define GSL_COMPLEX_P(zp)        (&(zp))
+#  define GSL_COMPLEX_EQ(z1,z2)    ((z1) == (z2))
+#  define GSL_SET_COMPLEX(zp,x,y)  ((*zp) = (x) + I * (y))
 
-typedef struct
-  {
-    float dat[2];
-  }
-gsl_complex_float;
+/* __real__ and __imag__ are GNU C extensions and not portable */
+#  ifdef __GNUC__bah
+#    define GSL_REAL(z)              (__real__ (z))
+#    define GSL_IMAG(z)              (__imag__ (z))
+#    define GSL_COMPLEX_P_REAL(zp)   (__real__ (*zp))
+#    define GSL_COMPLEX_P_IMAG(zp)   (__imag__ (*zp))
+#    define GSL_SET_REAL(zp,x)       (__real__ (*zp) = (x))
+#    define GSL_SET_IMAG(zp,y)       (__imag__ (*zp) = (y))
+#  else
+#    define GSL_REAL(z)              (creal(z))
+#    define GSL_IMAG(z)              (cimag(z))
+#    define GSL_COMPLEX_P_REAL(zp)   (creal(*zp))
+#    define GSL_COMPLEX_P_IMAG(zp)   (cimag(*zp))
+#  endif
 
-#define GSL_REAL(z)     ((z).dat[0])
-#define GSL_IMAG(z)     ((z).dat[1])
-#define GSL_COMPLEX_P(zp) ((zp)->dat)
-#define GSL_COMPLEX_P_REAL(zp)  ((zp)->dat[0])
-#define GSL_COMPLEX_P_IMAG(zp)  ((zp)->dat[1])
-#define GSL_COMPLEX_EQ(z1,z2) (((z1).dat[0] == (z2).dat[0]) && ((z1).dat[1] == (z2).dat[1]))
+#else /* legacy complex definitions */
 
-#define GSL_SET_COMPLEX(zp,x,y) do {(zp)->dat[0]=(x); (zp)->dat[1]=(y);} while(0)
-#define GSL_SET_REAL(zp,x) do {(zp)->dat[0]=(x);} while(0)
-#define GSL_SET_IMAG(zp,y) do {(zp)->dat[1]=(y);} while(0)
+/*#  define GSL_COMPLEX_DEFINE(R, C) typedef R C[2]*/
+#  define GSL_COMPLEX_DEFINE(R, C) typedef struct { R dat[2]; } C;
+
+#  define GSL_REAL(z)              ((z).dat[0])
+#  define GSL_IMAG(z)              ((z).dat[1])
+#  define GSL_COMPLEX_P(zp)        ((zp)->dat)
+#  define GSL_COMPLEX_P_REAL(zp)   ((zp)->dat[0])
+#  define GSL_COMPLEX_P_IMAG(zp)   ((zp)->dat[1])
+#  define GSL_COMPLEX_EQ(z1,z2)    (((z1).dat[0] == (z2).dat[0]) && ((z1).dat[1] == (z2).dat[1]))
+
+#  define GSL_SET_COMPLEX(zp,x,y)  do {(zp)->dat[0]=(x); (zp)->dat[1]=(y);} while(0)
+#  define GSL_SET_REAL(zp,x)       do {(zp)->dat[0]=(x);} while(0)
+#  define GSL_SET_IMAG(zp,y)       do {(zp)->dat[1]=(y);} while(0)
+
+#endif
+
+GSL_COMPLEX_DEFINE(double, gsl_complex);
+GSL_COMPLEX_DEFINE(long double, gsl_complex_long_double);
+GSL_COMPLEX_DEFINE(float, gsl_complex_float);
 
 #define GSL_SET_COMPLEX_PACKED(zp,n,x,y) do {*((zp)+2*(n))=(x); *((zp)+(2*(n)+1))=(y);} while(0)
 

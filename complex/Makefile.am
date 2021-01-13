@@ -7,10 +7,13 @@ AM_CPPFLAGS = -I$(top_srcdir)
 libgslcomplex_la_SOURCES = math.c inline.c
 
 TESTS = $(check_PROGRAMS)
-check_PROGRAMS = test
+check_PROGRAMS = test test_new
 
 test_SOURCES = test.c results.h results1.h results2.h results_real.h results_zreal.h
 test_LDADD = libgslcomplex.la ../err/libgslerr.la ../ieee-utils/libgslieeeutils.la ../err/libgslerr.la ../test/libgsltest.la ../sys/libgslsys.la  ../utils/libutils.la
+
+test_new_SOURCES = test_new.c results.h results1.h results2.h results_real.h results_zreal.h
+test_new_LDADD = libgslcomplex.la ../err/libgslerr.la ../ieee-utils/libgslieeeutils.la ../err/libgslerr.la ../test/libgsltest.la ../sys/libgslsys.la  ../utils/libutils.la
 
 results:
 	emacs -batch -l test.el -f test1 | sed  's/00\+e/0e/g' > results1.h
