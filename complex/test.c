@@ -21,10 +21,27 @@
 #include <config.h>
 #include <stdlib.h>
 #include <stdio.h>
+
+#if defined(HAVE_COMPLEX_H) && defined(TEST_C11)
+#include <complex.h>
+#endif
+
 #include <gsl/gsl_ieee_utils.h>
 #include <gsl/gsl_test.h>
 #include <gsl/gsl_math.h>
 #include <gsl/gsl_complex.h>
 #include <gsl/gsl_complex_math.h>
 
+#define BASE_DOUBLE
+#include "templates_on.h"
 #include "test_source.c"
+#include "templates_off.h"
+#undef BASE_DOUBLE
+
+int
+main (void)
+{
+  test_all();
+
+  exit (gsl_test_summary ());
+}
