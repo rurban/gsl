@@ -1,5 +1,7 @@
 * What is new in gsl-2.7:
 
+** fixed bug #58202 (rstat median for n=5)
+
 ** updated exponential fitting example for nonlinear least squares
 
 ** added banded LU decomposition and solver (gsl_linalg_LU_band)
