@@ -1,5 +1,7 @@
 * What is new in gsl-2.7:
 
+** fixed doc bug #59758
+
 ** fixed bug #58202 (rstat median for n=5)
 
 ** updated exponential fitting example for nonlinear least squares
