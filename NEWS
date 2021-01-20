@@ -1,5 +1,7 @@
 * What is new in gsl-2.7:
 
+** upgraded to autoconf 2.70, automake 1.16.3, libtool 2.4.6
+
 ** updated exponential fitting example for nonlinear least squares
 
 ** added banded LU decomposition and solver (gsl_linalg_LU_band)
