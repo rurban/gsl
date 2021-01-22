@@ -1,5 +1,7 @@
 * What is new in gsl-2.7:
 
+** fixed bug #45521 (erroneous GSL_ERROR_NULL in ode-initval2, thanks to M. Sitte)
+
 ** fixed doc bug #59758
 
 ** fixed bug #58202 (rstat median for n=5)
