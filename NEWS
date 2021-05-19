@@ -1,5 +1,7 @@
 * What is new in gsl-2.7:
 
+** fixed doc bug for gsl_histogram_min_bin (lhcsky at 163.com)
+
 ** fixed bug #60335 (spmatrix test failure, J. Lamb)
 
 ** fixed bug #36577
