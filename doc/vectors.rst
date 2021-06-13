@@ -615,6 +615,11 @@ functions fall into this category.
    This function copies the elements of the vector :data:`src` into the
    vector :data:`dest`.  The two vectors must have the same length.
 
+.. function:: int gsl_vector_complex_conj_memcpy (gsl_vector_complex * dest, const gsl_vector_complex * src)
+
+   This function copies the complex conjugate of the vector :data:`src` into the
+   vector :data:`dest`.  The two vectors must have the same length.
+
 .. function:: int gsl_vector_swap (gsl_vector * v, gsl_vector * w)
 
    This function exchanges the elements of the vectors :data:`v` and :data:`w`
