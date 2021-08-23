@@ -402,6 +402,8 @@ gsl_integration_lebedev_workspace * gsl_integration_lebedev_alloc(const size_t n
 
 void gsl_integration_lebedev_free(gsl_integration_lebedev_workspace * w);
 
+size_t gsl_integration_lebedev_n(const gsl_integration_lebedev_workspace * w);
+
 __END_DECLS
 
 #endif /* __GSL_INTEGRATION_H__ */

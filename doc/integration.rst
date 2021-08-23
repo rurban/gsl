@@ -1020,6 +1020,11 @@ Spherical Harmonic degree :math:`L` Quadrature weights and nodes :math:`n`
 
    This function frees the memory associated with the workspace :data:`w`.
 
+.. function:: size_t gsl_integration_lebedev_n(const gsl_integration_lebedev_workspace * w)
+
+   This function returns the number of quadrature nodes associated
+   with the workspace :data:`w`.
+
 Error codes
 ===========
 

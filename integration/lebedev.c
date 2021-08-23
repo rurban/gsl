@@ -183,12 +183,6 @@ gsl_integration_lebedev_n(const gsl_integration_lebedev_workspace * w)
   return w->n;
 }
 
-double *
-gsl_integration_lebedev_weights(const gsl_integration_lebedev_workspace * w)
-{
-  return w->weights;
-}
-
 /*
 lebedev_compute()
   Compute Lebedev nodes and weights for a given rule order

@@ -2633,6 +2633,7 @@ main (void)
 
   /* test Lebedev quadrature */
   {
+    int status;
     const double eps = 1.0e-12;
     const size_t norder = 32;
     const size_t order_array[] = {    6,   14,   26,   38,   50,   74,   86,  110,  146,  170,
@@ -2656,6 +2657,9 @@ main (void)
 
         /* test sum(weights) = 1 */
         gsl_test_rel(sum, 1.0, eps, "lebedev n=%zu sum(w)", order);
+
+        status = (order != gsl_integration_lebedev_n(work));
+        gsl_test(status, "lebedev_n n=%zu(%zu)", order, gsl_integration_lebedev_n(work));
 
         /*
          * Compute test integrals:
