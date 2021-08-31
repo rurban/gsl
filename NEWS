@@ -1,8 +1,10 @@
 * What is new in gsl-2.8:
 
-** add Lebedev quadrature (gsl_integration_lebedev)
+** add functions:
+   - gsl_matrix_complex_conjugate
+   - gsl_vector_complex_conj_memcpy
 
-** add function: gsl_vector_complex_conj_memcpy
+** add Lebedev quadrature (gsl_integration_lebedev)
 
 ** major overhaul to the B-spline module to add
    new functionality

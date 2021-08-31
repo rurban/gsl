@@ -1494,6 +1494,12 @@ The following operations are defined for real and complex matrices.
    matrix :data:`a`.  The result :math:`a(i,j) \leftarrow a(i,j) + x` is
    stored in :data:`a`.
 
+.. function:: int gsl_matrix_complex_conjugate (gsl_matrix * a)
+
+   This function replaces each element of the matrix :data:`a` with its
+   complex conjugate value. The result :math:`a(i,j) \leftarrow a(i,j)^{*}`
+   is stored in :data:`a`.
+
 Finding maximum and minimum elements of matrices
 ------------------------------------------------
 
