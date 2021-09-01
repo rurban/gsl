@@ -64,6 +64,12 @@ Note that the :math:`LU` decomposition is valid for singular matrices.
    Algorithm 3.4.1), combined with a recursive algorithm based on
    Level 3 BLAS (Peise and Bientinesi, 2016).
 
+   The functions return :macro:`GSL_SUCCESS` for non-singular matrices.
+   If the matrix is singular, the factorization is still completed, and
+   the functions return an integer :math:`k \in [1, MIN(M,N)]` such that
+   :math:`U(k,k) = 0`. In this case, :math:`U` is singular and the
+   decomposition should not be used to solve linear systems.
+
 .. index:: linear systems, solution of
 
 .. function:: int gsl_linalg_LU_solve (const gsl_matrix * LU, const gsl_permutation * p, const gsl_vector * b, gsl_vector * x)

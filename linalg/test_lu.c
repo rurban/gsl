@@ -125,6 +125,16 @@ test_LU_decomp(gsl_rng * r)
       gsl_matrix_free(m);
     }
 
+  /* bug #61094 */
+  {
+    double m_data[] = { 0.0, 0.0, 1.0,
+                        0.0, 1.0, 1.0,
+                        0.0, 1.0, 2.0 };
+    gsl_matrix_view m = gsl_matrix_view_array(m_data, 3, 3);
+
+    test_LU_decomp_eps(&m.matrix, 10.0 * GSL_DBL_EPSILON, "LU_decomp bug #61094");
+  }
+
   {
     gsl_matrix * m = gsl_matrix_alloc(100, 50);
     create_random_matrix(m, r);

@@ -126,6 +126,16 @@ test_LUc_decomp(gsl_rng * r)
       gsl_matrix_complex_free(m);
     }
 
+  /* bug #61094 */
+  {
+    double m_data[] = { 0.0, 0.0, 0.0, 0.0, 1.0, 0.0,
+                        0.0, 0.0, 1.0, 0.0, 1.0, 0.0, 
+                        0.0, 0.0, 1.0, 0.0, 2.0, 0.0 };
+    gsl_matrix_complex_view m = gsl_matrix_complex_view_array(m_data, 3, 3);
+
+    test_LUc_decomp_eps(&m.matrix, 10.0 * GSL_DBL_EPSILON, "complex_LU_decomp bug #61094");
+  }
+
   {
     gsl_matrix_complex * m = gsl_matrix_complex_alloc(100, 50);
     create_random_complex_matrix(m, r);

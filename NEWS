@@ -1,5 +1,7 @@
 * What is new in gsl-2.8:
 
+** bug fix #61094 (reported by A. Cheylus)
+
 ** add functions:
    - gsl_matrix_complex_conjugate
    - gsl_vector_complex_conj_memcpy
