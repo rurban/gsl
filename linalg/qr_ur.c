@@ -232,10 +232,65 @@ gsl_linalg_QR_UR_lssolve (const gsl_matrix * R, const gsl_matrix * Y, const gsl_
     }
   else
     {
+      int status;
+
+      gsl_vector_memcpy(x, b);
+      status = gsl_linalg_QR_UR_lssvx(R, Y, T, x, work);
+
+      return status;
+    }
+}
+
+/* Find the least squares solution to the overdetermined system 
+ *
+ *   [ U ] x = b
+ *   [ A ]
+ *  
+ * using the QR factorization [ U; A ] = Q R. 
+ *
+ * Inputs: R    - upper triangular R matrix, N-by-N
+ *         Y    - dense Y matrix, M-by-N
+ *         T    - upper triangular block reflector, N-by-N
+ *         x    - (input/output) solution, size N+M
+ *                on input, right hand side vector b, length N+M
+ *                on output,
+ *                  x(1:N) = least squares solution vector
+ *                  x(N+1:N+M) = vector whose norm equals ||b - [U; A] x||
+ *         work - workspace, size N
+ */
+
+int
+gsl_linalg_QR_UR_lssvx (const gsl_matrix * R, const gsl_matrix * Y, const gsl_matrix * T,
+                        gsl_vector * x, gsl_vector * work)
+{
+  const size_t N = R->size1;
+  const size_t M = Y->size1;
+
+  if (R->size2 != N)
+    {
+      GSL_ERROR ("R matrix must be square", GSL_ENOTSQR);
+    }
+  else if (Y->size2 != N)
+    {
+      GSL_ERROR ("Y matrix must have N columns", GSL_EBADLEN);
+    }
+  else if (T->size1 != N || T->size2 != N)
+    {
+      GSL_ERROR ("T matrix must be N-by-N", GSL_EBADLEN);
+    }
+  else if (N+M != x->size)
+    {
+      GSL_ERROR ("matrix size must match solution size", GSL_EBADLEN);
+    }
+  else if (N != work->size)
+    {
+      GSL_ERROR ("workspace must be length N", GSL_EBADLEN);
+    }
+  else
+    {
       gsl_vector_view x1 = gsl_vector_subvector(x, 0, N);
 
       /* compute x = Q^T b */
-      gsl_vector_memcpy(x, b);
       gsl_linalg_QR_UR_QTvec (Y, T, x, work);
 
       /* Solve R x = Q^T b */
