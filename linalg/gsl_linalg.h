@@ -441,6 +441,11 @@ int gsl_linalg_QR_UD_lssolve (const gsl_matrix * R, const gsl_matrix * Y, const 
 
 int gsl_linalg_QR_UR_decomp (gsl_matrix * S, gsl_matrix * A, gsl_matrix * T);
 
+int gsl_linalg_QR_UR_lssolve (const gsl_matrix * R, const gsl_matrix * Y, const gsl_matrix * T,
+                              const gsl_vector * b, gsl_vector * x, gsl_vector * work);
+
+int gsl_linalg_QR_UR_QTvec(const gsl_matrix * Y, const gsl_matrix * T, gsl_vector * b, gsl_vector * work);
+
 /* triangle on top of triangle QR decomposition */
 
 int gsl_linalg_QR_UU_decomp (gsl_matrix * U, gsl_matrix * S, gsl_matrix * T);

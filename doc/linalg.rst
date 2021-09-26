@@ -497,6 +497,32 @@ and :math:`Y` is dense and of the same dimensions as :math:`A`.
    by :math:`Y`.  The :math:`N`-by-:math:`N` upper triangular block reflector is
    stored in :data:`T` on output.
 
+.. function:: int gsl_linalg_QR_UR_lssolve (const gsl_matrix * R, const gsl_matrix * Y, const gsl_matrix * T, const gsl_vector * b, gsl_vector * x, gsl_vector * work)
+
+   This function find the least squares solution to the overdetermined
+   system,
+   
+   .. math:: \min_x \left| \left| b - \begin{pmatrix} U \\ A \end{pmatrix} x \right| \right|^2
+      
+   where :math:`U` is a :math:`N`-by-:math:`N` upper triangular matrix, and
+   :math:`A` is a :math:`M`-by-:math:`N` dense matrix.
+   The routine requires as input the :math:`QR` decomposition
+   of :math:`(U; A)` into (:data:`R`, :data:`Y`, :data:`T`) given by
+   :func:`gsl_linalg_QR_UR_decomp`.
+   The parameter :data:`x` is of length :math:`N+M`.
+   The solution :math:`x` is returned in the first :math:`N` rows of :data:`x`,
+   i.e. :math:`x =` :code:`x[0], x[1], ..., x[N-1]`. The last :math:`M` rows
+   of :data:`x` contain a vector whose norm is equal to the residual norm
+   :math:`|| b - (U; A) x ||`. This similar to the behavior of LAPACK DGELS.
+   Additional workspace of length :math:`N` is required in :data:`work`.
+
+.. function:: int gsl_linalg_QR_UR_QTvec(const gsl_matrix * Y, const gsl_matrix * T, gsl_vector * b, gsl_vector * work)
+
+   This function computes :math:`Q^T b` using the decomposition
+   (:data:`Y`, :data:`T`) previously computed by :func:`gsl_linalg_QR_UR_decomp`.
+   On input, :data:`b` contains the length :math:`N+M` vector :math:`b`, and on output it will contain
+   :math:`Q^T b`. Additional workspace of length :math:`N` is required in :data:`work`.
+
 Triangle on Top of Triangle
 ---------------------------
 
@@ -560,7 +586,7 @@ and :math:`Y` is :math:`N`-by-:math:`N` upper triangular.
    :math:`|| b - (U_1; U_2) x ||`. This similar to the behavior of LAPACK DGELS.
    Additional workspace of length :math:`N` is required in :data:`work`.
 
-.. function:: int gsl_linalg_QR_UU_QTec (const gsl_matrix * Y, const gsl_matrix * T, gsl_vector * b, gsl_vector * work)
+.. function:: int gsl_linalg_QR_UU_QTvec (const gsl_matrix * Y, const gsl_matrix * T, gsl_vector * b, gsl_vector * work)
 
    This function computes :math:`Q^T b` using the decomposition
    (:data:`Y`, :data:`T`) previously computed by :func:`gsl_linalg_QR_UU_decomp`.

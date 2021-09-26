@@ -3287,6 +3287,7 @@ main(void)
   gsl_test(test_QR_UU_decomp(r),         "QR_UU Decomposition");
   gsl_test(test_QR_UD_decomp(r),         "QR_UD Decomposition");
 
+  gsl_test(test_QR_UR_lssolve(r),        "QR_UR LS Solve");
   gsl_test(test_QR_UU_lssolve(r),        "QR_UU LS Solve");
   gsl_test(test_QR_UD_lssolve(r),        "QR_UD LS Solve");
 
