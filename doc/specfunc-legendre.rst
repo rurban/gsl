@@ -91,7 +91,7 @@ following normalizations are provided:
 * Schmidt semi-normalization
 
   Schmidt semi-normalized associated Legendre polynomials are often
-  used in the magnetics community and are defined as
+  used in the geophysical community and are defined as (Winch et al, 2005)
 
   .. only:: not texinfo
 

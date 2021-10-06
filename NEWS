@@ -13,6 +13,7 @@
    - gsl_linalg_QR_UR_QTvec
    - gsl_linalg_QR_UU_lssvx
    - gsl_linalg_QR_UD_lssvx
+   - gsl_linalg_QR_UD_QTvec
 
 ** add Lebedev quadrature (gsl_integration_lebedev)
 

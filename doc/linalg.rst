@@ -779,6 +779,13 @@ and :math:`Y` is :math:`N`-by-:math:`N` upper triangular.
    :math:`|| b - (U; D) x ||`. This similar to the behavior of LAPACK DGELS.
    Additional workspace of length :math:`N` is required in :data:`work`.
 
+.. function:: int gsl_linalg_QR_UD_QTvec (const gsl_matrix * Y, const gsl_matrix * T, gsl_vector * b, gsl_vector * work)
+
+   This function computes :math:`Q^T b` using the decomposition
+   (:data:`Y`, :data:`T`) previously computed by :func:`gsl_linalg_QR_UD_decomp`.
+   On input, :data:`b` contains the vector :math:`b`, and on output it will contain
+   :math:`Q^T b`. Additional workspace of length :math:`N` is required in :data:`work`.
+
 .. index:: QR decomposition with column pivoting
 
 .. _linalg-qrpt:
