@@ -323,7 +323,8 @@ specifies the type of normalization to use. The possible values are
               int gsl_sf_legendre_sphPlm_e (int l, int m, double x, gsl_sf_result * result)
 
    These routines compute the normalized associated Legendre polynomial
-   :math:`\sqrt{(2l+1)/(4\pi)} \sqrt{(l-m)!/(l+m)!} P_l^m(x)` suitable
+   (with Condon-Shortley phase)
+   :math:`(-1)^m \sqrt{(2l+1)/(4\pi)} \sqrt{(l-m)!/(l+m)!} P_l^m(x)` suitable
    for use in spherical harmonics.  The parameters must satisfy :math:`m \ge 0`,
    :math:`l \ge m`, and :math:`|x| \le 1`.
    These routines avoid the overflows
