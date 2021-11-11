@@ -109,8 +109,8 @@ following normalizations are provided:
 
   The factor of :math:`(-1)^m` is called the Condon-Shortley phase
   factor and can be excluded if desired by setting the parameter
-  :code:`csphase = 1` in the functions below. These functions satisfy
-  the normalization condition,
+  :code:`csphase = 0` in the function :func:`gsl_sf_legendre_precompute`
+  below. These functions satisfy the normalization condition,
 
   .. only:: not texinfo
 
@@ -209,82 +209,114 @@ specifies the type of normalization to use. The possible values are
    :code:`GSL_SF_LEGENDRE_FULL`       The fully normalized associated Legendre polynomials :math:`N_l^m(x)`
    ================================== ===============================================================================
 
-.. function:: int gsl_sf_legendre_array (const gsl_sf_legendre_t norm, const size_t lmax, const double x, double result_array[])
-              int gsl_sf_legendre_array_e (const gsl_sf_legendre_t norm, const size_t lmax, const double x, const double csphase, double result_array[])
+.. function:: int gsl_sf_legendre_precompute (const gsl_sf_legendre_t norm, const size_t lmax, const int csphase, double result_array[])
 
-   These functions calculate all normalized associated Legendre
-   polynomials for :math:`0 \le l \le lmax` and
-   :math:`0 \le m \le l` for :math:`|x| \le 1`.
+   This function precomputes the multiplicative factors needed for the
+   associated Legendre recurrence relations. The input :data:`norm`
+   specifies the ALF normalization. The input :data:`lmax` specifies
+   the maximum ALF degree. The input :data:`csphase` should be set to
+   :math:`1` to include Condon-Shortley phase and :math:`0` to omit the
+   phase factor. The output array :data:`result_array` should have a length
+   as returned by the function :func:`gsl_sf_legendre_array_n`. The computed
+   recurrence factors are stored at the end of :data:`result_array`, leaving
+   room at the front for the calculation of the ALFs.
+
+   This routine must be called prior to calling ALF functions with the suffix
+   :code:`arrayx`.
+
+.. function:: int gsl_sf_legendre_arrayx (const gsl_sf_legendre_t norm, const size_t lmax, const double x, double result_array[])
+
+   This function calculates all associated Legendre polynomials
+   for :math:`0 \le l \le lmax` and :math:`0 \le m \le l` for :math:`|x| \le 1`.
    The :data:`norm` parameter specifies which normalization is used.
    The normalized :math:`P_l^m(x)` values are stored in :data:`result_array`, whose
    minimum size can be obtained from calling :func:`gsl_sf_legendre_array_n`.
    The array index of :math:`P_l^m(x)` is obtained from calling
-   :code:`gsl_sf_legendre_array_index(l, m)`. To include or exclude
-   the Condon-Shortley phase factor of :math:`(-1)^m`, set the parameter
-   :data:`csphase` to either :math:`-1` or :math:`1` respectively in the
-   :code:`_e` function. This factor is excluded by default.
+   :code:`gsl_sf_legendre_array_index(l, m)`.
 
-.. function:: int gsl_sf_legendre_deriv_array (const gsl_sf_legendre_t norm, const size_t lmax, const double x, double result_array[], double result_deriv_array[])
-              int gsl_sf_legendre_deriv_array_e (const gsl_sf_legendre_t norm, const size_t lmax, const double x, const double csphase, double result_array[], double result_deriv_array[])
+   The function :func:`gsl_sf_legendre_precompute` must be called first
+   to initialize :data:`result_array` with the multiplicative factors
+   used in the recurrence relations.
 
-   These functions calculate all normalized associated Legendre
-   functions and their first derivatives up to degree :data:`lmax` for
-   :math:`|x| < 1`.
-   The parameter :data:`norm` specifies the normalization used. The
-   normalized :math:`P_l^m(x)` values and their derivatives
-   :math:`dP_l^m(x)/dx` are stored in :data:`result_array` and
-   :data:`result_deriv_array` respectively.
-   To include or exclude
-   the Condon-Shortley phase factor of :math:`(-1)^m`, set the parameter
-   :data:`csphase` to either :math:`-1` or :math:`1` respectively in the
-   :code:`_e` function. This factor is excluded by default.
+.. function:: int gsl_sf_legendre_deriv_alt_arrayx (const gsl_sf_legendre_t norm, const size_t lmax, const double x, double result_array[], double result_deriv_array[])
 
-.. function:: int gsl_sf_legendre_deriv_alt_array (const gsl_sf_legendre_t norm, const size_t lmax, const double x, double result_array[], double result_deriv_array[])
-              int gsl_sf_legendre_deriv_alt_array_e (const gsl_sf_legendre_t norm, const size_t lmax, const double x, const double csphase, double result_array[], double result_deriv_array[])
-
-   These functions calculate all normalized associated Legendre
-   functions and their (alternate) first derivatives up to degree :data:`lmax` for
-   :math:`|x| < 1`.
-   The normalized :math:`P_l^m(x)` values and their derivatives
+   This function calculates all associated Legendre
+   functions and their (alternate) first derivatives for :math:`0 \leq l \leq lmax`
+   and :math:`0 \leq m \leq l` for :math:`|x| \leq 1`.
+   The :data:`norm` parameter specifies which normalization
+   is used. The :math:`P_l^m(x)` values and their derivatives
    :math:`dP_l^m(\cos{\theta})/d\theta` are stored in :data:`result_array` and
    :data:`result_deriv_array` respectively.
-   To include or exclude
-   the Condon-Shortley phase factor of :math:`(-1)^m`, set the parameter
-   :data:`csphase` to either :math:`-1` or :math:`1` respectively in the
-   :code:`_e` function. This factor is excluded by default.
 
-.. function:: int gsl_sf_legendre_deriv2_array (const gsl_sf_legendre_t norm, const size_t lmax, const double x, double result_array[], double result_deriv_array[], double result_deriv2_array[])
-              int gsl_sf_legendre_deriv2_array_e (const gsl_sf_legendre_t norm, const size_t lmax, const double x, const double csphase, double result_array[], double result_deriv_array[], double result_deriv2_array[])
+   The function :func:`gsl_sf_legendre_precompute` must be called first
+   to initialize :data:`result_array` with the multiplicative factors
+   used in the recurrence relations.
 
-   These functions calculate all normalized associated Legendre
-   functions and their first and second derivatives up to degree :data:`lmax` for
-   :math:`|x| < 1`.
-   The parameter :data:`norm` specifies the normalization used. The
-   normalized :math:`P_l^m(x)`, their first derivatives
-   :math:`dP_l^m(x)/dx`, and their second derivatives
-   :math:`d^2 P_l^m(x)/dx^2` are stored in :data:`result_array`,
-   :data:`result_deriv_array`, and :data:`result_deriv2_array` respectively.
-   To include or exclude
-   the Condon-Shortley phase factor of :math:`(-1)^m`, set the parameter
-   :data:`csphase` to either :math:`-1` or :math:`1` respectively in the
-   :code:`_e` function. This factor is excluded by default.
+.. function:: int gsl_sf_legendre_deriv_arrayx (const gsl_sf_legendre_t norm, const size_t lmax, const double x, double result_array[], double result_deriv_array[])
 
-.. function:: int gsl_sf_legendre_deriv2_alt_array (const gsl_sf_legendre_t norm, const size_t lmax, const double x, double result_array[], double result_deriv_array[], double result_deriv2_array[])
-              int gsl_sf_legendre_deriv2_alt_array_e (const gsl_sf_legendre_t norm, const size_t lmax, const double x, const double csphase, double result_array[], double result_deriv_array[], double result_deriv2_array[])
+   This function calculates all associated Legendre
+   functions and their first derivatives for :math:`0 \leq l \leq lmax`
+   and :math:`0 \leq m \leq l` for :math:`|x| < 1`.
+   The :data:`norm` parameter specifies which
+   normalization is used. The :math:`P_l^m(x)` values and their derivatives
+   :math:`dP_l^m(x)/dx` are stored in :data:`result_array` and
+   :data:`result_deriv_array` respectively.
 
-   These functions calculate all normalized associated Legendre
-   functions and their (alternate) first and second derivatives up to degree
-   :data:`lmax` for
-   :math:`|x| < 1`.
-   The parameter :data:`norm` specifies the normalization used. The
-   normalized :math:`P_l^m(x)`, their first derivatives
-   :math:`dP_l^m(\cos{\theta})/d\theta`, and their second derivatives
+   Note that for some orders :math:`m`, the derivatives :math:`dP_l^m(x)/dx` have
+   singularities at the end points :math:`x = \pm 1`, and so this function only
+   accepts interior points as input, :math:`x \in (-1,1)`.
+
+   The function :func:`gsl_sf_legendre_precompute` must be called first
+   to initialize :data:`result_array` with the multiplicative factors
+   used in the recurrence relations.
+
+.. function:: int gsl_sf_legendre_deriv2_alt_arrayx (const gsl_sf_legendre_t norm, const size_t lmax, const double x, double result_array[], double result_deriv_array[], double result_deriv2_array[])
+
+   This function calculates all associated Legendre
+   functions and their (alternate) first and second derivatives for
+   :math:`0 \leq l \leq lmax` and :math:`0 \leq m \leq l` for :math:`|x| \leq 1`.
+   The :data:`norm` parameter specifies which normalization is used. The normalized :math:`P_l^m(x)`
+   values and their derivatives :math:`dP_l^m(\cos{\theta})/d\theta` and
    :math:`d^2 P_l^m(\cos{\theta})/d\theta^2` are stored in :data:`result_array`,
    :data:`result_deriv_array`, and :data:`result_deriv2_array` respectively.
-   To include or exclude
-   the Condon-Shortley phase factor of :math:`(-1)^m`, set the parameter
-   :data:`csphase` to either :math:`-1` or :math:`1` respectively in the
-   :code:`_e` function. This factor is excluded by default.
+
+   The function :func:`gsl_sf_legendre_precompute` must be called first
+   to initialize :data:`result_array` with the multiplicative factors
+   used in the recurrence relations.
+
+.. function:: int gsl_sf_legendre_deriv2_arrayx (const gsl_sf_legendre_t norm, const size_t lmax, const double x, double result_array[], double result_deriv_array[], double result_deriv2_array[])
+
+   This function calculates all associated Legendre
+   functions and their first and second derivatives for
+   :math:`0 \leq l \leq lmax` and :math:`0 \leq m \leq l` for :math:`|x| < 1`.
+   The :data:`norm` parameter specifies which
+   normalization is used. The :math:`P_l^m(x)` values and their derivatives
+   :math:`dP_l^m(x)/dx` and :math:`d^2 P_l^m(x)/dx^2` are stored in
+   :data:`result_array`, :data:`result_deriv_array`, and
+   :data:`result_deriv2_array` respectively.
+
+   Note that for some orders :math:`m`, the derivatives :math:`dP_l^m(x)/dx`
+   and :math:`d^2 P_l^m(x)/dx^2` have
+   singularities at the end points :math:`x = \pm 1`, and so this function only
+   accepts interior points as input, :math:`x \in (-1,1)`.
+
+   The function :func:`gsl_sf_legendre_precompute` must be called first
+   to initialize :data:`result_array` with the multiplicative factors
+   used in the recurrence relations.
+
+.. function:: int gsl_sf_legendre_array (const gsl_sf_legendre_t norm, const size_t lmax, const double x, double result_array[])
+              int gsl_sf_legendre_deriv_array (const gsl_sf_legendre_t norm, const size_t lmax, const double x, double result_array[], double result_deriv_array[])
+              int gsl_sf_legendre_deriv_alt_array (const gsl_sf_legendre_t norm, const size_t lmax, const double x, double result_array[], double result_deriv_array[])
+              int gsl_sf_legendre_deriv2_array (const gsl_sf_legendre_t norm, const size_t lmax, const double x, double result_array[], double result_deriv_array[], double result_deriv2_array[])
+              int gsl_sf_legendre_deriv2_alt_array (const gsl_sf_legendre_t norm, const size_t lmax, const double x, double result_array[], double result_deriv_array[], double result_deriv2_array[])
+
+   These functions are similar to their :code:`arrayx` counterparts above,
+   except they compute the recurrence factors by calling the function
+   :func:`gsl_sf_legendre_precompute` on each call. These functions
+   omit the Condon-Shortley phase factor. These functions are
+   provided for backward compatibility, but it is recommended to use instead
+   the :code:`arrayx` functions which are more efficient when calculating
+   ALFs for multiple input points :math:`x`.
 
 .. function:: size_t gsl_sf_legendre_nlm(const size_t lmax)
 
@@ -331,24 +363,13 @@ specifies the type of normalization to use. The possible values are
    that occur for the standard normalization of :math:`P_l^m(x)`.
 .. Exceptional Return Values: GSL_EDOM
 
-.. function:: int gsl_sf_legendre_Plm_array (int lmax, int m, double x, double result_array[])
-              int gsl_sf_legendre_Plm_deriv_array (int lmax, int m, double x, double result_array[], double result_deriv_array[])
+.. function:: int gsl_sf_legendre_array_e (const gsl_sf_legendre_t norm, const size_t lmax, const double x, const double csphase, double result_array[])
+              int gsl_sf_legendre_deriv_array_e (const gsl_sf_legendre_t norm, const size_t lmax, const double x, const double csphase, double result_array[], double result_deriv_array[])
+              int gsl_sf_legendre_deriv_alt_array_e (const gsl_sf_legendre_t norm, const size_t lmax, const double x, const double csphase, double result_array[], double result_deriv_array[])
+              int gsl_sf_legendre_deriv2_array_e (const gsl_sf_legendre_t norm, const size_t lmax, const double x, const double csphase, double result_array[], double result_deriv_array[], double result_deriv2_array[])
+              int gsl_sf_legendre_deriv2_alt_array_e (const gsl_sf_legendre_t norm, const size_t lmax, const double x, const double csphase, double result_array[], double result_deriv_array[], double result_deriv2_array[])
 
-   These functions are now deprecated and will be removed in a future
-   release; see :func:`gsl_sf_legendre_array` and
-   :func:`gsl_sf_legendre_deriv_array`.
-
-.. function:: int gsl_sf_legendre_sphPlm_array (int lmax, int m, double x, double result_array[])
-              int gsl_sf_legendre_sphPlm_deriv_array (int lmax, int m, double x, double result_array[], double result_deriv_array[])
-
-   These functions are now deprecated and will be removed in a future
-   release; see :func:`gsl_sf_legendre_array` and
-   :func:`gsl_sf_legendre_deriv_array`.
-
-.. function:: int gsl_sf_legendre_array_size (const int lmax, const int m)
-
-   This function is now deprecated and will be removed in a future
-   release.
+   These functions are deprecated and will be removed in a future release.
 
 Conical Functions
 -----------------

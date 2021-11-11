@@ -1,5 +1,10 @@
 * What is new in gsl-2.8:
 
+** rewrote array routines for associated Legendre
+   functions to improve efficiency; alternative
+   derivative functions now accept end points as
+   valid input arguments
+
 ** bug fix #61094 (reported by A. Cheylus)
 
 ** add functions:

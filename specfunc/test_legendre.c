@@ -1,7 +1,7 @@
 /* specfunc/test_legendre.c
  * 
  * Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2004 Gerard Jungman
- * Copyright (C) 2013 Patrick Alken
+ * Copyright (C) 2013, 2021 Patrick Alken
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -37,7 +37,7 @@ test_legendre_dx(const size_t l)
     dx = dx_max;
 
   return dx;
-} /* test_legendre_dx() */
+}
 
 /*
 test_legendre_sum()
@@ -128,418 +128,488 @@ test_value(const size_t lmax, const size_t l, const size_t m,
   value = p[idx];
 
   gsl_test_rel(value, expected, tol, "%s %s lmax=%zu l=%zu m=%zu", desc, desc2, lmax, l, m);
-} /* test_value() */
-
-/* Y_{lm} = factor * S_{lm} */
-static double
-test_factor_spharm(const size_t l, const size_t m)
-{
-  double factor = sqrt( (2.0 * l + 1.0) / 4.0 / M_PI);
-
-  if (m == 0)
-    return factor;
-  else
-    return (factor / sqrt(2.0));
-} /* test_factor_spharm() */
-
-/* N_{lm} = factor * S_{lm} */
-static double
-test_factor_full(const size_t l, const size_t m)
-{
-  double factor = sqrt(l + 0.5);
-
-  if (m == 0)
-    return factor;
-  else
-    return (factor / sqrt(2.0));
-} /* test_factor_full() */
-
-/* test that p = factor * p_expected */
-static int
-test_legendre_compare(const size_t lmax, const double *p_expected,
-                      const double *p,
-                      double (*factor)(const size_t l, const size_t m),
-                      const char *desc, const char *desc2)
-{
-  size_t l, m;
-
-  for (l = 0; l <= lmax; ++l)
-    {
-      for (m = 0; m <= l; ++m)
-        {
-          size_t idx = gsl_sf_legendre_array_index(l, m);
-          double fac = (*factor)(l, m);
-
-          if (fabs(p_expected[idx]) < GSL_DBL_MIN)
-            continue;
-
-          gsl_test_rel(p[idx] / fac, p_expected[idx], 1.0e-10,
-                       "%s %s l=%zu m=%zu", desc, desc2, l, m);
-        }
-    }
-
-  return 0;
-} /* test_legendre_compare() */
-
-static int
-test_legendre_schmidt(const size_t lmax, const double csphase, const char *desc)
-{
-  int s = 0;
-  const size_t nlm = gsl_sf_legendre_nlm(lmax);
-  size_t l;
-  double x, dx;
-  double *p, *p2, *dp, *d2p, *p_alt, *dp_alt;
-  size_t dim;
-  size_t i;
-  const gsl_sf_legendre_t norm = GSL_SF_LEGENDRE_SCHMIDT;
-
-  dim = gsl_sf_legendre_array_n(lmax);
-  p = malloc(sizeof(double) * dim);
-  p2 = malloc(sizeof(double) * dim);
-  dp = malloc(sizeof(double) * dim);
-  d2p = malloc(sizeof(double) * dim);
-  p_alt = malloc(sizeof(double) * dim);
-  dp_alt = malloc(sizeof(double) * dim);
-
-  /* test specific values */
-  x = 0.5;
-  gsl_sf_legendre_array(norm, lmax, x, p);
-  test_value(lmax, 0, 0, p, 1.000000000000000, 1.0e-10, desc, "x=0.5");
-  test_value(lmax, 1, 0, p, 0.500000000000000, 1.0e-10, desc, "x=0.5");
-  test_value(lmax, 1, 1, p, 0.866025403784439, 1.0e-10, desc, "x=0.5");
-  test_value(lmax, 2, 0, p, -0.125000000000000, 1.0e-10, desc, "x=0.5");
-  test_value(lmax, 2, 1, p, 0.750000000000000, 1.0e-10, desc, "x=0.5");
-  test_value(lmax, 2, 2, p, 0.649519052838329, 1.0e-10, desc, "x=0.5");
-  test_value(lmax, 3, 0, p, -0.437500000000000, 1.0e-10, desc, "x=0.5");
-  test_value(lmax, 3, 2, p, 0.726184377413891, 1.0e-10, desc, "x=0.5");
-  test_value(lmax, 3, 3, p, 0.513489897661093, 1.0e-10, desc, "x=0.5");
-
-  x = 0.1;
-  gsl_sf_legendre_array(norm, lmax, x, p);
-  test_value(lmax, 2700, 500, p, -7.421910573369699e-3, 1.0e-10, desc, "x=0.1");
-  test_value(lmax, 2700, 2500, p, 2.717612388452281e-2, 1.0e-10, desc, "x=0.1");
-  test_value(lmax, 2700, 2700, p, 1.887509917445211e-7, 1.0e-10, desc, "x=0.1");
-
-  x = 0.15;
-  gsl_sf_legendre_deriv_array(norm, lmax, x, p, dp);
-  test_value(lmax, 0, 0, dp, 0.000000000000000, 1.0e-10, desc, "deriv x=0.15");
-  test_value(lmax, 1, 0, dp, 1.000000000000000, 1.0e-10, desc, "deriv x=0.15");
-  test_value(lmax, 1, 1, dp, -0.151716521227252, 1.0e-10, desc, "deriv x=0.15");
-  test_value(lmax, 2, 1, dp, 1.67303727048739, 1.0e-10, desc, "deriv x=0.15");
-
-  x = 0.23;
-  gsl_sf_legendre_deriv2_array(norm, lmax, x, p, dp, d2p);
-  test_value(lmax, 0, 0, d2p, 0.000000000000000, 1.0e-10, desc, "deriv2 x=0.23");
-  test_value(lmax, 1, 0, d2p, 0.000000000000000, 1.0e-10, desc, "deriv2 x=0.23");
-  test_value(lmax, 1, 1, d2p, -1.08494130865644, 1.0e-10, desc, "deriv2 x=0.23");
-  test_value(lmax, 2, 0, d2p, 3.000000000000000, 1.0e-10, desc, "deriv2 x=0.23");
-  test_value(lmax, 2, 1, d2p, -1.25090188696335, 1.0e-10, desc, "deriv2 x=0.23");
-
-  /* test array routines */
-  dx = test_legendre_dx(lmax);
-  for (x = -1.0; x <= 1.0; x += dx)
-    {
-      s += gsl_sf_legendre_array_e(norm, lmax, x, csphase, p);
-
-      for (l = 0; l <= lmax; ++l)
-        {
-          double sum = test_legendre_sum(l, p);
-          double rhs = 1.0;
-
-          gsl_test_rel(sum, rhs, 1.0e-10,
-                       "%s l=%zu, x=%f, sum=%.12e", desc, l, x, sum);
-        }
-    }
-
-  /* test deriv array routines */
-  for (x = -1.0 + dx; x < 1.0 - dx; x += dx)
-    {
-      double u = sqrt((1.0 - x) * (1.0 + x));
-      double uinv = 1.0 / u;
-
-      s += gsl_sf_legendre_array(norm, lmax, x, p2);
-      s += gsl_sf_legendre_deriv_array(norm, lmax, x, p, dp);
-      s += gsl_sf_legendre_deriv_alt_array(norm, lmax, x, p_alt, dp_alt);
-
-      for (i = 0; i < nlm; ++i)
-        {
-          if (fabs(p2[i]) < GSL_DBL_MIN)
-            continue;
-
-          /* check p = p_alt = p2 */
-          gsl_test_rel(p[i], p2[i], 1.0e-10, "%s deriv i=%zu", desc, i);
-          gsl_test_rel(p_alt[i], p2[i], 1.0e-10, "%s deriv_alt i=%zu", desc, i);
-
-          /* check dp = -1/u*dp_alt */
-          gsl_test_rel(-uinv * dp_alt[i], dp[i], 1.0e-10,
-                       "%s deriv_alt x=%f i=%zu", desc, x, i);
-        }
-
-      for (l = 0; l <= lmax; ++l)
-        {
-          double sum = test_legendre_sum_deriv(l, p, dp);
-
-          gsl_test_abs(sum, 0.0, 1.0e-10,
-                       "%s deriv l=%zu, x=%f, sum=%.12e", desc, l, x, sum);
-        }
-    }
-
-  /* test deriv2 array routines */
-  for (x = -1.0 + dx; x < 1.0 - dx; x += dx)
-    {
-      s += gsl_sf_legendre_array(norm, lmax, x, p2);
-      s += gsl_sf_legendre_deriv2_array(norm, lmax, x, p, dp, d2p);
-
-      /* check p = p2 */
-      for (i = 0; i < nlm; ++i)
-        {
-          if (fabs(p2[i]) < 1.0e3 * GSL_DBL_EPSILON)
-            gsl_test_abs(p[i], p2[i], 1.0e-10, "%s deriv2 i=%zu", desc, i);
-          else
-            gsl_test_rel(p[i], p2[i], 1.0e-10, "%s deriv2 i=%zu", desc, i);
-        }
-
-      for (l = 0; l <= lmax; ++l)
-        {
-          double sum = test_legendre_sum_deriv(l, p, dp);
-          double sum2 = test_legendre_sum_deriv2(l, p, dp, d2p);
-
-          gsl_test_abs(sum, 0.0, 1.0e-10,
-                       "%s deriv2 l=%zu, x=%f, sum=%.12e", desc, l, x, sum);
-          gsl_test_abs(sum2, 0.0, 1.0e-6,
-                       "%s deriv2 l=%zu, x=%f, sum=%.12e", desc, l, x, sum2);
-        }
-    }
-
-  free(p);
-  free(p2);
-  free(dp);
-  free(d2p);
-  free(p_alt);
-  free(dp_alt);
-
-  return s;
-} /* test_legendre_schmidt() */
-
-/* test other normalizations (other than schmidt) */
-static int
-test_legendre_norm(const gsl_sf_legendre_t norm_type, const size_t lmax,
-                   const double csphase, const char *desc)
-{
-  int s = 0;
-  double x, dx;
-  double *p_schmidt, *dp_schmidt, *d2p_schmidt;
-  double *p, *dp, *d2p;
-  size_t dim;
-  double (*factor)(const size_t l, const size_t m) = NULL;
-
-  dim = gsl_sf_legendre_array_n(lmax);
-  p = malloc(sizeof(double) * dim);
-  dp = malloc(sizeof(double) * dim);
-  d2p = malloc(sizeof(double) * dim);
-  p_schmidt = malloc(sizeof(double) * dim);
-  dp_schmidt = malloc(sizeof(double) * dim);
-  d2p_schmidt = malloc(sizeof(double) * dim);
-
-  if (norm_type == GSL_SF_LEGENDRE_SPHARM)
-    {
-      factor = &test_factor_spharm;
-    }
-  else if (norm_type == GSL_SF_LEGENDRE_FULL)
-    {
-      factor = &test_factor_full;
-
-      /* test specific values (computed from GNU octave) */
-      x = 0.45;
-      s += gsl_sf_legendre_array(norm_type, lmax, x, p);
-      test_value(lmax, 0, 0, p, 0.707106781186548, 1.0e-10, desc, "x=0.45");
-      test_value(lmax, 1, 0, p, 0.551135192126215, 1.0e-10, desc, "x=0.45");
-      test_value(lmax, 1, 1, p, 0.773385414912901, 1.0e-10, desc, "x=0.45");
-      test_value(lmax, 2, 0, p, -0.310298495404022, 1.0e-10, desc, "x=0.45");
-      test_value(lmax, 2, 1, p, 0.778204062248457, 1.0e-10, desc, "x=0.45");
-      test_value(lmax, 2, 2, p, 0.772176054650104, 1.0e-10, desc, "x=0.45");
-      test_value(lmax, 3, 0, p, -0.83661120632398589, 1.0e-10, desc, "x=0.45");
-      test_value(lmax, 3, 1, p, 0.00904294765791280, 1.0e-10, desc, "x=0.45");
-      test_value(lmax, 3, 2, p, 0.91934361403343767, 1.0e-10, desc, "x=0.45");
-      test_value(lmax, 3, 3, p, 0.74482641545541073, 1.0e-10, desc, "x=0.45");
-    }
-
-  /*
-   * test the scale factors between the Schmidts and these
-   * normalized functions
-   */
-
-  dx = test_legendre_dx(lmax);
-  for (x = -1.0; x <= 1.0; x += dx)
-    {
-      s += gsl_sf_legendre_array_e(GSL_SF_LEGENDRE_SCHMIDT, lmax, x,
-             csphase, p_schmidt);
-      s += gsl_sf_legendre_array_e(norm_type, lmax, x, csphase, p);
-      test_legendre_compare(lmax, p_schmidt, p, factor, desc, "p");
-    }
-
-  /* test derivatives */
-  for (x = -1.0 + dx; x < 1.0 - dx; x += dx)
-    {
-      s += gsl_sf_legendre_deriv_array_e(GSL_SF_LEGENDRE_SCHMIDT,
-             lmax, x, csphase, p_schmidt, dp_schmidt);
-      s += gsl_sf_legendre_deriv_array_e(norm_type, lmax, x, csphase, p, dp);
-      test_legendre_compare(lmax, p_schmidt, p, factor, desc, "deriv p");
-      test_legendre_compare(lmax, dp_schmidt, dp, factor, desc, "deriv dp");
-
-      s += gsl_sf_legendre_deriv2_array_e(GSL_SF_LEGENDRE_SCHMIDT,
-             lmax, x, csphase, p_schmidt, dp_schmidt, d2p_schmidt);
-      s += gsl_sf_legendre_deriv2_array_e(norm_type, lmax, x, csphase,
-             p, dp, d2p);
-      test_legendre_compare(lmax, p_schmidt, p, factor, desc, "deriv2 p");
-      test_legendre_compare(lmax, dp_schmidt, dp, factor, desc, "deriv2 dp");
-      test_legendre_compare(lmax, d2p_schmidt, d2p, factor, desc, "deriv2 d2p");
-    }
-
-  free(p);
-  free(dp);
-  free(d2p);
-  free(p_schmidt);
-  free(dp_schmidt);
-  free(d2p_schmidt);
-
-  return s;
-} /* test_legendre_norm() */
+}
 
 /*
-test_legendre_unnorm()
-  This routine tests the unnormalized ALFs using the relation
-
-S(l,m)(x) = a(l,m) * P(l,m)(x)
-
-where
-
-a(l,0) = 1
-a(l,1) = -sqrt(2)/sqrt(l * (l+1))
-a(l,m+1) = a(l,m) / sqrt((l+m+1) * (l-m)), m > 1
-
-and
-
-S(l,m) are the Schmidt semi-normalized ALFs
+test_legendre_cross()
+  This routine cross tests the ALF normalizations against each other
 */
 
 static int
-test_legendre_unnorm(const size_t lmax_orig, const char *desc)
+test_legendre_cross(const double tol, const size_t lmax,
+                    const int csphase, const char *desc)
 {
   int s = 0;
-  const int lmax = GSL_MIN(lmax_orig, 140);
+  const size_t lmax_P = GSL_MIN(lmax, 140);
+  const size_t nlm = gsl_sf_legendre_nlm(lmax);
+  const size_t plm_size = gsl_sf_legendre_array_n(lmax);
+  const double dx = test_legendre_dx(lmax);
+  const double b = 1.0 / M_SQRT2 / M_SQRTPI; /* Ylm = b * Nlm */
   size_t l, m;
-  double x, dx;
-  double *p, *dp, *d2p, *p2;
-  double *p_schmidt, *dp_schmidt, *d2p_schmidt;
-  size_t dim;
+  double x;
+  double *p = malloc(plm_size * sizeof(double));
+  double *dp = malloc(nlm * sizeof(double));
+  double *d2p = malloc(nlm * sizeof(double));
+  double *p_schmidt = malloc(plm_size * sizeof(double));
+  double *dp_schmidt = malloc(nlm * sizeof(double));
+  double *d2p_schmidt = malloc(nlm * sizeof(double));
+  double *p_spharm = malloc(plm_size * sizeof(double));
+  double *dp_spharm = malloc(nlm * sizeof(double));
+  double *d2p_spharm = malloc(nlm * sizeof(double));
+  double *p_full = malloc(plm_size * sizeof(double));
+  double *dp_full = malloc(nlm * sizeof(double));
+  double *d2p_full = malloc(nlm * sizeof(double));
 
-  dim = gsl_sf_legendre_array_n(lmax);
-  p = malloc(sizeof(double) * dim);
-  dp = malloc(sizeof(double) * dim);
-  d2p = malloc(sizeof(double) * dim);
-  p2 = malloc(sizeof(double) * dim);
-  p_schmidt = malloc(sizeof(double) * dim);
-  dp_schmidt = malloc(sizeof(double) * dim);
-  d2p_schmidt = malloc(sizeof(double) * dim);
+  gsl_sf_legendre_precompute(GSL_SF_LEGENDRE_NONE, lmax, csphase, p);
+  gsl_sf_legendre_precompute(GSL_SF_LEGENDRE_SCHMIDT, lmax, csphase, p_schmidt);
+  gsl_sf_legendre_precompute(GSL_SF_LEGENDRE_SPHARM, lmax, csphase, p_spharm);
+  gsl_sf_legendre_precompute(GSL_SF_LEGENDRE_FULL, lmax, csphase, p_full);
 
-  dx = test_legendre_dx(lmax);
-
-  for (x = -1.0 + dx; x < 1.0 - dx; x += dx)
+  for (x = -1.0; x <= 1.0; x += dx)
     {
-      gsl_sf_legendre_deriv2_array(GSL_SF_LEGENDRE_SCHMIDT, lmax, x,
-                                   p_schmidt, dp_schmidt, d2p_schmidt);
-      gsl_sf_legendre_deriv2_array(GSL_SF_LEGENDRE_NONE, lmax, x, p, dp, d2p);
+      gsl_sf_legendre_deriv2_alt_arrayx(GSL_SF_LEGENDRE_NONE, lmax, x, p, dp, d2p);
+      gsl_sf_legendre_deriv2_alt_arrayx(GSL_SF_LEGENDRE_SCHMIDT, lmax, x,
+                                        p_schmidt, dp_schmidt, d2p_schmidt);
+      gsl_sf_legendre_deriv2_alt_arrayx(GSL_SF_LEGENDRE_SPHARM, lmax, x,
+                                        p_spharm, dp_spharm, d2p_spharm);
+      gsl_sf_legendre_deriv2_alt_arrayx(GSL_SF_LEGENDRE_FULL, lmax, x,
+                                        p_full, dp_full, d2p_full);
 
-      for (l = 0; l <= (size_t) lmax; ++l)
+      for (l = 0; l <= lmax; ++l)
         {
           double a_lm = sqrt(2.0 / (double)l / (l + 1.0));
-          size_t idx;
+          size_t l0idx = gsl_sf_legendre_array_index(l, 0);
+          double cl0 = sqrt((4.0 * M_PI) / (2.0 * l + 1.0));
+          double clm = sqrt((8.0 * M_PI) / (2.0 * l + 1.0));
 
-          /* test S(l,0) = P(l,0) */
-          idx = gsl_sf_legendre_array_index(l, 0);
-          gsl_test_rel(p[idx], p_schmidt[idx], 1.0e-10,
-                       "legendre unnorm l=%zu, m=0, x=%f", l, x);
-          gsl_test_rel(dp[idx], dp_schmidt[idx], 1.0e-10,
-                       "legendre unnorm deriv l=%zu, m=0, x=%f", l, x);
+          if (lmax <= lmax_P)
+            {
+              /* test S(l,0) = P(l,0) */
+              gsl_test_rel(p[l0idx], p_schmidt[l0idx], tol,
+                           "%s l=%zu, m=0, x=%f", desc, l, x);
+              gsl_test_rel(dp[l0idx], dp_schmidt[l0idx], tol,
+                           "%s deriv l=%zu, m=0, x=%f", desc, l, x);
 
-          if (l > 1)
-            {
-              gsl_test_rel(d2p[idx], d2p_schmidt[idx], 1.0e-10,
-                           "legendre unnorm deriv2 l=%zu, m=0, x=%f", l, x);
+              if (l > 1)
+                {
+                  gsl_test_rel(d2p[l0idx], d2p_schmidt[l0idx], tol,
+                               "%s deriv2 l=%zu, m=0, x=%f", desc, l, x);
+                }
+              else
+                {
+                  gsl_test_abs(d2p[l0idx], d2p_schmidt[l0idx], tol,
+                               "%s deriv2 l=%zu, m=0, x=%f", desc, l, x);
+                }
             }
-          else
-            {
-              gsl_test_abs(d2p[idx], d2p_schmidt[idx], 1.0e-10,
-                           "legendre unnorm deriv2 l=%zu, m=0, x=%f", l, x);
-            }
+
+          gsl_test_rel(cl0 * p_spharm[l0idx], p_schmidt[l0idx], tol,
+                       "%s spharm l=%zu, m=%zu, x=%f", desc, l, m, x);
+          gsl_test_rel(cl0 * dp_spharm[l0idx], dp_schmidt[l0idx], tol,
+                       "%s spharm deriv l=%zu, m=%zu, x=%f", desc, l, m, x);
+          gsl_test_rel(cl0 * d2p_spharm[l0idx], d2p_schmidt[l0idx], tol,
+                       "%s spharm deriv2 l=%zu, m=%zu, x=%f", desc, l, m, x);
+
+          gsl_test_rel(b * p_full[l0idx], p_spharm[l0idx], tol,
+                       "%s full l=%zu, m=%zu, x=%f", desc, l, m, x);
+          gsl_test_rel(b * dp_full[l0idx], dp_spharm[l0idx], tol,
+                       "%s full deriv l=%zu, m=%zu, x=%f", desc, l, m, x);
+          gsl_test_rel(b * d2p_full[l0idx], d2p_spharm[l0idx], tol,
+                       "%s full deriv2 l=%zu, m=%zu, x=%f", desc, l, m, x);
 
           /* test S(l,m) = a_{lm} * P(l,m) for m > 0 */
           for (m = 1; m <= l; ++m)
             {
-              idx = gsl_sf_legendre_array_index(l, m);
+              size_t lmidx = gsl_sf_legendre_array_index(l, m);
 
-              gsl_test_rel(a_lm * p[idx], p_schmidt[idx], 1.0e-9,
-                           "legendre unnorm l=%zu, m=%zu, x=%f", l, m, x);
-              gsl_test_abs(a_lm * dp[idx], dp_schmidt[idx], 1.0e-10,
-                           "legendre unnorm deriv l=%zu, m=%zu, x=%f", l, m, x);
-              gsl_test_abs(a_lm * d2p[idx], d2p_schmidt[idx], 1.0e-10,
-                           "legendre unnorm deriv2 l=%zu, m=%zu, x=%f", l, m, x);
+              if (lmax <= lmax_P)
+                {
+                  gsl_test_rel(a_lm * p[lmidx], p_schmidt[lmidx], tol,
+                               "%s schmidt l=%zu, m=%zu, x=%f", desc, l, m, x);
+                  gsl_test_abs(a_lm * dp[lmidx], dp_schmidt[lmidx], tol,
+                               "%s schmidt deriv l=%zu, m=%zu, x=%f", desc, l, m, x);
+                  gsl_test_abs(a_lm * d2p[lmidx], d2p_schmidt[lmidx], tol,
+                               "%s schmidt deriv2 l=%zu, m=%zu, x=%f", desc, l, m, x);
 
-              a_lm /= sqrt((double) (l + m + 1)) *
-                      sqrt((double) (l - m));
-            }
-        }
+                  a_lm /= sqrt((double) (l + m + 1)) *
+                          sqrt((double) (l - m));
+                }
 
-      gsl_sf_legendre_array(GSL_SF_LEGENDRE_NONE, lmax, x, p2);
-      /* test if p = p2 */
-      for (l = 0; l <= (size_t) lmax; ++l)
-        {
-          for (m = 0; m <= l; ++m)
-            {
-              size_t idx = gsl_sf_legendre_array_index(l, m);
-              gsl_test_rel(p2[idx], p[idx], 1.0e-10,
-                           "%s compare l=%zu, m=%zu, x=%f",
-                           desc, l, m, x);
+              gsl_test_rel(clm * p_spharm[lmidx], p_schmidt[lmidx], tol,
+                           "%s spharm l=%zu, m=%zu, x=%f", desc, l, m, x);
+              gsl_test_rel(clm * dp_spharm[lmidx], dp_schmidt[lmidx], tol,
+                           "%s spharm deriv l=%zu, m=%zu, x=%f", desc, l, m, x);
+              gsl_test_rel(clm * d2p_spharm[lmidx], d2p_schmidt[lmidx], tol,
+                           "%s spharm deriv2 l=%zu, m=%zu, x=%f", desc, l, m, x);
+
+              gsl_test_rel(b * p_full[lmidx], p_spharm[lmidx], tol,
+                           "%s full l=%zu, m=%zu, x=%f", desc, l, m, x);
+              gsl_test_rel(b * dp_full[lmidx], dp_spharm[lmidx], tol,
+                           "%s full deriv l=%zu, m=%zu, x=%f", desc, l, m, x);
+              gsl_test_rel(b * d2p_full[lmidx], d2p_spharm[lmidx], tol,
+                           "%s full deriv2 l=%zu, m=%zu, x=%f", desc, l, m, x);
             }
         }
     }
 
   free(p);
-  free(p2);
   free(dp);
   free(d2p);
   free(p_schmidt);
   free(dp_schmidt);
   free(d2p_schmidt);
+  free(p_spharm);
+  free(dp_spharm);
+  free(d2p_spharm);
+  free(p_full);
+  free(dp_full);
+  free(d2p_full);
 
   return s;
-} /* test_legendre_unnorm() */
+}
+
+int
+test_legendre_eps(const double tol, const gsl_sf_legendre_t norm, const size_t lmax,
+                  const int csphase, const char * desc)
+{
+  int s = 0;
+  const size_t nlm = gsl_sf_legendre_nlm(lmax);
+  const size_t plm_size = gsl_sf_legendre_array_n(lmax);
+  const double dx = test_legendre_dx(lmax);
+  double *Plm = malloc(plm_size * sizeof(double));
+  double *dPlm = malloc(nlm * sizeof(double));
+  double *d2Plm = malloc(nlm * sizeof(double));
+  double *Plm_alt = malloc(plm_size * sizeof(double));
+  double *dPlm_alt = malloc(nlm * sizeof(double));
+  double *d2Plm_alt = malloc(nlm * sizeof(double));
+  size_t l, i;
+  char buf[32];
+  double x;
+
+  const double * P_norm, * dP_norm, * d2P_norm;
+
+  const size_t nx = 4;
+  const double x_vals[] = { -0.38, 0.86, -1.0, 1.0 };
+
+  const double P_schmidt[] = {
+     1.0000000000000000,  1.0000000000000000,  1.0000000000000000,  1.0000000000000000, /* P(0,0) */
+    -0.3800000000000000,  0.8600000000000000, -1.0000000000000000,  1.0000000000000000, /* P(1,0) */
+     0.924986486387774,   0.510294032886923,   0.0000000000000000,  0.0000000000000000, /* P(1,1) */
+    -0.2834000000000000,  0.6094000000000000,  1.0000000000000000,  1.0000000000000000, /* P(2,0) */
+    -0.6088069644805322,  0.7601154649130617,  0.0000000000000000,  0.0000000000000000, /* P(2,1) */
+     0.7409713354779655,  0.2255130151454678,  0.0000000000000000,  0.0000000000000000, /* P(2,2) */
+     0.432820000000000,   0.3001400000000000, -1.0000000000000000,  1.0000000000000000, /* P(3,0) */
+    -0.1574692712880831,  0.843098019568306,   0.0000000000000000,  0.0000000000000000, /* P(3,1) */
+    -0.6296076646928626,  0.433665691241537,   0.0000000000000000,  0.0000000000000000, /* P(3,2) */
+     0.6256712113882177,  0.105051311462542,   0.0000000000000000,  0.0000000000000000  /* P(3,3) */
+  };
+  const double dP_schmidt[] = {
+     0.0000000000000000,  0.0000000000000000,  0.0000000000000000,  0.0000000000000000, /* d/dt P(0,0) */
+    -0.9249864863877740, -0.5102940328869230,  0.0000000000000000,  0.0000000000000000, /* d/dt P(1,0) */
+    -0.3800000000000000,  0.8600000000000000, -1.0000000000000000,  1.0000000000000000, /* d/dt P(1,1) */
+     1.0544845944820630, -1.3165586048482610,  0.0000000000000000,  0.0000000000000000, /* d/dt P(2,0) */
+    -1.2318345343429852,  0.8299987469870067,  1.732050807568877,   1.732050807568877,  /* d/dt P(2,1) */
+    -0.6088069644805323,  0.7601154649130618,  0.0000000000000000,  0.0000000000000000, /* d/dt P(2,2) */
+     0.3857193648237012, -2.0651599510933770,  0.0000000000000000,  0.0000000000000000, /* d/dt P(3,0) */
+     2.0556852768359271,  0.0495041877016476, -2.449489742783178,   2.449489742783178,  /* d/dt P(3,1) */
+    -1.015268386703732,   1.204393961359827,   0.0000000000000000,  0.0000000000000000, /* d/dt P(3,2) */
+    -0.7711087583214189,  0.5311298312465608,  0.0000000000000000,  0.0000000000000000  /* d/dt P(3,3) */
+  };
+  const double d2P_schmidt[] = {
+     0.0000000000000000,  0.0000000000000000,  0.0000000000000000,  0.0000000000000000, /* d2/dt2 P(0,0) */
+     0.3800000000000000, -0.8600000000000000,  1.0000000000000000, -1.0000000000000000, /* d2/dt2 P(1,0) */
+    -0.924986486387774,  -0.510294032886923,   0.0000000000000000,  0.0000000000000000, /* d2/dt2 P(1,1) */
+     2.1336000000000000, -1.4376000000000000, -3.0000000000000000, -3.0000000000000000, /* d2/dt2 P(2,0) */
+     2.435227857922129,  -3.040461859652247,   0.0000000000000000,  0.0000000000000000, /* d2/dt2 P(2,1) */
+    -1.231834534342985,   0.829998746987006,   1.732050807568877,   1.732050807568877,  /* d2/dt2 P(2,2) */
+    -5.0353800000000000, -0.1212600000000000,  6.0000000000000000, -6.0000000000000000, /* d2/dt2 P(3,0) */
+     2.550095896902701,  -6.962902176434765,   0.0000000000000000,  0.0000000000000000, /* d2/dt2 P(3,1) */
+     4.194735310676946,  -0.572225543435454,  -3.872983346207417,   3.872983346207417,  /* d2/dt2 P(3,2) */
+    -1.243444749701409,   1.475075327310439,   0.0000000000000000,  0.0000000000000000  /* d2/dt2 P(3,3) */
+  };
+
+  const double P_spharm[] = {
+     0.2820947917738781,  0.2820947917738781,  0.2820947917738781,  0.2820947917738781, /* P(0,0) */
+    -0.1856689545231096,  0.4201981602365111, -0.4886025119029199,  0.4886025119029199, /* P(1,0) */
+     0.3195774193870231,  0.1763036028725652,  0.0000000000000000,  0.0000000000000000, /* P(1,1) */
+    -0.1787639391851283,  0.3843992397297712,  0.6307831305050398,  0.6307831305050398, /* P(2,0) */
+    -0.2715467968528703,  0.3390350830030173,  0.0000000000000000,  0.0000000000000000, /* P(2,1) */
+     0.3304962072510409,  0.1005858022068386,  0.0000000000000000,  0.0000000000000000, /* P(2,2) */
+     0.3230363605433075,  0.2240102889271943, -0.7463526651802306,  0.7463526651802306, /* P(3,0) */
+    -0.0831045702267447,  0.4449458488130187,  0.0000000000000000,  0.0000000000000000, /* P(3,1) */
+    -0.3322760939818003,  0.228867515534375,   0.0000000000000000,  0.0000000000000000, /* P(3,2) */
+     0.3301986266929495,  0.05544093790133093, 0.0000000000000000,  0.0000000000000000  /* P(3,3) */
+  };
+  const double dP_spharm[] = {
+     0.0000000000000000,  0.0000000000000000,  0.0000000000000000,  0.0000000000000000, /* d/dt P(0,0) */
+    -0.4519507207253225, -0.2493309462776218,  0.0000000000000000,  0.0000000000000000, /* d/dt P(1,0) */
+    -0.1312877767991075,  0.2971249685453485, -0.3454941494713355,  0.3454941494713355, /* d/dt P(1,1) */
+     0.6651510935767333, -0.830462958259534,   0.0000000000000000,  0.0000000000000000, /* d/dt P(2,0) */
+    -0.5494364249577846,  0.3702051952190248,  0.7725484040463791,  0.7725484040463791, /* d/dt P(2,1) */
+    -0.2715467968528703,  0.3390350830030173,  0.0000000000000000,  0.0000000000000000, /* d/dt P(2,2) */
+     0.2878826759477952, -1.541337633522017,   0.0000000000000000,  0.0000000000000000, /* d/dt P(3,0) */
+     1.0848900236564757,  0.02612588608378763, -1.292720736456603,  1.292720736456603,  /* d/dt P(3,1) */
+    -0.5358089375257002,  0.6356201544832385,  0.0000000000000000,  0.0000000000000000, /* d/dt P(3,2) */
+    -0.4069534419902396,  0.2803043158788606,  0.0000000000000000,  0.0000000000000000  /* d/dt P(3,3) */
+  };
+  const double d2P_spharm[] = {
+     0.0000000000000000,  0.0000000000000000,  0.0000000000000000,  0.0000000000000000, /* d2/dt2 P(0,0) */
+     0.1856689545231096, -0.4201981602365112,  0.4886025119029199, -0.4886025119029199, /* d2/dt2 P(1,0) */
+    -0.3195774193870231, -0.1763036028725652,  0.0000000000000000,  0.0000000000000000, /* d2/dt2 P(1,1) */
+     1.345838887245553,  -0.906813828414046,  -1.89234939151512,   -1.89234939151512,   /* d2/dt2 P(2,0) */
+     1.086187187411481,  -1.356140332012069,   0.0000000000000000,  0.0000000000000000, /* d2/dt2 P(2,1) */
+    -0.5494364249577846,  0.3702051952190248,  0.7725484040463791,  0.7725484040463791, /* d2/dt2 P(2,2) */
+    -3.758169283195231,  -0.0905027241797544,  4.478115991081385,  -4.478115991081385,  /* d2/dt2 P(3,0) */
+     1.345815737988507,  -3.674678800315671,   0.0000000000000000,  0.0000000000000000, /* d2/dt2 P(3,1) */
+     2.213775883746908,  -0.3019926203441294, -2.043970952866565,   2.043970952866565,  /* d2/dt2 P(3,2) */
+    -0.6562292482803778,  0.7784725243564758,  0.0000000000000000,  0.0000000000000000  /* d2/dt2 P(3,3) */
+  };
+
+  const double P_full[] = {
+     0.7071067811865475,  0.7071067811865475,  0.7071067811865475,  0.7071067811865475, /* P(0,0) */
+    -0.4654030511288038,  1.053280589396766,  -1.224744871391589,   1.224744871391589,  /* P(1,0) */
+     0.801061795369121,   0.441927595879687,   0.0000000000000000,  0.0000000000000000, /* P(1,1) */
+    -0.4480947444458591,  0.963546003053305,   1.581138830084189,   1.581138830084189,  /* P(2,0) */
+    -0.680666878876885,   0.849834925147231,   0.0000000000000000,  0.0000000000000000, /* P(2,1) */
+     0.828431137753766,   0.2521312158381029,  0.0000000000000000,  0.0000000000000000, /* P(2,2) */
+     0.809732075071749,   0.5615105240331647, -1.87082869338697,    1.87082869338697,   /* P(3,0) */
+    -0.2083122654814157,  1.115313845314403,   0.0000000000000000,  0.0000000000000000, /* P(3,1) */
+    -0.832892652158728,   0.5736857855830142,  0.0000000000000000,  0.0000000000000000, /* P(3,2) */
+     0.827685213912874,   0.1389698225155376,  0.0000000000000000,  0.0000000000000000  /* P(3,3) */
+  };
+  const double dP_full[] = {
+     0.0000000000000000,  0.0000000000000000,  0.0000000000000000,  0.0000000000000000, /* d/dt P(0,0) */
+    -1.132872455309952,  -0.6249799996799897,  0.0000000000000000,  0.0000000000000000, /* d/dt P(1,0) */
+    -0.3290896534380868,  0.7447818472546172, -0.866025403784439,   0.866025403784439,  /* d/dt P(1,1) */
+     1.66728653806117,   -2.081661932207053,   0.0000000000000000,  0.0000000000000000, /* d/dt P(2,0) */
+    -1.377232877911357,   0.927966809751297,   1.936491673103708,   1.936491673103708,  /* d/dt P(2,1) */
+    -0.6806668788768851,  0.849834925147231,   0.0000000000000000,  0.0000000000000000, /* d/dt P(2,2) */
+     0.7216148553071772, -3.863560492939122,   0.0000000000000000,  0.0000000000000000, /* d/dt P(3,0) */
+     2.719416008162415,   0.06548788475741096, -3.24037034920393,   3.24037034920393,   /* d/dt P(3,1) */
+    -1.343073832601915,   1.59326345115301,    0.0000000000000000,  0.0000000000000000, /* d/dt P(3,2) */
+    -1.020081004151141,   0.7026187236830514,  0.0000000000000000,  0.0000000000000000  /* d/dt P(3,3) */
+  };
+  const double d2P_full[] = {
+     0.0000000000000000,  0.0000000000000000,  0.0000000000000000,  0.0000000000000000, /* d2/dt2 P(0,0) */
+     0.4654030511288039, -1.053280589396766,   1.224744871391589,  -1.224744871391589,  /* d2/dt2 P(1,0) */
+    -0.801061795369121,  -0.441927595879687,   0.0000000000000000,  0.0000000000000000, /* d2/dt2 P(1,1) */
+     3.373517807867627,  -2.273045182129031,  -4.743416490252569,  -4.743416490252569,  /* d2/dt2 P(2,0) */
+     2.722667515507541,  -3.399339700588925,   0.0000000000000000,  0.0000000000000000, /* d2/dt2 P(2,1) */
+    -1.377232877911357,   0.927966809751297,   1.936491673103708,   1.936491673103708,  /* d2/dt2 P(2,2) */
+    -9.42033338610689,   -0.2268566873601031,  11.22497216032182,  -11.22497216032182,  /* d2/dt2 P(3,0) */
+     3.373459781285376,  -9.21105378105839,    0.000000000000000,   0.000000000000000,  /* d2/dt2 P(3,1) */
+     5.549113223896231,  -0.7569832408844999, -5.123475382979799,   5.123475382979799,  /* d2/dt2 P(3,2) */
+    -1.644922788379442,   1.951341240575312,   0.0000000000000000,  0.0000000000000000  /* d2/dt2 P(3,3) */
+  };
+
+  const double P_none[] = {
+     1.0000000000000000,  1.0000000000000000,  1.0000000000000000,  1.0000000000000000, /* P(0,0) */
+    -0.3800000000000000,  0.8600000000000000, -1.0000000000000000,  1.0000000000000000, /* P(1,0) */
+     0.924986486387774,   0.510294032886923,   0.0000000000000000,  0.0000000000000000, /* P(1,1) */
+    -0.2834000000000000,  0.6094000000000000,  1.0000000000000000,  1.0000000000000000, /* P(2,0) */
+    -1.054484594482063,   1.316558604848261,   0.0000000000000000,  0.0000000000000000, /* P(2,1) */
+     2.5668000000000000,  0.7812000000000000,  0.0000000000000000,  0.0000000000000000, /* P(2,2) */
+     0.432820000000000,   0.3001400000000000, -1.0000000000000000,  1.0000000000000000, /* P(3,0) */
+    -0.3857193648237012,  2.065159951093377,   0.0000000000000000,  0.0000000000000000, /* P(3,1) */
+    -4.8769200000000000,  3.359160000000000,   0.0000000000000000,  0.0000000000000000, /* P(3,2) */
+     11.87127656630069,   1.993208492456322,   0.0000000000000000,  0.0000000000000000  /* P(3,3) */
+  };
+  const double dP_none[] = {
+     0.0000000000000000,  0.0000000000000000,  0.0000000000000000,  0.0000000000000000, /* d/dt P(0,0) */
+    -0.9249864863877740, -0.5102940328869230,  0.0000000000000000,  0.0000000000000000, /* d/dt P(1,0) */
+    -0.3800000000000000,  0.8600000000000000, -1.0000000000000000,  1.0000000000000000, /* d/dt P(1,1) */
+     1.0544845944820630, -1.3165586048482610,  0.0000000000000000,  0.0000000000000000, /* d/dt P(2,0) */
+    -2.1336000000000000,  1.4376000000000000,  3.0000000000000000,  3.0000000000000000, /* d/dt P(2,1) */
+    -2.108969188964126,   2.633117209696523,   0.0000000000000000,  0.0000000000000000, /* d/dt P(2,2) */
+     0.3857193648237012, -2.0651599510933770,  0.0000000000000000,  0.0000000000000000, /* d/dt P(3,0) */
+     5.0353800000000000,  0.1212600000000000, -6.0000000000000000,  6.0000000000000000, /* d/dt P(3,1) */
+    -7.864235107268853,   9.32919550923872,    0.0000000000000000,  0.0000000000000000, /* d/dt P(3,2) */
+    -14.630760000000000,  10.077480000000000,  0.0000000000000000,  0.0000000000000000  /* d/dt P(3,3) */
+  };
+  const double d2P_none[] = {
+     0.0000000000000000,  0.0000000000000000,  0.0000000000000000,  0.0000000000000000, /* d2/dt2 P(0,0) */
+     0.3800000000000000, -0.8600000000000000,  1.0000000000000000, -1.0000000000000000, /* d2/dt2 P(1,0) */
+    -0.924986486387774,  -0.510294032886923,   0.0000000000000000,  0.0000000000000000, /* d2/dt2 P(1,1) */
+     2.1336000000000000, -1.4376000000000000, -3.0000000000000000, -3.0000000000000000, /* d2/dt2 P(2,0) */
+     4.217938377928252,  -5.266234419393045,   0.0000000000000000,  0.0000000000000000, /* d2/dt2 P(2,1) */
+    -4.267200000000000,   2.875200000000000,   6.0000000000000000,  6.0000000000000000, /* d2/dt2 P(2,2) */
+    -5.0353800000000000, -0.1212600000000000,  6.0000000000000000, -6.0000000000000000, /* d2/dt2 P(3,0) */
+     6.246433742576635,  -17.05555746117962,   0.0000000000000000,  0.0000000000000000, /* d2/dt2 P(3,1) */
+     32.49228000000000,  -4.432440000000000,  -30.000000000000000,  30.000000000000000, /* d2/dt2 P(3,2) */
+    -23.59270532180656,   27.98758652771618,   0.0000000000000000,  0.0000000000000000  /* d2/dt2 P(3,3) */
+  };
+
+  /* test specific values */
+  gsl_sf_legendre_precompute(norm, lmax, csphase, Plm);
+
+  if (norm == GSL_SF_LEGENDRE_SCHMIDT)
+    {
+      P_norm = P_schmidt;
+      dP_norm = dP_schmidt;
+      d2P_norm = d2P_schmidt;
+    }
+  else if (norm == GSL_SF_LEGENDRE_SPHARM)
+    {
+      P_norm = P_spharm;
+      dP_norm = dP_spharm;
+      d2P_norm = d2P_spharm;
+    }
+  else if (norm == GSL_SF_LEGENDRE_FULL)
+    {
+      P_norm = P_full;
+      dP_norm = dP_full;
+      d2P_norm = d2P_full;
+    }
+  else if (norm == GSL_SF_LEGENDRE_NONE)
+    {
+      P_norm = P_none;
+      dP_norm = dP_none;
+      d2P_norm = d2P_none;
+    }
+  else
+    {
+      fprintf(stderr, "test_legendre_eps: invalid norm\n");
+      return -1;
+    }
+
+  for (i = 0; i < nx; ++i)
+    {
+      gsl_sf_legendre_deriv2_alt_arrayx(norm, lmax, x_vals[i], Plm, dPlm, d2Plm);
+
+      for (l = 0; l <= 3; ++l)
+        {
+          size_t m;
+
+          for (m = 0; m <= l; ++m)
+            {
+              size_t lmidx = gsl_sf_legendre_array_index(l, m);
+              size_t idx = nx * lmidx + i;
+              double csfac = 1.0;
+
+              if (csphase && (m & 1))
+                csfac = -1.0;
+
+              sprintf(buf, "x=%g", x_vals[i]);
+              test_value(lmax, l, m, Plm, csfac * P_norm[idx], tol, desc, buf);
+
+              sprintf(buf, "deriv x=%g", x_vals[i]);
+              test_value(lmax, l, m, dPlm, csfac * dP_norm[idx], tol, desc, buf);
+
+              sprintf(buf, "deriv2 x=%g", x_vals[i]);
+              test_value(lmax, l, m, d2Plm, csfac * d2P_norm[idx], tol, desc, buf);
+            }
+        }
+    }
+
+  /* test array routines */
+
+  gsl_sf_legendre_precompute(norm, lmax, csphase, Plm);
+  gsl_sf_legendre_precompute(norm, lmax, csphase, Plm_alt);
+
+  for (x = -1.0 + dx; x < 1.0; x += dx)
+    {
+      double u = sqrt((1.0 + x) * (1.0 - x)); /* sin(theta) */
+
+      s += gsl_sf_legendre_deriv2_arrayx(norm, lmax, x, Plm, dPlm, d2Plm);
+      s += gsl_sf_legendre_deriv2_alt_arrayx(norm, lmax, x, Plm_alt, dPlm_alt, d2Plm_alt);
+
+      for (l = 0; l <= lmax; ++l)
+        {
+          double sum = test_legendre_sum(l, Plm);
+          double dsum = test_legendre_sum_deriv(l, Plm, dPlm);
+          double ddsum = test_legendre_sum_deriv2(l, Plm, dPlm, d2Plm);
+          double rhs;
+          size_t m;
+
+          /* test arrays vs alternate arrays */
+          for (m = 0; m <= l; ++m)
+            {
+              size_t idx = gsl_sf_legendre_array_index(l, m);
+              gsl_test_rel(Plm[idx], Plm_alt[idx], tol, "%s Plm lmax=%zu l=%zu m=%zu x=%g", desc, lmax, l, m, x);
+              gsl_test_rel(-u * dPlm[idx], dPlm_alt[idx], tol, "%s dPlm lmax=%zu l=%zu m=%zu x=%g", desc, lmax, l, m, x);
+
+              if (fabs(d2Plm_alt[idx]) > 1.0e-10)
+                {
+                  gsl_test_rel(u*u * d2Plm[idx] - x * dPlm[idx], d2Plm_alt[idx], tol,
+                               "%s d2Plm lmax=%zu l=%zu m=%zu x=%g", desc, lmax, l, m, x);
+                }
+            }
+
+          if (norm == GSL_SF_LEGENDRE_SCHMIDT)
+            rhs = 1.0;
+          else if (norm == GSL_SF_LEGENDRE_SPHARM)
+            {
+              if (l == 0)
+                rhs = (2.0 * l + 1.0) / (4.0 * M_PI);
+              else
+                {
+                  double Pl = gsl_sf_legendre_Pl(l, x);
+                  rhs = (2.0 * l + 1.0) / (8.0 * M_PI) * (1.0 + Pl*Pl);
+                }
+            }
+          else if (norm == GSL_SF_LEGENDRE_FULL)
+            {
+              if (l == 0)
+                rhs = 0.5 * (2.0 * l + 1.0);
+              else
+                {
+                  double Pl = gsl_sf_legendre_Pl(l, x);
+                  rhs = 0.25 * (2.0 * l + 1.0) * (1.0 + Pl*Pl);
+                }
+            }
+
+          if (norm != GSL_SF_LEGENDRE_NONE)
+            gsl_test_rel(sum, rhs, tol, "%s lmax=%zu l=%zu, x=%f, sum=%.12e", desc, lmax, l, x, sum);
+
+          if (norm == GSL_SF_LEGENDRE_SCHMIDT) /*XXX*/
+            {
+              gsl_test_abs(dsum, 0.0, tol, "%s deriv lmax=%zu l=%zu, x=%f, sum=%.12e", desc, lmax, l, x, dsum);
+              gsl_test_abs(ddsum, 0.0, tol, "%s deriv2 lmax=%zu l=%zu, x=%f, sum=%.12e", desc, lmax, l, x, ddsum);
+            }
+        }
+    }
+
+  free(Plm);
+  free(dPlm);
+  free(d2Plm);
+  free(Plm_alt);
+  free(dPlm_alt);
+  free(d2Plm_alt);
+
+  return s;
+}
 
 static int
 test_legendre_all(const size_t lmax)
 {
   int s = 0;
+  const double tol = 1.0e-10;
 
-  s += test_legendre_schmidt(lmax, 1.0, "schmidt csphase=1");
-  s += test_legendre_schmidt(lmax, -1.0, "schmidt csphase=-1");
+  s += test_legendre_eps(tol, GSL_SF_LEGENDRE_SCHMIDT, lmax, 0, "schmidt csphase=0");
+  s += test_legendre_eps(tol, GSL_SF_LEGENDRE_SCHMIDT, lmax, 1, "schmidt csphase=1");
 
-  s += test_legendre_norm(GSL_SF_LEGENDRE_SPHARM, lmax, 1.0,
-                          "spharm csphase=1");
-  s += test_legendre_norm(GSL_SF_LEGENDRE_SPHARM, lmax, -1.0,
-                          "spharm csphase=-1");
+  s += test_legendre_eps(tol, GSL_SF_LEGENDRE_SPHARM, lmax, 0, "spharm csphase=0");
+  s += test_legendre_eps(tol, GSL_SF_LEGENDRE_SPHARM, lmax, 1, "spharm csphase=1");
 
-  s += test_legendre_norm(GSL_SF_LEGENDRE_FULL, lmax, 1.0,
-                          "full csphase=1");
-  s += test_legendre_norm(GSL_SF_LEGENDRE_FULL, lmax, -1.0,
-                          "full csphase=-1");
+  s += test_legendre_eps(tol, GSL_SF_LEGENDRE_FULL, lmax, 0, "full csphase=0");
+  s += test_legendre_eps(tol, GSL_SF_LEGENDRE_FULL, lmax, 1, "full csphase=1");
 
-  s += test_legendre_unnorm(lmax, "unnorm csphase=1");
+  if (lmax <= 100)
+    {
+      s += test_legendre_eps(tol, GSL_SF_LEGENDRE_NONE, lmax, 0, "unnorm csphase=0");
+      s += test_legendre_eps(tol, GSL_SF_LEGENDRE_NONE, lmax, 1, "unnorm csphase=1");
+    }
+
+  if (lmax <= 200)
+    {
+      s += test_legendre_cross(tol, lmax, 0, "legendre cross csphase=0");
+      s += test_legendre_cross(tol, lmax, 1, "legendre cross csphase=1");
+    }
 
   return s;
-} /* test_legendre_all() */
+}
 
-int test_legendre(void)
+int
+test_legendre(void)
 {
   gsl_sf_result r;
   double L[256], DL[256];
