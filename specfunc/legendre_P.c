@@ -931,15 +931,15 @@ legendre_derivk_alt_array(const gsl_sf_legendre_t norm,
           k += l; /* idx(l,0) */
 
           /* d^k/dtheta^k P(l,0) = -sqrt(l(l+1)/2) d^{k-1}/dtheta^{k-1} P(l,1) */
-          output_array[k] = -csfac * sqrt(0.5 * l) * sqrts[l + 1] * input_array[k + 1];
+          output_array[k] = -csfac * (sqrts[l] / M_SQRT2) * sqrts[l + 1] * input_array[k + 1];
 
           /* d^k/dtheta^k P(l,1) = sqrt(l(l+1)/2) d^{k-1}/dtheta^{k-1} P(l,0) -
            *                       1/2 sqrt((l-1)(l+2)) d^{k-1}/dtheta^{k-1} P(l,2) */
-          output_array[k + 1] = csfac * (sqrt(0.5 * l) * sqrts[l + 1] * input_array[k] -
+          output_array[k + 1] = csfac * ((sqrts[l] / M_SQRT2) * sqrts[l + 1] * input_array[k] -
                                          0.5 * sqrts[l - 1] * sqrts[l + 2] * input_array[k + 2]);
 
           /* d^k/dtheta^k P(l,l) = sqrt(l/2) d^{k-1}/dtheta^{k-1} P(l,l-1) */
-          output_array[k + l] = csfac * sqrt(0.5 * l) * input_array[k + l - 1];
+          output_array[k + l] = csfac * (sqrts[l] / M_SQRT2) * input_array[k + l - 1];
 
           for (m = 2; m < l; ++m)
             {
@@ -959,7 +959,7 @@ legendre_derivk_alt_array(const gsl_sf_legendre_t norm,
           output_array[k] = -csfac * sqrts[l] * sqrts[l + 1] * input_array[k + 1];
 
           /* d^k/dtheta^k P(l,l) = sqrt(l/2) d^{k-1}/dtheta^{k-1} P(l,l-1) */
-          output_array[k + l] = csfac * sqrt(0.5 * l) * input_array[k + l - 1];
+          output_array[k + l] = csfac * (sqrts[l] / M_SQRT2) * input_array[k + l - 1];
 
           for (m = 1; m < l; ++m)
             {

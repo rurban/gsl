@@ -2748,7 +2748,6 @@ int main(int argc, char * argv[])
   gsl_ieee_env_setup ();
   gsl_set_error_handler_off ();
 
-#if 0
   gsl_test(test_airy(),        "Airy Functions");
   gsl_test(test_bessel(),      "Bessel Functions");
   gsl_test(test_clausen(),     "Clausen Integral");
@@ -2770,9 +2769,7 @@ int main(int argc, char * argv[])
   gsl_test(test_hyperg(),      "Hypergeometric Functions");
   gsl_test(test_laguerre(),    "Laguerre Polynomials");
   gsl_test(test_lambert(),     "Lambert W Functions");
-#endif
   gsl_test(test_legendre(),    "Legendre Functions");
-#if 0/*XXX*/
   gsl_test(test_log(),         "Logarithm");
   gsl_test(test_mathieu(),     "Mathieu Functions");
   gsl_test(test_pow_int(),     "Integer Powers");
@@ -2785,7 +2782,6 @@ int main(int argc, char * argv[])
   gsl_test(test_zeta(),        "Zeta Functions");
 
   gsl_test(test_results(),     "Result Methods");
-#endif
 
   exit (gsl_test_summary());
 }
