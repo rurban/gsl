@@ -25,6 +25,10 @@
 ** major overhaul to the B-spline module to add
    new functionality
 
+* What was new in gsl-2.7.1:
+
+** update libtool version numbers
+
 * What was new in gsl-2.7:
 
 ** fixed doc bug for gsl_histogram_min_bin (lhcsky at 163.com)
