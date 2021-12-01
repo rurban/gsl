@@ -1,4 +1,8 @@
-* What is new in gsl-2.7:
+* What is new in gsl-2.7.1:
+
+** update libtool version numbers
+
+* What was new in gsl-2.7:
 
 ** fixed doc bug for gsl_histogram_min_bin (lhcsky at 163.com)
 
