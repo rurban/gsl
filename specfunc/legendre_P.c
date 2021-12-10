@@ -97,10 +97,10 @@ Special storage:
 alm[idx(0,0) = 0] = P(0,0)
 alm[idx(1,0) = 1] = P(1,0)/x
 alm[idx(1,1) = 2] = unused
-blm[idx(0,0) = 0] = csfac
+blm[idx(0,0) = 0] = unused
 blm[idx(1,0) = 1] = unused
 blm[idx(1,1) = 2] = unused
-dl[0]             = unused
+dl[0]             = csfac
 */
 
 int
@@ -126,13 +126,12 @@ gsl_sf_legendre_precompute(const gsl_sf_legendre_t norm, const size_t lmax,
       for (l = 0; l <= 2 * lmax + 1; ++l)
         sqrts[l] = sqrt((double) l);
 
-      /* store csfac in blm[0] which is not needed in the recurrence relations */
-      blm[0] = csfac;
+      /* store csfac in dl[0] which is not needed in the recurrence relations */
+      dl[0] = csfac;
 
       if (norm == GSL_SF_LEGENDRE_SCHMIDT)
         {
           cl[0] = 1.0;
-          dl[0] = 0.0;
           alm[0] = 1.0; /* S(0,0) */
 
           if (lmax == 0)
@@ -142,73 +141,90 @@ gsl_sf_legendre_precompute(const gsl_sf_legendre_t norm, const size_t lmax,
           dl[1] = csfac;
           alm[1] = 1.0; /* S(1,0)/x */
 
-          k = 3; /* idx(2,0) */
+          /* m = 0 terms */
+          k = 2; /* idx(2,0) */
+          for (l = 2; l <= lmax; ++l)
+            {
+              /* a_l^0 */
+              alm[2*k] = 2.0 - 1.0 / (double) l;
+
+              /* b_l^0 */
+              alm[2*k + 1] = -(1.0 - 1.0 / (double) l);
+
+              ++k;
+            }
+
+          /* m > 0 terms */
+          k = lmax + 1; /* idx(1,1) */
+          for (m = 1; m <= lmax; ++m)
+            {
+              /* alm and blm are unused for l=m and l=m+1 */
+              k += 2;
+
+              for (l = m + 2; l <= lmax; ++l)
+                {
+                  /* a_l^m */
+                  alm[2*k] = ((2.0*l - 1.0) / sqrts[l + m]) / sqrts[l - m];
+
+                  /* b_l^m */
+                  alm[2*k + 1] = -(sqrts[l + m - 1] / sqrts[l + m]) *
+                                  (sqrts[l - m - 1] / sqrts[l - m]);
+
+                  ++k;
+                }
+            }
+
           for (l = 2; l <= lmax; ++l)
             {
               cl[l] = sqrts[2 * l + 1];
               dl[l] = csfac * sqrt(1.0 - 0.5 / l);
-
-              /* m = 0 terms */
-              alm[k] = 2.0 - 1.0 / (double) l;
-              blm[k] = -(l - 1.0) / (2.0 * l - 1.0);
-
-              for (m = 1; m < l; ++m)
-                {
-                  alm[k + m] = ((2.0*l - 1.0) / sqrts[l + m]) /
-                               sqrts[l - m];
-
-                  if (m == (l - 1))
-                    blm[k + m] = 0.0;
-                  else
-                    {
-                      blm[k + m] = -(sqrts[l + m - 1] / sqrts[2 * l - 1]) *
-                                    (sqrts[l - m - 1] / sqrts[2 * l - 1]);
-                    }
-                }
-
-              k += l + 1;
             }
         }
       else if (norm == GSL_SF_LEGENDRE_SPHARM)
         {
-          cl[0] = M_SQRT3;
-          dl[0] = 0.0;
           alm[0] = 0.5 / M_SQRTPI;    /* Y(0,0) */
+          cl[0] = M_SQRT3;
 
           if (lmax == 0)
             return GSL_SUCCESS;
 
+          alm[1] = sqrt(0.75 / M_PI); /* Y(1,0)/x */
           cl[1] = sqrt(5.0);
           dl[1] = csfac * (M_SQRT3 / M_SQRT2);
-          alm[1] = sqrt(0.75 / M_PI); /* Y(1,0)/x */
 
-          k = 3; /* idx(2,0) */
+          k = 2; /* idx(2,0) */
+          for (m = 0; m <= lmax; ++m)
+            {
+              if (m > 0)
+                {
+                  /* alm and blm are unused for l=m and l=m+1 */
+                  k += 2;
+                }
+
+              for (l = m + 2; l <= lmax; ++l)
+                {
+                  /* a_l^m */
+                  alm[2*k] = (sqrts[2 * l + 1] / sqrts[l + m]) *
+                             (sqrts[2 * l - 1] / sqrts[l - m]);
+
+                  /* b_l^m */
+                  alm[2*k + 1] = -(sqrts[l + m - 1] / sqrts[l + m]) *
+                                  (sqrts[l - m - 1] / sqrts[l - m]) *
+                                  (sqrts[2*l + 1] / sqrts[2*l - 3]);
+
+                  ++k;
+                }
+            }
+
           for (l = 2; l <= lmax; ++l)
             {
               cl[l] = sqrt(2.0 * l + 3.0);
               dl[l] = csfac * sqrt(1.0 + 0.5 / l);
-
-              for (m = 0; m < l; ++m)
-                {
-                  alm[k + m] = (sqrts[2 * l + 1] / sqrts[l + m]) *
-                               (sqrts[2 * l - 1] / sqrts[l - m]);
-
-                  if (m == (l - 1))
-                    blm[k + m] = 0.0;
-                  else
-                    {
-                      blm[k + m] = -(sqrts[l + m - 1] / sqrts[2 * l - 1]) *
-                                    (sqrts[l - m - 1] / sqrts[2 * l - 3]);
-                    }
-                }
-
-              k += l + 1;
             }
         }
       else if (norm == GSL_SF_LEGENDRE_FULL)
         {
           cl[0] = M_SQRT3;
-          dl[0] = 0.0;
           alm[0] = M_SQRT1_2;         /* N(0,0) */
 
           if (lmax == 0)
@@ -218,33 +234,39 @@ gsl_sf_legendre_precompute(const gsl_sf_legendre_t norm, const size_t lmax,
           dl[1] = csfac * (M_SQRT3 / M_SQRT2);
           alm[1] = M_SQRT3 / M_SQRT2; /* N(1,0)/x */
 
-          k = 3; /* idx(2,0) */
+          k = 2; /* idx(2,0) */
+          for (m = 0; m <= lmax; ++m)
+            {
+              if (m > 0)
+                {
+                  /* alm and blm are unused for l=m and l=m+1 */
+                  k += 2;
+                }
+
+              for (l = m + 2; l <= lmax; ++l)
+                {
+                  /* a_l^m */
+                  alm[2*k] = (sqrts[2 * l + 1] / sqrts[l + m]) *
+                             (sqrts[2 * l - 1] / sqrts[l - m]);
+
+                  /* b_l^m */
+                  alm[2*k + 1] = -(sqrts[l + m - 1] / sqrts[l + m]) *
+                                  (sqrts[l - m - 1] / sqrts[l - m]) *
+                                  (sqrts[2*l + 1] / sqrts[2*l - 3]);
+
+                  ++k;
+                }
+            }
+
           for (l = 2; l <= lmax; ++l)
             {
               cl[l] = sqrt(2.0 * l + 3.0);
               dl[l] = csfac * sqrt(1.0 + 0.5 / l);
-
-              for (m = 0; m < l; ++m)
-                {
-                  alm[k + m] = (sqrts[2 * l + 1] / sqrts[l + m]) *
-                               (sqrts[2 * l - 1] / sqrts[l - m]);
-
-                  if (m == (l - 1))
-                    blm[k + m] = 0.0;
-                  else
-                    {
-                      blm[k + m] = -(sqrts[l + m - 1] / sqrts[2 * l - 1]) *
-                                    (sqrts[l - m - 1] / sqrts[2 * l - 3]);
-                    }
-                }
-
-              k += l + 1;
             }
         }
       else if (norm == GSL_SF_LEGENDRE_NONE)
         {
           cl[0] = 1.0;
-          dl[0] = 0.0;
           alm[0] = 1.0;         /* P(0,0) */
 
           if (lmax == 0)
@@ -254,23 +276,31 @@ gsl_sf_legendre_precompute(const gsl_sf_legendre_t norm, const size_t lmax,
           dl[1] = csfac;
           alm[1] = 1.0;         /* P(1,0)/x */
 
-          k = 3; /* idx(2,0) */
+          k = 2; /* idx(2,0) */
+          for (m = 0; m <= lmax; ++m)
+            {
+              if (m > 0)
+                {
+                  /* alm and blm are unused for l=m and l=m+1 */
+                  k += 2;
+                }
+
+              for (l = m + 2; l <= lmax; ++l)
+                {
+                  /* a_l^m */
+                  alm[2*k] = (2.0 * l - 1.0) / ((double) (l - m));
+
+                  /* b_l^m */
+                  alm[2*k + 1] = -(l + m - 1.0) / ((double) (l - m));
+
+                  ++k;
+                }
+            }
+
           for (l = 2; l <= lmax; ++l)
             {
               cl[l] = 2.0 * l + 1.0;
               dl[l] = csfac * (2.0 * l - 1.0);
-
-              for (m = 0; m < l; ++m)
-                {
-                  alm[k + m] = (2.0 * l - 1.0) / ((double) (l - m));
-
-                  if (m == (l - 1))
-                    blm[k + m] = 0.0;
-                  else
-                    blm[k + m] = -(l + m - 1.0) / (2.0 * l - 1.0);
-                }
-
-              k += l + 1;
             }
         }
       else
@@ -328,6 +358,245 @@ and be initialized by gsl_sf_legendre_precompute()
 2) result_array is indexed by gsl_sf_legendre_array_index(l,m),
 result_array[index(l,m)] = Plm(x)
 */
+
+#if 1
+
+int
+gsl_sf_legendre_arrayx(const gsl_sf_legendre_t norm, const size_t lmax,
+                       const double x, double result_array[])
+{
+  if (x < -1.0 || x > 1.0)
+    {
+      GSL_ERROR ("x is outside [-1,1]", GSL_EDOM);
+    }
+  else if (x == -1.0 || x == 1.0) /* endpoints */
+    {
+      const size_t nlm = gsl_sf_legendre_nlm(lmax);
+      const double * alm = &result_array[nlm];
+      const double * cl = alm + 2 * nlm;
+      const double * dl = cl + lmax + 1;
+      const double * sqrts = dl + lmax + 1;
+      size_t l, m, k;
+
+      /* l=0 m=0 term */
+      result_array[0] = alm[0];
+
+      /* check for quick return */
+      if (lmax == 0)
+        return GSL_SUCCESS;
+
+      /* set P(l,m) = 0 for m > 0 */
+      k = 0;
+      for (l = 1; l <= lmax; ++l)
+        {
+          k += l;
+          for (m = 1; m <= l; ++m)
+            result_array[k + m] = 0.0;
+        }
+
+      /* set m=0 terms according to normalization */
+      k = 0; /* idx(0,0) */
+      if (norm == GSL_SF_LEGENDRE_SCHMIDT)
+        {
+          if (x == 1.0)
+            {
+              for (l = 1; l <= lmax; ++l)
+                {
+                  k += l;
+                  result_array[k] = 1.0;
+                }
+            }
+          else
+            {
+              for (l = 1; l <= lmax; ++l)
+                {
+                  k += l;
+                  if (l & 1)
+                    result_array[k] = -1.0;
+                  else
+                    result_array[k] =  1.0;
+                }
+            }
+        }
+      else if (norm == GSL_SF_LEGENDRE_SPHARM)
+        {
+          if (x == 1.0)
+            {
+              for (l = 1; l <= lmax; ++l)
+                {
+                  k += l;
+                  result_array[k] = alm[0] * sqrts[2*l + 1];
+                }
+            }
+          else
+            {
+              for (l = 1; l <= lmax; ++l)
+                {
+                  k += l;
+                  if (l & 1)
+                    result_array[k] = -alm[0] * sqrts[2*l + 1];
+                  else
+                    result_array[k] =  alm[0] * sqrts[2*l + 1];
+                }
+            }
+        }
+      else if (norm == GSL_SF_LEGENDRE_FULL)
+        {
+          if (x == 1.0)
+            {
+              for (l = 1; l <= lmax; ++l)
+                {
+                  k += l;
+                  result_array[k] = sqrt(l + 0.5);
+                }
+            }
+          else
+            {
+              for (l = 1; l <= lmax; ++l)
+                {
+                  k += l;
+                  if (l & 1)
+                    result_array[k] = -sqrt(l + 0.5);
+                  else
+                    result_array[k] =  sqrt(l + 0.5);
+                }
+            }
+        }
+      else if (norm == GSL_SF_LEGENDRE_NONE)
+        {
+          if (x == 1.0)
+            {
+              for (l = 1; l <= lmax; ++l)
+                {
+                  k += l;
+                  result_array[k] = 1.0;
+                }
+            }
+          else
+            {
+              for (l = 1; l <= lmax; ++l)
+                {
+                  k += l;
+                  if (l & 1)
+                    result_array[k] = -1.0;
+                  else
+                    result_array[k] =  1.0;
+                }
+            }
+        }
+      else
+        {
+          GSL_ERROR ("unknown normalization", GSL_EDOM);
+        }
+
+      return GSL_SUCCESS;
+    }
+  else
+    {
+      /* interior point */
+
+      const double eps = 1.0e-280;
+      const double u = sqrt((1.0 - x) * (1.0 + x)); /* sin(theta) */
+      const size_t Lp2 = lmax + 2;
+      const size_t nlm = gsl_sf_legendre_nlm(lmax);
+      const double * alm = &result_array[nlm];
+      const double * cl = alm + 2 * nlm;
+      const double * dl = cl + lmax + 1;
+      size_t l, m, k;
+      double plm,      /* eps * P(l,m) / u^m */
+             pmm;      /* eps * P(m,m) / u^m */
+      double plmp1;    /* P(l+1,m) */
+      double rescalem; /* u^m / eps */
+      size_t idxmm;    /* idx(m,m) for output array */
+      size_t aidxmm;   /* aidx(m,m) for precomputed arrays */
+      const double *al;
+
+      /* initial values P(0,0) and P(1,0) */
+
+      plm = alm[0];       /* P(0,0) */
+      result_array[0] = plm;
+
+      /* check for quick return */
+      if (lmax == 0)
+        return GSL_SUCCESS;
+
+      plmp1 = alm[1] * x; /* P(1,0) */
+      result_array[1] = plmp1;
+
+      /* Compute P(l,0), l=2:lmax */
+
+      k = 3;        /* idx(2,0) */
+      al = &alm[4]; /* aidx(2,0) = 2 */
+      for (l = 2; l < lmax; l += 2)
+        {
+          plm   = (al[0] * x) * plmp1 + al[1] * plm;
+          plmp1 = (al[2] * x) * plm   + al[3] * plmp1;
+
+          result_array[k]         = plm;
+          result_array[k + l + 1] = plmp1;
+
+          k += (l << 1) + 3; al += 4;
+        }
+
+      if (l == lmax)
+        result_array[k] = (al[0] * x) * plmp1 + al[1] * plm;
+
+      /* compute P(m,m), P(m+1,m) and P(l,m) */
+
+      pmm = result_array[0] * eps; /* eps * P(0,0) */
+      rescalem = 1.0 / eps;
+      idxmm = 0;                   /* idx(0,0) for result_array */
+      aidxmm = 0;                  /* idx(0,0) for alm */
+
+      for (m = 1; m < lmax; ++m)
+        {
+          /* rescalem = u^m / eps */
+          rescalem *= u;
+
+          /* compute P(m,m) = d_m * u * P(m-1,m-1) */
+          idxmm += m + 1; /* idx(m,m) = idx(m-1,m-1) + m + 1 */
+          pmm *= dl[m];
+          result_array[idxmm] = pmm * rescalem;
+          plm = pmm;
+
+          /* compute P(m+1,m) = c_m * x * P(m,m) */
+          plmp1 = (cl[m] * x) * plm;
+          result_array[idxmm + m + 1] = plmp1 * rescalem;
+
+          /* compute P(l,m) for l=m+2:lmax */
+          aidxmm += Lp2 - m;            /* aidx(m,m) = aidx(m-1,m-1) + L + 2 - m */
+          al = &alm[(aidxmm + 2) << 1]; /* aidx(m+2,m) = aidx(m,m) + 2 */
+          k = idxmm + 2 * m + 3;        /* idx(m+2,m) = idx(m,m) + 2 * m + 3 */
+          for (l = m + 2; l < lmax; l += 2)
+            {
+              plm   = (al[0] * x) * plmp1 + al[1] * plm;
+              plmp1 = (al[2] * x) * plm   + al[3] * plmp1;
+
+              result_array[k]         = plm * rescalem;
+              result_array[k + l + 1] = plmp1 * rescalem;
+
+              k += (l << 1) + 3; al += 4;
+            }
+
+          if (l == lmax)
+            {
+              plm = (al[0] * x) * plmp1 + al[1] * plm;
+              result_array[k] = plm * rescalem;
+            }
+        }
+
+      /* compute P(lmax,lmax) */
+
+      rescalem *= u;
+      idxmm += m + 1; /* idx(lmax,lmax) */
+      pmm *= dl[lmax];
+      result_array[idxmm] = pmm * rescalem;
+
+      return GSL_SUCCESS;
+    }
+}
+
+#else /* old */
 
 int
 gsl_sf_legendre_arrayx(const gsl_sf_legendre_t norm,
@@ -500,7 +769,7 @@ gsl_sf_legendre_arrayx(const gsl_sf_legendre_t norm,
       for (l = 2; l <= lmax; ++l)
         {
           k += l;
-          plm = alm[k] * (x * pm1 + blm[k] * pm2);
+          plm = (alm[k] * x) * pm1 + blm[k] * pm2;
           result_array[k] = plm;
           pm2 = pm1;
           pm1 = plm;
@@ -532,7 +801,7 @@ gsl_sf_legendre_arrayx(const gsl_sf_legendre_t norm,
           for (l = m + 2; l <= lmax; ++l)
             {
               k += l; /* idx(l,m) = idx(l-1,m) + l */
-              plm = alm[k] * (x * pm1 + blm[k] * pm2);
+              plm = (alm[k] * x) * pm1 + blm[k] * pm2;
               result_array[k] = plm * rescalem;
               pm2 = pm1;
               pm1 = plm;
@@ -549,6 +818,8 @@ gsl_sf_legendre_arrayx(const gsl_sf_legendre_t norm,
       return GSL_SUCCESS;
     }
 }
+
+#endif
 
 /*
 gsl_sf_legendre_deriv_alt_arrayx()
@@ -586,7 +857,7 @@ gsl_sf_legendre_deriv_alt_arrayx(const gsl_sf_legendre_t norm,
   const double * cl = blm + nlm;
   const double * dl = cl + lmax + 1;
   const double * sqrts = dl + lmax + 1;
-  const double csfac = blm[0];
+  const double csfac = dl[0];
 
   /* compute Plm(x) */
   status = gsl_sf_legendre_arrayx(norm, lmax, x, result_array);
@@ -692,7 +963,7 @@ gsl_sf_legendre_deriv2_alt_arrayx(const gsl_sf_legendre_t norm,
   const double * cl = blm + nlm;
   const double * dl = cl + lmax + 1;
   const double * sqrts = dl + lmax + 1;
-  const double csfac = blm[0];
+  const double csfac = dl[0];
 
   /* compute Plm(x) and d/dtheta Plm(x) */
   status = gsl_sf_legendre_deriv_alt_arrayx(norm, lmax, x, result_array, result_deriv_array);
