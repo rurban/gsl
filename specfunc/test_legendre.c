@@ -50,7 +50,8 @@ ALFs for all l.
 */
 
 static double
-test_legendre_sum(const size_t l, double *p)
+test_legendre_sum(const int indexl, const size_t lmax,
+                  const size_t l, double *p)
 {
   double sum = 0.0;
   size_t idx;
@@ -58,73 +59,25 @@ test_legendre_sum(const size_t l, double *p)
 
   for (m = 0; m <= l; ++m)
     {
-      idx = gsl_sf_legendre_array_index(l, m);
+      idx = indexl ? gsl_sf_legendre_array_index(l, m) : gsl_sf_legendre_array_index_m(l, m, lmax);
       sum += p[idx] * p[idx];
     }
 
   return sum;
-} /* test_legendre_sum() */
-
-/*
-test_legendre_sum_deriv()
-  This routine computes the sum:
-
-  Sum_{m=0}^l P(l,m)(x) * dP(l,m)/dx
-
-which should equal 0 in the case of Schmidt normalized ALFs.
-*/
-
-static double
-test_legendre_sum_deriv(const int l, double *p, double *dp)
-{
-  double sum = 0.0;
-  size_t idx;
-  int m;
-
-  for (m = 0; m <= l; ++m)
-    {
-      idx = gsl_sf_legendre_array_index(l, m);
-      sum += p[idx] * dp[idx];
-    }
-
-  return sum;
-} /* test_legendre_sum_deriv() */
-
-/*
-test_legendre_sum_deriv2()
-  This routine computes the sum:
-
-  Sum_{m=0}^l P(l,m)(x) * dP(l,m)/dx
-
-which should equal 0 in the case of Schmidt normalized ALFs.
-*/
-
-static double
-test_legendre_sum_deriv2(const int l, double *p, double *dp, double *d2p)
-{
-  double sum = 0.0;
-  int m;
-
-  for (m = 0; m <= l; ++m)
-    {
-      size_t idx = gsl_sf_legendre_array_index(l, m);
-      sum += dp[idx] * dp[idx] + p[idx] * d2p[idx];
-    }
-
-  return sum;
-} /* test_legendre_sum_deriv2() */
+}
 
 static void
-test_value(const size_t lmax, const size_t l, const size_t m,
+test_value(const size_t flags, const size_t lmax, const size_t l, const size_t m,
            const double *p, const double expected, const double tol,
            const char *desc, const char *desc2)
 {
-  size_t idx = gsl_sf_legendre_array_index(l, m);
+  size_t idx;
   double value;
 
   if (l > lmax)
     return;
 
+  idx = (flags & GSL_SF_LEGENDRE_FLG_INDEXL) ? gsl_sf_legendre_array_index(l, m) : gsl_sf_legendre_array_index_m(l, m, lmax);
   value = p[idx];
 
   gsl_test_rel(value, expected, tol, "%s %s lmax=%zu l=%zu m=%zu", desc, desc2, lmax, l, m);
@@ -137,7 +90,7 @@ test_legendre_cross()
 
 static int
 test_legendre_cross(const double tol, const size_t lmax,
-                    const int csphase, const char *desc)
+                    const size_t flags, const char *desc)
 {
   int s = 0;
   const size_t lmax_P = GSL_MIN(lmax, 140);
@@ -145,6 +98,7 @@ test_legendre_cross(const double tol, const size_t lmax,
   const size_t plm_size = gsl_sf_legendre_array_n(lmax);
   const double dx = test_legendre_dx(lmax);
   const double b = 1.0 / M_SQRT2 / M_SQRTPI; /* Ylm = b * Nlm */
+  const int indexl = (flags & GSL_SF_LEGENDRE_FLG_INDEXL);
   size_t l, m;
   double x;
   double *p = malloc(plm_size * sizeof(double));
@@ -160,10 +114,10 @@ test_legendre_cross(const double tol, const size_t lmax,
   double *dp_full = malloc(nlm * sizeof(double));
   double *d2p_full = malloc(nlm * sizeof(double));
 
-  gsl_sf_legendre_precompute(GSL_SF_LEGENDRE_NONE, lmax, csphase, p);
-  gsl_sf_legendre_precompute(GSL_SF_LEGENDRE_SCHMIDT, lmax, csphase, p_schmidt);
-  gsl_sf_legendre_precompute(GSL_SF_LEGENDRE_SPHARM, lmax, csphase, p_spharm);
-  gsl_sf_legendre_precompute(GSL_SF_LEGENDRE_FULL, lmax, csphase, p_full);
+  gsl_sf_legendre_precompute(GSL_SF_LEGENDRE_NONE, lmax, flags, p);
+  gsl_sf_legendre_precompute(GSL_SF_LEGENDRE_SCHMIDT, lmax, flags, p_schmidt);
+  gsl_sf_legendre_precompute(GSL_SF_LEGENDRE_SPHARM, lmax, flags, p_spharm);
+  gsl_sf_legendre_precompute(GSL_SF_LEGENDRE_FULL, lmax, flags, p_full);
 
   for (x = -1.0; x <= 1.0; x += dx)
     {
@@ -178,7 +132,7 @@ test_legendre_cross(const double tol, const size_t lmax,
       for (l = 0; l <= lmax; ++l)
         {
           double a_lm = sqrt(2.0 / (double)l / (l + 1.0));
-          size_t l0idx = gsl_sf_legendre_array_index(l, 0);
+          size_t l0idx = indexl ? gsl_sf_legendre_array_index(l, 0) : gsl_sf_legendre_array_index_m(l, 0, lmax);
           double cl0 = sqrt((4.0 * M_PI) / (2.0 * l + 1.0));
           double clm = sqrt((8.0 * M_PI) / (2.0 * l + 1.0));
 
@@ -219,7 +173,7 @@ test_legendre_cross(const double tol, const size_t lmax,
           /* test S(l,m) = a_{lm} * P(l,m) for m > 0 */
           for (m = 1; m <= l; ++m)
             {
-              size_t lmidx = gsl_sf_legendre_array_index(l, m);
+              size_t lmidx = indexl ? gsl_sf_legendre_array_index(l, m) : gsl_sf_legendre_array_index_m(l, m, lmax);
 
               if (lmax <= lmax_P)
                 {
@@ -269,12 +223,13 @@ test_legendre_cross(const double tol, const size_t lmax,
 
 int
 test_legendre_eps(const double tol, const gsl_sf_legendre_t norm, const size_t lmax,
-                  const int csphase, const char * desc)
+                  const size_t flags, const char * desc)
 {
   int s = 0;
   const size_t nlm = gsl_sf_legendre_nlm(lmax);
   const size_t plm_size = gsl_sf_legendre_array_n(lmax);
   const double dx = test_legendre_dx(lmax);
+  const int indexl = (flags & GSL_SF_LEGENDRE_FLG_INDEXL);
   double *Plm = malloc(plm_size * sizeof(double));
   double *dPlm = malloc(nlm * sizeof(double));
   double *d2Plm = malloc(nlm * sizeof(double));
@@ -439,7 +394,7 @@ test_legendre_eps(const double tol, const gsl_sf_legendre_t norm, const size_t l
   };
 
   /* test specific values */
-  gsl_sf_legendre_precompute(norm, lmax, csphase, Plm);
+  gsl_sf_legendre_precompute(norm, lmax, flags, Plm);
 
   if (norm == GSL_SF_LEGENDRE_SCHMIDT)
     {
@@ -485,25 +440,25 @@ test_legendre_eps(const double tol, const gsl_sf_legendre_t norm, const size_t l
               size_t idx = nx * lmidx + i;
               double csfac = 1.0;
 
-              if (csphase && (m & 1))
+              if ((flags & GSL_SF_LEGENDRE_FLG_CSPHASE) && (m & 1))
                 csfac = -1.0;
 
               sprintf(buf, "x=%g", x_vals[i]);
-              test_value(lmax, l, m, Plm, csfac * P_norm[idx], tol, desc, buf);
+              test_value(flags, lmax, l, m, Plm, csfac * P_norm[idx], tol, desc, buf);
 
               sprintf(buf, "deriv x=%g", x_vals[i]);
-              test_value(lmax, l, m, dPlm, csfac * dP_norm[idx], tol, desc, buf);
+              test_value(flags, lmax, l, m, dPlm, csfac * dP_norm[idx], tol, desc, buf);
 
               sprintf(buf, "deriv2 x=%g", x_vals[i]);
-              test_value(lmax, l, m, d2Plm, csfac * d2P_norm[idx], tol, desc, buf);
+              test_value(flags, lmax, l, m, d2Plm, csfac * d2P_norm[idx], tol, desc, buf);
             }
         }
     }
 
   /* test array routines */
 
-  gsl_sf_legendre_precompute(norm, lmax, csphase, Plm);
-  gsl_sf_legendre_precompute(norm, lmax, csphase, Plm_alt);
+  gsl_sf_legendre_precompute(norm, lmax, flags, Plm);
+  gsl_sf_legendre_precompute(norm, lmax, flags, Plm_alt);
 
   for (x = -1.0 + dx; x < 1.0; x += dx)
     {
@@ -514,16 +469,14 @@ test_legendre_eps(const double tol, const gsl_sf_legendre_t norm, const size_t l
 
       for (l = 0; l <= lmax; ++l)
         {
-          double sum = test_legendre_sum(l, Plm);
-          double dsum = test_legendre_sum_deriv(l, Plm, dPlm);
-          double ddsum = test_legendre_sum_deriv2(l, Plm, dPlm, d2Plm);
+          double sum = test_legendre_sum(indexl, lmax, l, Plm);
           double rhs;
           size_t m;
 
           /* test arrays vs alternate arrays */
           for (m = 0; m <= l; ++m)
             {
-              size_t idx = gsl_sf_legendre_array_index(l, m);
+              size_t idx = indexl ? gsl_sf_legendre_array_index(l, m) : gsl_sf_legendre_array_index_m(l, m, lmax);
               gsl_test_rel(Plm[idx], Plm_alt[idx], tol, "%s Plm lmax=%zu l=%zu m=%zu x=%g", desc, lmax, l, m, x);
               gsl_test_rel(-u * dPlm[idx], dPlm_alt[idx], tol, "%s dPlm lmax=%zu l=%zu m=%zu x=%g", desc, lmax, l, m, x);
 
@@ -559,12 +512,6 @@ test_legendre_eps(const double tol, const gsl_sf_legendre_t norm, const size_t l
 
           if (norm != GSL_SF_LEGENDRE_NONE)
             gsl_test_rel(sum, rhs, tol, "%s lmax=%zu l=%zu, x=%f, sum=%.12e", desc, lmax, l, x, sum);
-
-          if (norm == GSL_SF_LEGENDRE_SCHMIDT) /*XXX*/
-            {
-              gsl_test_abs(dsum, 0.0, tol, "%s deriv lmax=%zu l=%zu, x=%f, sum=%.12e", desc, lmax, l, x, dsum);
-              gsl_test_abs(ddsum, 0.0, tol, "%s deriv2 lmax=%zu l=%zu, x=%f, sum=%.12e", desc, lmax, l, x, ddsum);
-            }
         }
     }
 
@@ -583,26 +530,46 @@ test_legendre_all(const size_t lmax)
 {
   int s = 0;
   const double tol = 1.0e-10;
+  size_t flags;
 
-  s += test_legendre_eps(tol, GSL_SF_LEGENDRE_SCHMIDT, lmax, 0, "schmidt csphase=0");
-  s += test_legendre_eps(tol, GSL_SF_LEGENDRE_SCHMIDT, lmax, 1, "schmidt csphase=1");
-
-  s += test_legendre_eps(tol, GSL_SF_LEGENDRE_SPHARM, lmax, 0, "spharm csphase=0");
-  s += test_legendre_eps(tol, GSL_SF_LEGENDRE_SPHARM, lmax, 1, "spharm csphase=1");
-
-  s += test_legendre_eps(tol, GSL_SF_LEGENDRE_FULL, lmax, 0, "full csphase=0");
-  s += test_legendre_eps(tol, GSL_SF_LEGENDRE_FULL, lmax, 1, "full csphase=1");
-
+  flags = GSL_SF_LEGENDRE_FLG_INDEXL;
+  s += test_legendre_eps(tol, GSL_SF_LEGENDRE_SCHMIDT, lmax, flags, "schmidt L nocsphase");
+  s += test_legendre_eps(tol, GSL_SF_LEGENDRE_SPHARM, lmax, flags, "spharm L nocsphase");
+  s += test_legendre_eps(tol, GSL_SF_LEGENDRE_FULL, lmax, flags, "full L nocsphase");
   if (lmax <= 100)
     {
-      s += test_legendre_eps(tol, GSL_SF_LEGENDRE_NONE, lmax, 0, "unnorm csphase=0");
-      s += test_legendre_eps(tol, GSL_SF_LEGENDRE_NONE, lmax, 1, "unnorm csphase=1");
+      s += test_legendre_eps(tol, GSL_SF_LEGENDRE_NONE, lmax, flags, "unnorm L nocsphase");
+      s += test_legendre_cross(tol, lmax, flags, "legendre cross L nocsphase");
     }
 
-  if (lmax <= 200)
+  flags = GSL_SF_LEGENDRE_FLG_INDEXL | GSL_SF_LEGENDRE_FLG_CSPHASE;
+  s += test_legendre_eps(tol, GSL_SF_LEGENDRE_SCHMIDT, lmax, flags, "schmidt L csphase");
+  s += test_legendre_eps(tol, GSL_SF_LEGENDRE_SPHARM, lmax, flags, "spharm L csphase");
+  s += test_legendre_eps(tol, GSL_SF_LEGENDRE_FULL, lmax, flags, "full L csphase");
+  if (lmax <= 100)
     {
-      s += test_legendre_cross(tol, lmax, 0, "legendre cross csphase=0");
-      s += test_legendre_cross(tol, lmax, 1, "legendre cross csphase=1");
+      s += test_legendre_eps(tol, GSL_SF_LEGENDRE_NONE, lmax, flags, "unnorm L csphase");
+      s += test_legendre_cross(tol, lmax, flags, "legendre cross L csphase");
+    }
+
+  flags = 0;
+  s += test_legendre_eps(tol, GSL_SF_LEGENDRE_SCHMIDT, lmax, flags, "schmidt M nocsphase");
+  s += test_legendre_eps(tol, GSL_SF_LEGENDRE_SPHARM, lmax, flags, "spharm M nocsphase");
+  s += test_legendre_eps(tol, GSL_SF_LEGENDRE_FULL, lmax, flags, "full M nocsphase");
+  if (lmax <= 100)
+    {
+      s += test_legendre_eps(tol, GSL_SF_LEGENDRE_NONE, lmax, flags, "unnorm M nocsphase");
+      s += test_legendre_cross(tol, lmax, flags, "legendre cross M nocsphase");
+    }
+
+  flags = GSL_SF_LEGENDRE_FLG_CSPHASE;
+  s += test_legendre_eps(tol, GSL_SF_LEGENDRE_SCHMIDT, lmax, flags, "schmidt M csphase");
+  s += test_legendre_eps(tol, GSL_SF_LEGENDRE_SPHARM, lmax, flags, "spharm M csphase");
+  s += test_legendre_eps(tol, GSL_SF_LEGENDRE_FULL, lmax, flags, "full M csphase");
+  if (lmax <= 100)
+    {
+      s += test_legendre_eps(tol, GSL_SF_LEGENDRE_NONE, lmax, flags, "unnorm M csphase");
+      s += test_legendre_cross(tol, lmax, flags, "legendre cross M csphase");
     }
 
   return s;

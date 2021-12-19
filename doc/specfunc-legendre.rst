@@ -108,8 +108,8 @@ following normalizations are provided:
         S_l^m(x) = (-1)^m \sqrt((2(l-m)! / (l+m)!)) P_l^m(x), m > 0 
 
   The factor of :math:`(-1)^m` is called the Condon-Shortley phase
-  factor and can be excluded if desired by setting the parameter
-  :code:`csphase = 0` in the function :func:`gsl_sf_legendre_precompute`
+  factor and can be included if desired by setting the flag
+  :macro:`GSL_SF_LEGENDRE_FLG_CSPHASE` in the function :func:`gsl_sf_legendre_precompute`
   below. These functions satisfy the normalization condition,
 
   .. only:: not texinfo
@@ -209,14 +209,39 @@ specifies the type of normalization to use. The possible values are
    :code:`GSL_SF_LEGENDRE_FULL`       The fully normalized associated Legendre polynomials :math:`N_l^m(x)`
    ================================== ===============================================================================
 
-.. function:: int gsl_sf_legendre_precompute (const gsl_sf_legendre_t norm, const size_t lmax, const int csphase, double result_array[])
+.. function:: int gsl_sf_legendre_precompute (const gsl_sf_legendre_t norm, const size_t lmax, const size_t flags, double result_array[])
 
    This function precomputes the multiplicative factors needed for the
    associated Legendre recurrence relations. The input :data:`norm`
    specifies the ALF normalization. The input :data:`lmax` specifies
-   the maximum ALF degree. The input :data:`csphase` should be set to
-   :math:`1` to include Condon-Shortley phase and :math:`0` to omit the
-   phase factor. The output array :data:`result_array` should have a length
+   the maximum ALF degree. The input :data:`flags` is a bitmask which
+   specifies how the ALFs are computed and stored. It can contain the
+   following values,
+
+   .. macro:: GSL_SF_LEGENDRE_FLG_CSPHASE
+
+      This flag will include the Condon-Shortley phase factor in the calculation
+      of the ALFs
+
+   .. macro:: GSL_SF_LEGENDRE_FLG_INDEXL
+
+      This flag will store the output arrays using L-major indexing,
+      so that
+
+      .. math:: \mathcal{I}_l(l,m) = \frac{l(l+1)}{2} + m
+
+      The default behavior, if this flag is not set, is to use M-major
+      indexing,
+
+      .. math:: \mathcal{I}_m(l,m,L) = m L - \frac{m(m-1)}{2} + l
+
+      where :math:`L` is the maximum ALF degree (:data:`lmax`). Due
+      to the nature of the recurrence relations used to calculate the
+      ALFs, the :math:`\mathcal{I}_m` indexing scheme is more cache efficient
+      and it is recommended to use this. The L-major indexing, :math:`\mathcal{I}_l`
+      is provided for backward compatibility.
+
+   The output array :data:`result_array` should have a length
    as returned by the function :func:`gsl_sf_legendre_array_n`. The computed
    recurrence factors are stored at the end of :data:`result_array`, leaving
    room at the front for the calculation of the ALFs.
