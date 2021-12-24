@@ -183,6 +183,36 @@ following normalizations are provided:
 
   .. math:: \int_{-1}^1 N_k^m(x) N_l^m(x) dx = \delta_{kl}
 
+* :math:`4 \pi` Normalization
+
+  The :math:`4 \pi` normalized associated Legendre polynomials are often used in geodesy and are defined as
+
+  .. only:: not texinfo
+
+     .. math:: R_l^m(x) = (-1)^m \sqrt{(2 - \delta_{m0}) (2 l + 1) {(l-m)! \over (l+m)!}} P_l^m(x)
+
+  .. only:: texinfo
+  
+     ::
+     
+        R_l^m(x) = (-1)^m \sqrt((2 - \delta_{m0}) (2 l + 1) (l-m)! / (l+m)!) P_l^m(x)
+
+  These functions satisfy the normalization condition,
+
+  .. only:: not texinfo
+
+     .. math:: \int_{-1}^1 R_k^m(x) R_l^m(x) dx = 2 \left( 2 - \delta_{m0} \right) \delta_{kl}
+
+  .. only:: texinfo
+
+     ::
+
+        \int_{-1}^1 R_k^m(x) R_l^m(x) dx = 2 (2 - \delta_{m0}) \delta_{kl}
+
+  When used in the definition of real spherical harmonics, they satisfy a
+  :math:`4\pi` normalization condition when integrated over the unit sphere.
+  More information on these functions can be found in Hofmann-Wellenhof and Moritz, 2006.
+
 The normalized associated Legendre routines below use a recurrence
 relation which is stable up to a degree and order of about 2700.
 Beyond this, the computed functions could suffer from underflow
@@ -207,6 +237,7 @@ specifies the type of normalization to use. The possible values are
    :code:`GSL_SF_LEGENDRE_SCHMIDT`    The Schmidt semi-normalized associated Legendre polynomials :math:`S_l^m(x)`
    :code:`GSL_SF_LEGENDRE_SPHARM`     The spherical harmonic associated Legendre polynomials :math:`Y_l^m(x)`
    :code:`GSL_SF_LEGENDRE_FULL`       The fully normalized associated Legendre polynomials :math:`N_l^m(x)`
+   :code:`GSL_SF_LEGENDRE_FOURPI`     The :math:`4\pi` normalized associated Legendre polynomials :math:`R_l^m(x)`
    ================================== ===============================================================================
 
 .. function:: int gsl_sf_legendre_precompute (const gsl_sf_legendre_t norm, const size_t lmax, const size_t flags, double result_array[])

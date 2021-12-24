@@ -139,8 +139,8 @@ gsl_sf_legendre_precompute(const gsl_sf_legendre_t norm, const size_t lmax,
 
   if (norm == GSL_SF_LEGENDRE_SCHMIDT)
     {
-      cl[0] = 1.0;
       alm[0] = 1.0; /* S(0,0) */
+      cl[0] = 1.0;
 
       if (lmax == 0)
         return GSL_SUCCESS;
@@ -185,6 +185,47 @@ gsl_sf_legendre_precompute(const gsl_sf_legendre_t norm, const size_t lmax,
         {
           cl[l] = sqrts[2 * l + 1];
           dl[l] = csfac * sqrt(1.0 - 0.5 / l);
+        }
+    }
+  else if (norm == GSL_SF_LEGENDRE_FOURPI)
+    {
+      alm[0] = 1.0;    /* R(0,0) */
+      cl[0] = M_SQRT3;
+
+      if (lmax == 0)
+        return GSL_SUCCESS;
+
+      cl[1] = sqrts[5];
+      dl[1] = csfac * M_SQRT3;
+
+      k = 2; /* idx(2,0) */
+      for (m = 0; m <= lmax; ++m)
+        {
+          if (m > 0)
+            {
+              /* alm and blm are unused for l=m and l=m+1 */
+              k += 2;
+            }
+
+          for (l = m + 2; l <= lmax; ++l)
+            {
+              /* a_l^m */
+              alm[2*k] = (sqrts[2 * l + 1] / sqrts[l + m]) *
+                         (sqrts[2 * l - 1] / sqrts[l - m]);
+
+              /* b_l^m */
+              alm[2*k + 1] = -(sqrts[l + m - 1] / sqrts[l + m]) *
+                              (sqrts[l - m - 1] / sqrts[l - m]) *
+                              (sqrts[2*l + 1] / sqrts[2*l - 3]);
+
+              ++k;
+            }
+        }
+
+      for (l = 2; l <= lmax; ++l)
+        {
+          cl[l] = sqrt(2.0 * l + 3.0);
+          dl[l] = csfac * sqrt(1.0 + 0.5 / l);
         }
     }
   else if (norm == GSL_SF_LEGENDRE_SPHARM)
@@ -824,6 +865,28 @@ legendre_array_l(const gsl_sf_legendre_t norm, const size_t lmax,
                 }
             }
         }
+      else if (norm == GSL_SF_LEGENDRE_FOURPI)
+        {
+          if (x == 1.0)
+            {
+              for (l = 1; l <= lmax; ++l)
+                {
+                  k += l;
+                  result_array[k] = alm[0] * sqrts[2*l + 1];
+                }
+            }
+          else
+            {
+              for (l = 1; l <= lmax; ++l)
+                {
+                  k += l;
+                  if (l & 1)
+                    result_array[k] = -alm[0] * sqrts[2*l + 1];
+                  else
+                    result_array[k] =  alm[0] * sqrts[2*l + 1];
+                }
+            }
+        }
       else if (norm == GSL_SF_LEGENDRE_NONE)
         {
           if (x == 1.0)
@@ -1061,6 +1124,24 @@ legendre_array_m(const gsl_sf_legendre_t norm, const size_t lmax,
                 }
             }
         }
+      else if (norm == GSL_SF_LEGENDRE_FOURPI)
+        {
+          if (x == 1.0)
+            {
+              for (l = 1; l <= lmax; ++l)
+                result_array[l] = alm[0] * sqrts[2*l + 1];
+            }
+          else
+            {
+              for (l = 1; l <= lmax; ++l)
+                {
+                  if (l & 1)
+                    result_array[l] = -alm[0] * sqrts[2*l + 1];
+                  else
+                    result_array[l] =  alm[0] * sqrts[2*l + 1];
+                }
+            }
+        }
       else if (norm == GSL_SF_LEGENDRE_NONE)
         {
           if (x == 1.0)
@@ -1235,7 +1316,8 @@ legendre_derivk_alt_array_l(const gsl_sf_legendre_t norm,
             }
         }
     }
-  else if (norm == GSL_SF_LEGENDRE_SCHMIDT)
+  else if ((norm == GSL_SF_LEGENDRE_SCHMIDT) ||
+           (norm == GSL_SF_LEGENDRE_FOURPI))
     {
       /* d^k/dtheta^k P(1,0) = -d^{k-1}/dtheta^{k-1} P(1,1) */
       output_array[1] = -csfac * input_array[2];
@@ -1360,7 +1442,8 @@ legendre_derivk_alt_array_m(const gsl_sf_legendre_t norm,
           idxmp1 += Lp1 - m - 1; /* idx(m+1,m+1) */
         }
     }
-  else if (norm == GSL_SF_LEGENDRE_SCHMIDT)
+  else if ((norm == GSL_SF_LEGENDRE_SCHMIDT) ||
+           (norm == GSL_SF_LEGENDRE_FOURPI))
     {
       /* d^k/dtheta^k P(1,0) = -d^{k-1}/dtheta^{k-1} P(1,1) */
       output_array[1] = -csfac * input_array[lmax + 1];

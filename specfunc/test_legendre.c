@@ -356,6 +356,43 @@ test_legendre_eps(const double tol, const gsl_sf_legendre_t norm, const size_t l
     -1.644922788379442,   1.951341240575312,   0.0000000000000000,  0.0000000000000000  /* d2/dt2 P(3,3) */
   };
 
+  const double P_fourpi[] = {
+     1.0000000000000000,  1.0000000000000000,  1.0000000000000000,  1.0000000000000000, /* P(0,0) */
+    -0.6581793068761732,  1.489563694509234,  -1.732050807568877,   1.732050807568877,  /* P(1,0) */
+     1.602123590738243,   0.883855191759374,   0.0000000000000000,  0.0000000000000000, /* P(1,1) */
+    -0.6337016648234405,  1.362659825488371,   2.23606797749979,    2.23606797749979,   /* P(2,0) */
+    -1.36133375775377,    1.699669850294463,   0.0000000000000000,  0.0000000000000000, /* P(2,1) */
+     1.656862275507533,   0.5042624316762058,  0.0000000000000000,  0.0000000000000000, /* P(2,2) */
+     1.145134082454976,   0.7940957985029255, -2.645751311064591,   2.64575131106459,   /* P(3,0) */
+    -0.4166245309628321,  2.230627690628806,   0.0000000000000000,  0.0000000000000000, /* P(3,1) */
+    -1.665785304317457,   1.147371571166028,   0.0000000000000000,  0.0000000000000000, /* P(3,2) */
+     1.655370427825749,   0.2779396450310752,  0.0000000000000000,  0.0000000000000000  /* P(3,3) */
+  };
+  const double dP_fourpi[] = {
+     0.0000000000000000,  0.0000000000000000,  0.0000000000000000,  0.0000000000000000, /* d/dt P(0,0) */
+    -1.602123590738243,  -0.883855191759374,   0.0000000000000000,  0.0000000000000000, /* d/dt P(1,0) */
+    -0.6581793068761735,  1.489563694509234,  -1.732050807568877,   1.732050807568877,  /* d/dt P(1,1) */
+     2.357899234488192,  -2.943914536802996,   0.0000000000000000,  0.0000000000000000, /* d/dt P(2,0) */
+    -2.754465755822713,   1.855933619502594,   3.872983346207416,   3.872983346207416,  /* d/dt P(2,1) */
+    -1.36133375775377,    1.699669850294462,   0.0000000000000000,  0.0000000000000000, /* d/dt P(2,2) */
+     1.020517515185309,  -5.463899648163387,   0.0000000000000000,  0.0000000000000000, /* d/dt P(3,0) */
+     5.438832016324831,   0.1309757695148213, -6.48074069840786,    6.48074069840786,   /* d/dt P(3,1) */
+    -2.686147665203831,   3.18652690230602,    0.0000000000000000,  0.0000000000000000, /* d/dt P(3,2) */
+    -2.040162008302282,   1.405237447366103,   0.0000000000000000,  0.0000000000000000  /* d/dt P(3,3) */
+  };
+  const double d2P_fourpi[] = {
+     0.0000000000000000,  0.0000000000000000,  0.0000000000000000,  0.0000000000000000, /* d2/dt2 P(0,0) */
+     0.6581793068761735, -1.489563694509235,   1.732050807568877,  -1.732050807568877,  /* d2/dt2 P(1,0) */
+    -1.602123590738243,  -0.883855191759374,   0.0000000000000000,  0.0000000000000000, /* d2/dt2 P(1,1) */
+     4.770874636793549,  -3.214571324453697,  -6.708203932499369,  -6.708203932499369,  /* d2/dt2 P(2,0) */
+     5.44533503101508,   -6.79867940117785,    0.0000000000000000,  0.0000000000000000, /* d2/dt2 P(2,1) */
+    -2.754465755822715,   1.855933619502594,   3.872983346207417,   3.872983346207417,  /* d2/dt2 P(2,2) */
+    -13.32236323670842,  -0.3208238039796884,  15.87450786638754,  -15.87450786638754,  /* d2/dt2 P(3,0) */
+     6.746919562570754,  -18.42210756211677,   0.0000000000000000,  0.0000000000000000, /* d2/dt2 P(3,1) */
+     11.09822644779246,  -1.513966481769002,  -10.2469507659596,    10.2469507659596,   /* d2/dt2 P(3,2) */
+    -3.289845576758885,   3.902682481150626,   0.0000000000000000,  0.0000000000000000  /* d2/dt2 P(3,3) */
+  };
+
   const double P_none[] = {
      1.0000000000000000,  1.0000000000000000,  1.0000000000000000,  1.0000000000000000, /* P(0,0) */
     -0.3800000000000000,  0.8600000000000000, -1.0000000000000000,  1.0000000000000000, /* P(1,0) */
@@ -413,6 +450,12 @@ test_legendre_eps(const double tol, const gsl_sf_legendre_t norm, const size_t l
       P_norm = P_full;
       dP_norm = dP_full;
       d2P_norm = d2P_full;
+    }
+  else if (norm == GSL_SF_LEGENDRE_FOURPI)
+    {
+      P_norm = P_fourpi;
+      dP_norm = dP_fourpi;
+      d2P_norm = d2P_fourpi;
     }
   else if (norm == GSL_SF_LEGENDRE_NONE)
     {
@@ -489,6 +532,8 @@ test_legendre_eps(const double tol, const gsl_sf_legendre_t norm, const size_t l
 
           if (norm == GSL_SF_LEGENDRE_SCHMIDT)
             rhs = 1.0;
+          else if (norm == GSL_SF_LEGENDRE_FOURPI)
+            rhs = 2.0 * l + 1.0;
           else if (norm == GSL_SF_LEGENDRE_SPHARM)
             {
               if (l == 0)
@@ -536,6 +581,7 @@ test_legendre_all(const size_t lmax)
   s += test_legendre_eps(tol, GSL_SF_LEGENDRE_SCHMIDT, lmax, flags, "schmidt L nocsphase");
   s += test_legendre_eps(tol, GSL_SF_LEGENDRE_SPHARM, lmax, flags, "spharm L nocsphase");
   s += test_legendre_eps(tol, GSL_SF_LEGENDRE_FULL, lmax, flags, "full L nocsphase");
+  s += test_legendre_eps(tol, GSL_SF_LEGENDRE_FOURPI, lmax, flags, "4pi L nocsphase");
   if (lmax <= 100)
     {
       s += test_legendre_eps(tol, GSL_SF_LEGENDRE_NONE, lmax, flags, "unnorm L nocsphase");
@@ -546,6 +592,7 @@ test_legendre_all(const size_t lmax)
   s += test_legendre_eps(tol, GSL_SF_LEGENDRE_SCHMIDT, lmax, flags, "schmidt L csphase");
   s += test_legendre_eps(tol, GSL_SF_LEGENDRE_SPHARM, lmax, flags, "spharm L csphase");
   s += test_legendre_eps(tol, GSL_SF_LEGENDRE_FULL, lmax, flags, "full L csphase");
+  s += test_legendre_eps(tol, GSL_SF_LEGENDRE_FOURPI, lmax, flags, "4pi L csphase");
   if (lmax <= 100)
     {
       s += test_legendre_eps(tol, GSL_SF_LEGENDRE_NONE, lmax, flags, "unnorm L csphase");
@@ -556,6 +603,7 @@ test_legendre_all(const size_t lmax)
   s += test_legendre_eps(tol, GSL_SF_LEGENDRE_SCHMIDT, lmax, flags, "schmidt M nocsphase");
   s += test_legendre_eps(tol, GSL_SF_LEGENDRE_SPHARM, lmax, flags, "spharm M nocsphase");
   s += test_legendre_eps(tol, GSL_SF_LEGENDRE_FULL, lmax, flags, "full M nocsphase");
+  s += test_legendre_eps(tol, GSL_SF_LEGENDRE_FOURPI, lmax, flags, "4pi M nocsphase");
   if (lmax <= 100)
     {
       s += test_legendre_eps(tol, GSL_SF_LEGENDRE_NONE, lmax, flags, "unnorm M nocsphase");
@@ -566,6 +614,7 @@ test_legendre_all(const size_t lmax)
   s += test_legendre_eps(tol, GSL_SF_LEGENDRE_SCHMIDT, lmax, flags, "schmidt M csphase");
   s += test_legendre_eps(tol, GSL_SF_LEGENDRE_SPHARM, lmax, flags, "spharm M csphase");
   s += test_legendre_eps(tol, GSL_SF_LEGENDRE_FULL, lmax, flags, "full M csphase");
+  s += test_legendre_eps(tol, GSL_SF_LEGENDRE_FOURPI, lmax, flags, "4pi M csphase");
   if (lmax <= 100)
     {
       s += test_legendre_eps(tol, GSL_SF_LEGENDRE_NONE, lmax, flags, "unnorm M csphase");

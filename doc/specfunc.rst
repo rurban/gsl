@@ -321,6 +321,8 @@ to compute the special functions,
 * Bunck, B. F., A fast algorithm for evaluation of normalized Hermite
   functions, BIT Numer. Math, 49: 281-295, 2009.
 
+* B. Hofmann-Wellenhof and H. Moritz, Physical Geodesy, Springer, 2006.
+
 * G.N. Watson, A Treatise on the Theory of Bessel Functions,
   2nd Edition (Cambridge University Press, 1944).
 
