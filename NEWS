@@ -1,5 +1,7 @@
 * What is new in gsl-2.8:
 
+** optimized cspline and cspline_periodic interpolation
+
 ** rewrote array routines for associated Legendre
    functions to improve efficiency; alternative
    derivative functions now accept end points as
