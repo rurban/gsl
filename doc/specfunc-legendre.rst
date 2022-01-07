@@ -223,7 +223,8 @@ versions :math:`d P_l^m(\cos{\theta})/d\theta` and
 :math:`d^2 P_l^m(\cos{\theta})/d\theta^2`. While there is a simple
 scaling relationship between the two forms, the derivatives
 involving :math:`\theta` are heavily used in spherical harmonic
-expansions and so these routines are also provided.
+expansions, and also do not suffer from singularities at the poles,
+:math:`x = \pm 1`, and so these routines are also provided.
 
 In the functions below, a parameter of type :type:`gsl_sf_legendre_t`
 specifies the type of normalization to use. The possible values are
@@ -239,6 +240,64 @@ specifies the type of normalization to use. The possible values are
    :code:`GSL_SF_LEGENDRE_FULL`       The fully normalized associated Legendre polynomials :math:`N_l^m(x)`
    :code:`GSL_SF_LEGENDRE_FOURPI`     The :math:`4\pi` normalized associated Legendre polynomials :math:`R_l^m(x)`
    ================================== ===============================================================================
+
+In the routines below which return an array of ALFs, there are two possible
+indexing schemes which can be used.
+
+* M-major indexing
+
+  This scheme uses the following indexing function to locate an ALF of degree :math:`l` and order
+  :math:`m`,
+
+  .. math:: \mathcal{I}_m(l,m,L) = m L - \frac{m(m-1)}{2} + l
+
+  where :math:`L` is the maximum degree, :code:`lmax`. This corresponds to the following memory layout,
+
+  .. math:: l \quad \overbrace{0 \; 1 \; 2 \; \cdots \; L}^{m = 0} \quad \overbrace{1 \; 2 \; \cdots \; L}^{m = 1} \quad \overbrace{2 \; 3 \; \cdots \; L}^{m = 2} \quad \cdots \quad \overbrace{L}^{m = L}
+
+  This is the default method and is recommended since it corresponds to the order that ALFs
+  are computed in their recurrence relations, and is therefore cache-efficient. The following
+  code demonstrates how to access the array elements in order,
+
+  .. code::
+
+     idx = 0;
+     for (m = 0; m <= lmax; ++m) {
+       for (l = m; l <= lmax; ++l) {
+         double value = Plm[idx]; /* (l,m) element */
+         ++idx;
+       }
+     }
+
+* L-major indexing
+
+  This scheme uses the following indexing function to locate an ALF of degree :math:`l` and order
+  :math:`m`,
+
+  .. math:: \mathcal{I}_l(l,m) = \frac{l(l+1)}{2} + m
+
+  This corresponds to the following memory layout,
+
+  .. math:: m \quad \overbrace{0}^{l = 0} \quad \overbrace{0 \; 1}^{l = 1} \quad \overbrace{0 \; 1 \; 2}^{l = 2} \quad \cdots \quad \overbrace{0 \; 1 \; 2 \; \cdots \; L}^{l = L}
+
+  The following code demonstrates how to access array elements in order,
+
+  .. code::
+
+     idx = 0;
+     for (l = 0; l <= lmax; ++l) {
+       for (m = 0; m <= l; ++m) {
+         double value = Plm[idx]; /* (l,m) element */
+         ++idx;
+       }
+     }
+
+  .. important::
+
+     The L-major indexing scheme was the default in GSL versions 2.7 and earlier. However, it
+     is not as cache efficient as the M-major indexing scheme, and so GSL v2.8 and later
+     use M-major indexing by default. It is recommended to use M-major indexing to get
+     maximum performance when computing ALFs.
 
 .. function:: int gsl_sf_legendre_precompute (const gsl_sf_legendre_t norm, const size_t lmax, const size_t flags, double result_array[])
 
@@ -257,20 +316,8 @@ specifies the type of normalization to use. The possible values are
    .. macro:: GSL_SF_LEGENDRE_FLG_INDEXL
 
       This flag will store the output arrays using L-major indexing,
-      so that
-
-      .. math:: \mathcal{I}_l(l,m) = \frac{l(l+1)}{2} + m
-
-      The default behavior, if this flag is not set, is to use M-major
-      indexing,
-
-      .. math:: \mathcal{I}_m(l,m,L) = m L - \frac{m(m-1)}{2} + l
-
-      where :math:`L` is the maximum ALF degree (:data:`lmax`). Due
-      to the nature of the recurrence relations used to calculate the
-      ALFs, the :math:`\mathcal{I}_m` indexing scheme is more cache efficient
-      and it is recommended to use this. The L-major indexing, :math:`\mathcal{I}_l`
-      is provided for backward compatibility.
+      :math:`\mathcal{I}_l(l,m)`. If this flag is not set, the output
+      arrays will use M-major indexing, :math:`\mathcal{I}_m(l,m,L)`.
 
    The output array :data:`result_array` should have a length
    as returned by the function :func:`gsl_sf_legendre_array_n`. The computed
@@ -369,8 +416,9 @@ specifies the type of normalization to use. The possible values are
    These functions are similar to their :code:`arrayx` counterparts above,
    except they compute the recurrence factors by calling the function
    :func:`gsl_sf_legendre_precompute` on each call. These functions
-   omit the Condon-Shortley phase factor. These functions are
-   provided for backward compatibility, but it is recommended to use instead
+   omit the Condon-Shortley phase factor, and store the output arrays
+   in L-major order. These functions are provided for backward compatibility,
+   but it is recommended to use instead
    the :code:`arrayx` functions which are more efficient when calculating
    ALFs for multiple input points :math:`x`.
 
