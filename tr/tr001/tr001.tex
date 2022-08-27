@@ -413,6 +413,8 @@ which corresponds to the memory layout
 $$
 l \quad \overbrace{0 \quad 1 \quad 2 \quad \cdots \quad L}^{m \; = \; 0} \quad \overbrace{1 \quad 2 \quad \cdots \quad L}^{m \; = \; 1} \quad \overbrace{2 \quad \cdots \quad L}^{m \; = \; 2} \quad \cdots \quad \overbrace{L}^{m \; = \; L}
 $$
+This memory layout was inspired by the SHTns software package
+\citep{schaeffer2013}.
 Here we group entries according to order $m$, and in each $m$ block, consecutive elements correspond to increasing $l$.
 This memory scheme is ideal for the recurrence Eq.~\eqref{eqn:R1} since the terms $a_l^m,b_l^m$ will be needed
 during one iteration, while the terms $a_{l+1}^m,b_{l+1}^m$ will be needed on the next. We go one step further and
@@ -434,7 +436,7 @@ Legendre functions and their derivatives.
 \subsection{Known identities}
 
 \begin{figure}[ht]
-\includegraphics[width=\textwidth]{legeps.png}
+\includegraphics[width=\textwidth]{plots/legeps.png}
 \caption{Left: $\epsilon_{2700}(x)$ for $2000$ randomly distributed points
 on $[-1,1]$. Right: Map of $\log_{10}(\epsilon_l(x))$ as a function of
 ALF degree $l$ and $x$. Schmidt normalization is used.
@@ -461,7 +463,7 @@ input $x$.
 \subsection{Comparison with arbitrary precision libraries}
 
 \begin{figure}[ht]
-\includegraphics[width=\textwidth]{compare.png}
+\includegraphics[width=\textwidth]{plots/compare.png}
 \caption{
 Log of relative error between GSL and mpmath calculations plotted versus
 ALF degree and order for $\theta = 60^{\circ}$ (left),
@@ -494,7 +496,7 @@ degree 2000 and order 1500 for $\theta = 25^{\circ}$.
 \section{Benchmarks}
 
 \begin{figure}[ht]
-\includegraphics[width=\textwidth]{bench.png}
+\includegraphics[width=\textwidth]{plots/bench.png}
 \caption{Top: Average time of ALF calculation for different libraries as a function of ALF
 degree, for the input $x = -0.75$. Bottom: Ratio of library times to the SHTns library.}
 \label{fig:bench}
