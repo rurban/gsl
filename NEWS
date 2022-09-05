@@ -25,6 +25,7 @@
    - gsl_linalg_QR_UU_lssvx
    - gsl_linalg_QR_UD_lssvx
    - gsl_linalg_QR_UD_QTvec
+   - gsl_linalg_complex_cholesky_{decomp2,svx2,solve2,scale,scale_apply}
 
 ** add Lebedev quadrature (gsl_integration_lebedev)
 

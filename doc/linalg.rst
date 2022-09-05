@@ -1446,16 +1446,15 @@ both the scaled and unscaled systems.
    stored in-place in :data:`cholesky`.
 
 .. function:: int gsl_linalg_cholesky_decomp2 (gsl_matrix * A, gsl_vector * S)
+              int gsl_linalg_complex_cholesky_decomp2 (gsl_matrix_complex * A, gsl_vector * S)
 
    This function calculates a diagonal scaling transformation :math:`S` for
    the symmetric, positive-definite square matrix :data:`A`, and then
    computes the Cholesky decomposition :math:`S A S = L L^T`.
    On input, the values from the diagonal and lower-triangular part of the matrix :data:`A` are
    used (the upper triangular part is ignored).  On output the diagonal and lower triangular part
-   of the input matrix :data:`A` contain the matrix :math:`L`, while the upper triangular part
-   of the input matrix is overwritten with :math:`L^T` (the diagonal terms being
-   identical for both :math:`L` and :math:`L^T`).  If the matrix is not
-   positive-definite then the decomposition will fail, returning the
+   of the input matrix :data:`A` contain the matrix :math:`L`.
+   If the matrix is not positive-definite then the decomposition will fail, returning the
    error code :macro:`GSL_EDOM`. The diagonal scale factors are stored in :data:`S`
    on output.
 
@@ -1463,21 +1462,25 @@ both the scaled and unscaled systems.
    handler first to avoid triggering an error.
 
 .. function:: int gsl_linalg_cholesky_solve2 (const gsl_matrix * cholesky, const gsl_vector * S, const gsl_vector * b, gsl_vector * x)
+              int gsl_linalg_complex_cholesky_solve2 (const gsl_matrix_complex * cholesky, const gsl_vector * S, const gsl_vector_complex * b, gsl_vector_complex * x)
 
    This function solves the system :math:`(S A S) (S^{-1} x) = S b` using the Cholesky
    decomposition of :math:`S A S` held in the matrix :data:`cholesky` which must
-   have been previously computed by :func:`gsl_linalg_cholesky_decomp2`.
+   have been previously computed by :func:`gsl_linalg_cholesky_decomp2` or
+   :func:`gsl_linalg_complex_cholesky_decomp2`.
 
 .. function:: int gsl_linalg_cholesky_svx2 (const gsl_matrix * cholesky, const gsl_vector * S, gsl_vector * x)
+              int gsl_linalg_complex_cholesky_svx2 (const gsl_matrix_complex * cholesky, const gsl_vector * S, gsl_vector_complex * x)
 
    This function solves the system :math:`(S A S) (S^{-1} x) = S b` in-place using the
    Cholesky decomposition of :math:`S A S` held in the matrix :data:`cholesky`
    which must have been previously computed by
-   :func:`gsl_linalg_cholesky_decomp2`.  On input :data:`x` should
-   contain the right-hand side :math:`b`, which is replaced by the
+   :func:`gsl_linalg_cholesky_decomp2` or :func:`gsl_linalg_complex_cholesky_decomp2`.
+   On input :data:`x` should contain the right-hand side :math:`b`, which is replaced by the
    solution on output.
 
 .. function:: int gsl_linalg_cholesky_scale (const gsl_matrix * A, gsl_vector * S)
+              int gsl_linalg_complex_cholesky_scale (const gsl_matrix_complex * A, gsl_vector * S)
 
    This function calculates a diagonal scaling transformation of the
    symmetric, positive definite matrix :data:`A`, such that
@@ -1489,6 +1492,7 @@ both the scaled and unscaled systems.
    is set to :math:`1`.
 
 .. function:: int gsl_linalg_cholesky_scale_apply (gsl_matrix * A, const gsl_vector * S)
+              int gsl_linalg_complex_cholesky_scale_apply (gsl_matrix_complex * A, const gsl_vector * S)
 
    This function applies the scaling transformation :data:`S` to the matrix :data:`A`. On output,
    :data:`A` is replaced by :math:`S A S`.
