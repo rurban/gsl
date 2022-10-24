@@ -81,10 +81,6 @@ int gsl_bspline_init_periodic (const double a, const double b, gsl_bspline_works
 
 int gsl_bspline_init (const gsl_vector * t, gsl_bspline_workspace * w);
 
-int gsl_bspline_init_interp (const gsl_vector * x, gsl_bspline_workspace * w);
-
-int gsl_bspline_col_interp(const gsl_vector * tau, gsl_matrix * XB, gsl_bspline_workspace * w);
-
 int gsl_bspline_proj_rhs(const gsl_function * F, gsl_vector * y, gsl_bspline_workspace * w);
 
 INLINE_DECL size_t gsl_bspline_find_interval (const double x, int *flag, gsl_bspline_workspace * w);
@@ -141,6 +137,18 @@ int gsl_bspline_calc_integ(const double a, const double b,
 
 int gsl_bspline_basis_integ(const double a, const double b,
                             gsl_vector * bint, gsl_bspline_workspace * w);
+
+/* interp.c */
+
+int gsl_bspline_init_interp (const gsl_vector * x, gsl_bspline_workspace * w);
+
+int gsl_bspline_init_hermite(const size_t nderiv, const gsl_vector * x, gsl_bspline_workspace * w);
+
+int gsl_bspline_col_interp(const gsl_vector * tau, gsl_matrix * XB, gsl_bspline_workspace * w);
+
+int gsl_bspline_interp_chermite(const gsl_vector * x, const gsl_vector * y,
+                                const gsl_vector * dy, gsl_vector * c,
+                                const gsl_bspline_workspace * w);
 
 /* ls.c */
 

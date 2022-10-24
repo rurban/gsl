@@ -1,6 +1,6 @@
 /* bspline/test_interp.c
  *
- * Copyright (C) 2019, 2020, 2021 Patrick Alken
+ * Copyright (C) 2019, 2020, 2021, 2022 Patrick Alken
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -67,6 +67,38 @@ test_interp_eps (const size_t n, const size_t order, const double tol,
   gsl_vector_uint_free(ipiv);
 }
 
+static void
+test_interp_hermite_eps (const size_t n, const size_t order, const double tol,
+                         const double * data_x, const double * data_y, const double * data_dy,
+                         const char * desc)
+{
+  const size_t nderiv = 1;
+  gsl_vector_const_view xv = gsl_vector_const_view_array(data_x, n);
+  gsl_vector_const_view yv = gsl_vector_const_view_array(data_y, n);
+  gsl_vector_const_view dyv = gsl_vector_const_view_array(data_dy, n);
+  const size_t ncontrol = (nderiv + 1) * (n + 2) - order;
+  gsl_bspline_workspace * work = gsl_bspline_alloc_ncontrol(order, ncontrol);
+  gsl_vector * c = gsl_vector_alloc(ncontrol);
+  size_t i;
+
+  gsl_bspline_init_hermite(nderiv, &xv.vector, work);
+  gsl_bspline_interp_chermite(&xv.vector, &yv.vector, &dyv.vector, c, work);
+
+  for (i = 0; i < n; ++i)
+    {
+      double result, dresult;
+
+      gsl_bspline_calc(data_x[i], c, &result, work);
+      gsl_bspline_calc_deriv(data_x[i], c, nderiv, &dresult, work);
+
+      gsl_test_rel(result, data_y[i], tol, "%s order=%zu i=%zu", desc, order, i);
+      gsl_test_rel(dresult, data_dy[i], tol, "%s deriv order=%zu i=%zu", desc, order, i);
+    }
+  
+  gsl_bspline_free(work);
+  gsl_vector_free(c);
+}
+
 static int
 test_interp (void)
 {
@@ -74,14 +106,16 @@ test_interp (void)
 
   {
     double data_x[6] = { 0.0, 0.2, 0.4, 0.6, 0.8, 1.0 };
-    double data_y[6] = { 1.0, 
-                         0.961538461538461, 0.862068965517241, 
-                         0.735294117647059, 0.609756097560976, 
-                         0.500000000000000 };
+    double data_y[6] = { 1.0, 0.961538461538461, 0.862068965517241, 
+                         0.735294117647059, 0.609756097560976, 0.500000000000000 };
+    double data_dy[6] = {  0.000000000000e+00, -3.698224852071e-01, -5.945303210464e-01,
+                          -6.487889273356e-01, -5.948839976205e-01, -5.000000000000e-01 };
 
     test_interp_eps(6, 2, GSL_DBL_EPSILON, data_x, data_y, "1/(1+x^2) interpolation");
     test_interp_eps(6, 3, GSL_DBL_EPSILON, data_x, data_y, "1/(1+x^2) interpolation");
     test_interp_eps(6, 4, 10.0 * GSL_DBL_EPSILON, data_x, data_y, "1/(1+x^2) interpolation");
+
+    test_interp_hermite_eps(6, 4, 1.0e2 * GSL_DBL_EPSILON, data_x, data_y, data_dy, "1/(1+x^2) Hermite interpolation");
   }
 
   {

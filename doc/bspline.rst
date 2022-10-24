@@ -223,6 +223,19 @@ Initializing the knots vector
    which satisfy the Schoenberg-Whitney conditions, although this may not be
    the optimal knot vector for a given interpolation problem.
 
+.. function:: int gsl_bspline_init_hermite(const size_t nderiv, const gsl_vector * x, gsl_bspline_workspace * w)
+
+   This function calculates a knot vector suitable for performing Hermite
+   interpolation data at the :math:`n` abscissa values provided in :data:`x`,
+   which must be in ascending order. The parameter :data:`nderiv` specifies
+   the maximum derivative order which will be interpolated.
+
+   The knot vector has length :math:`(m+1)(n+2)`, where :math:`m = nderiv`, and is given by,
+
+   .. math:: \mathbf{t} = \{ \underbrace{x_0, \dots, x_0}_{m+1 \textrm{ copies}}, \underbrace{x_1, \dots, x_1}_{m+1}, \dots, \underbrace{x_n, \dots, x_n}_{m+1}, \underbrace{x_{n+1}, \dots, x_{n+1}}_{m+1} \}
+
+   This function uses the convention that :math:`x_0 = x_1` and :math:`x_{n+1} = x_n`.
+
 .. function:: int gsl_bspline_init (const gsl_vector * t, gsl_bspline_workspace * w)
 
    This function sets the knot vector equal to the user-supplied vector :data:`t` which
@@ -640,6 +653,47 @@ these conditions, see the function :func:`gsl_bspline_init_interp`.
    matrix is stored in :data:`XB` on output in banded storage format suitable
    for use with the banded LU routines. Therefore, :data:`XB` must have dimension
    :math:`n`-by-:math:`3(k-1) + 1`.
+
+.. index::
+   single: basis splines, Hermite interpolation
+
+Hermite Interpolation with B-splines
+====================================
+
+Given a set of :math:`n` data interpolation sites,
+:math:`x_1 < x_2 < \dots < x_n`, and a set of interpolation
+values,
+
+.. math:: f_i^{(j)}, \qquad i=1,\dots,n, j=0,1,\dots,m
+
+then there is a unique interpolating spline of order
+:math:`k = 2m+2` which will match the given function values
+(and their derivatives). The spline has :math:`(m+1)n` control
+points and is given by,
+
+.. math:: f(x) = \sum_{j=1}^{(m+1)n} c_j B_j(x)
+
+This spline will satisfy,
+
+.. math:: f^{(j)}(x_i) = f_i^{(j)}, \qquad i=1,\dots,n, j=0,1,\dots,m
+
+Mummy (1989) provides an efficient algorithm to determine the spline
+coefficients :math:`c_j`.
+
+.. function:: int gsl_bspline_interp_chermite(const gsl_vector * x, const gsl_vector * y, const gsl_vector * dy, gsl_vector * c, const gsl_bspline_workspace * w)
+
+   This function will calculate the coefficients of an interpolating
+   cubic Hermite spline which match the provided function values :math:`y_i`
+   and first derivatives :math:`y'_i` at the interpolation sites
+   :math:`x_i`. The inputs :data:`x`, :data:`y`, :data:`dy` are
+   all of the same length :math:`n` and contain the :math:`x_i`,
+   :math:`y_i`, and :math:`y'_i` respectively. On output, the spline coefficients
+   are stored in :data:`c`, which must have length :math:`2n`.
+
+   This function is specifically designed for cubic Hermite splines, and
+   so the spline order must be :math:`k = 4`. The function
+   :func:`gsl_bspline_init_hermite` must be called to initialize the knot vector.
+   The algorithm used is provided by Mummy (1989).
 
 Projection onto the B-spline Basis
 ==================================
@@ -1072,6 +1126,9 @@ found in the following references,
   Computer Graphics and Image Processing, 20, 1982.
 
 * P. Dierckx, *Curve and surface fitting with splines*, Oxford University Press, 1995.
+
+* M. S. Mummy, *Hermite interpolation with B-splines*,
+  Computer Aided Geometric Design, 6, 177--179, 1989.
 
 Further information of Greville abscissae and B-spline collocation
 can be found in the following paper,

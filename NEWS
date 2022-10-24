@@ -1,5 +1,7 @@
 * What is new in gsl-2.8:
 
+** add routines for Hermite B-spline interpolation
+
 ** fix for bug #59624
 
 ** fix for bug #59781 (M. Dunlap)
