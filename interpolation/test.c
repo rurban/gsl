@@ -139,14 +139,11 @@ make_xy_table (double x[], double y[], size_t n)
 }
 
 static int
-test_interp (
-  const xy_table * data_table,
-  const gsl_interp_type * T,
-  xy_table * test_table,
-  xy_table * test_d_table,
-  xy_table * test_i_table
-  )
+test_interp (const xy_table * data_table, const gsl_interp_type * T,
+             const xy_table * test_table, const xy_table * test_d_table,
+             const xy_table * test_i_table)
 {
+  const double tol = 1.0e-10;
   int status = 0, s1, s2, s3;
   size_t i;
 
@@ -165,7 +162,8 @@ test_interp (
       double y;
       double deriv;
       double integ;
-      double diff_y, diff_deriv, diff_integ;
+      double diff_y;
+
       s1 = gsl_interp_eval_e (interp, data_table->x, data_table->y, x, a, &y);
       s2 = gsl_interp_eval_deriv_e (interp, data_table->x, data_table->y, x, a, &deriv);
       s3 = gsl_interp_eval_integ_e (interp, data_table->x, data_table->y, test_table->x[0], x, a, &integ);
@@ -174,16 +172,26 @@ test_interp (
       gsl_test (s2, "gsl_interp_eval_deriv_e %s", gsl_interp_name(interp));
       gsl_test (s3, "gsl_interp_eval_integ_e %s", gsl_interp_name(interp));
 
-      gsl_test_abs (y, test_table->y[i], 1e-10, "%s %d", gsl_interp_name(interp), i);
-      gsl_test_abs (deriv, test_d_table->y[i], 1e-10, "%s deriv %d", gsl_interp_name(interp), i);
-      gsl_test_abs (integ, test_i_table->y[i], 1e-10, "%s integ %d", gsl_interp_name(interp), i);
-
+      gsl_test_abs (y, test_table->y[i], tol, "%s %d", gsl_interp_name(interp), i);
       diff_y = y - test_table->y[i];
-      diff_deriv = deriv - test_d_table->y[i];
-      diff_integ = integ - test_i_table->y[i];
-      if (fabs (diff_y) > 1.e-10 || fabs(diff_deriv) > 1.0e-10 || fabs(diff_integ) > 1.0e-10) {
+      if (fabs (diff_y) > tol)
         status++;
-      }
+
+      if (test_d_table != NULL)
+        {
+          double diff_deriv = deriv - test_d_table->y[i];
+          gsl_test_abs (deriv, test_d_table->y[i], tol, "%s deriv %d", gsl_interp_name(interp), i);
+          if (fabs(diff_deriv) > tol)
+            status++;
+        }
+
+      if (test_i_table != NULL)
+        {
+          double diff_integ = integ - test_i_table->y[i];
+          gsl_test_abs (integ, test_i_table->y[i], tol, "%s integ %d", gsl_interp_name(interp), i);
+          if (fabs(diff_integ) > tol)
+            status++;
+        }
     }
 
   gsl_interp_accel_free (a);
@@ -472,6 +480,39 @@ test_cspline3 (void)
   s = test_interp (&data_table, gsl_interp_cspline, &test_table, &test_d_table, &test_i_table);
   gsl_test (s, "cspline arbitrary data interpolation");
   return s;
+}
+
+static int
+test_cspline4(void)
+{
+  int status = 0;
+  const size_t nmax = 10;
+  double * x = malloc(nmax * sizeof(double));
+  double * y = malloc(nmax * sizeof(double));
+  size_t n;
+
+  for (n = 2; n <= nmax; ++n)
+    {
+      int s;
+      xy_table data_table = make_xy_table(x, y, n);
+      double dx = 2.0 * M_PI / (n - 1.0);
+      size_t i;
+
+      for (i = 0; i < n; ++i)
+        {
+          x[i] = i * dx;
+          y[i] = cos(x[i]);
+        }
+
+      s = test_interp (&data_table, gsl_interp_cspline, &data_table, NULL, NULL);
+      gsl_test (s, "cspline cosine data interpolation");
+      status += s;
+    }
+
+  free(x);
+  free(y);
+
+  return status;
 }
 
 static int
@@ -1221,6 +1262,7 @@ main (int argc, char **argv)
   status += test_cspline();
   status += test_cspline2();
   status += test_cspline3();
+  status += test_cspline4();
   status += test_csplinep();
   status += test_csplinep2();
   status += test_akima();

@@ -30,6 +30,10 @@
 #undef TYPE
 #endif
 
+#ifdef REAL_FUNCTION
+#undef REAL_FUNCTION
+#endif
+
 #ifdef REAL_TYPE
 #undef REAL_TYPE
 #endif

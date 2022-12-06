@@ -181,6 +181,8 @@ int gsl_vector_complex_float_scale (gsl_vector_complex_float * a, const gsl_comp
 int gsl_vector_complex_float_add_constant (gsl_vector_complex_float * a, const gsl_complex_float x);
 int gsl_vector_complex_float_axpby (const gsl_complex_float alpha, const gsl_vector_complex_float * x, const gsl_complex_float beta, gsl_vector_complex_float * y);
 
+int gsl_vector_complex_float_div_real (gsl_vector_complex_float * a, const gsl_vector_float * b);
+
 INLINE_DECL gsl_complex_float gsl_vector_complex_float_get (const gsl_vector_complex_float * v, const size_t i);
 INLINE_DECL void gsl_vector_complex_float_set (gsl_vector_complex_float * v, const size_t i, gsl_complex_float z);
 INLINE_DECL gsl_complex_float *gsl_vector_complex_float_ptr (gsl_vector_complex_float * v, const size_t i);

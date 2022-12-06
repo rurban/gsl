@@ -215,11 +215,13 @@
 #define QUALIFIED_VIEW(dir,name) CONCAT4(dir,SHORT,QUALIFIER,name)
 #endif
 #if defined(BASE_GSL_COMPLEX)
+#define REAL_FUNCTION(dir,name) CONCAT3(dir,QUALIFIER,name)
 #define REAL_TYPE(dir) dir
 #define REAL_VIEW(dir,name) CONCAT2(dir,name)
 #define QUALIFIED_REAL_TYPE(dir) QUALIFIER dir
 #define QUALIFIED_REAL_VIEW(dir,name) CONCAT3(dir,QUALIFIER,name)
 #else
+#define REAL_FUNCTION(a,c) CONCAT4(a,SHORT_REAL,QUALIFIER,c)
 #define REAL_TYPE(dir) CONCAT2(dir,SHORT_REAL)
 #define REAL_VIEW(dir,name) CONCAT3(dir,SHORT_REAL,name)
 #define QUALIFIED_REAL_TYPE(dir) QUALIFIER CONCAT2(dir,SHORT_REAL)
@@ -240,11 +242,13 @@
 #define QUALIFIED_VIEW(dir,name) CONCAT3(dir,SHORT,name)
 #endif
 #if defined(BASE_GSL_COMPLEX)
+#define REAL_FUNCTION(dir,name) CONCAT2(dir,name)
 #define REAL_TYPE(dir) dir
 #define REAL_VIEW(dir,name) CONCAT2(dir,name)
 #define QUALIFIED_REAL_TYPE(dir) dir
 #define QUALIFIED_REAL_VIEW(dir,name) CONCAT2(dir,name)
 #else
+#define REAL_FUNCTION(a,c) CONCAT3(a,SHORT_REAL,c)
 #define REAL_TYPE(dir) CONCAT2(dir,SHORT_REAL)
 #define REAL_VIEW(dir,name) CONCAT3(dir,SHORT_REAL,name)
 #define QUALIFIED_REAL_TYPE(dir) CONCAT2(dir,SHORT_REAL)

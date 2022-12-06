@@ -234,7 +234,8 @@ Initializing the knots vector
 
    .. math:: \mathbf{t} = \{ \underbrace{x_0, \dots, x_0}_{m+1 \textrm{ copies}}, \underbrace{x_1, \dots, x_1}_{m+1}, \dots, \underbrace{x_n, \dots, x_n}_{m+1}, \underbrace{x_{n+1}, \dots, x_{n+1}}_{m+1} \}
 
-   This function uses the convention that :math:`x_0 = x_1` and :math:`x_{n+1} = x_n`.
+   This function uses the convention that :math:`x_0 = x_1` and :math:`x_{n+1} = x_n`. See
+   Mummy (1989) for more details.
 
 .. function:: int gsl_bspline_init (const gsl_vector * t, gsl_bspline_workspace * w)
 

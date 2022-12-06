@@ -692,6 +692,15 @@ Vector operations
    This function performs the operation :math:`y \leftarrow \alpha x + \beta y`. The
    vectors :data:`x` and :data:`y` must have the same length.
 
+The following additional functions are available for complex vector operations.
+
+.. function:: int gsl_vector_complex_div_real (gsl_vector_complex * a, const gsl_vector * b)
+
+   This function divides the elements of complex vector :data:`a` by the elements
+   of real vector :data:`b`.  The result :math:`a_i \leftarrow a_i / b_i` is
+   stored in :data:`a` and :data:`b` remains unchanged. The two vectors must
+   have the same length.
+
 Finding maximum and minimum elements of vectors
 -----------------------------------------------
 

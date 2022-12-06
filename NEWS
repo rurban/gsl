@@ -18,6 +18,7 @@
 ** add functions:
    - gsl_matrix_complex_conjugate
    - gsl_vector_complex_conj_memcpy
+   - gsl_vector_complex_div_real
    - gsl_linalg_QR_lssolvem_r
    - gsl_linalg_complex_QR_lssolvem_r
    - gsl_linalg_complex_QR_QHmat_r

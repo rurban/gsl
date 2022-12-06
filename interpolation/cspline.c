@@ -422,7 +422,7 @@ cspline_eval_integ (const void * vstate,
 static const gsl_interp_type cspline_type = 
 {
   "cspline", 
-  3,
+  2,
   &cspline_alloc,
   &cspline_init,
   &cspline_eval,
