@@ -1,5 +1,8 @@
 * What is new in gsl-2.8:
 
+** updated multilarge TSQR method to store ||z_2|| and
+   provide it to the user
+
 ** add routines for Hermite B-spline interpolation
 
 ** fix for bug #59624

@@ -1294,15 +1294,45 @@ Tall Skinny QR (TSQR) Approach
 
 An algorithm which has better numerical stability for ill-conditioned
 problems is known as the Tall Skinny QR (TSQR) method. This method
-is based on computing the thin QR decomposition of the least squares
-matrix :math:`X = Q R`, where :math:`Q` is an :math:`n`-by-:math:`p` matrix
-with orthogonal columns, and :math:`R` is a :math:`p`-by-:math:`p`
-upper triangular matrix. Once these factors are calculated, the
-residual becomes
+is based on computing the QR decomposition of the least squares
+matrix,
 
-.. math:: \chi^2 = || Q^T y - R c ||^2 + \lambda^2 || c ||^2
+.. only:: not texinfo
 
-which can be written as the matrix equation
+   .. math:: X = Q \begin{pmatrix} R \\ 0 \end{pmatrix}
+   
+.. only:: texinfo
+
+   ::
+
+      X = Q [ R; 0 ]
+
+where :math:`Q` is an :math:`n`-by-:math:`n` orthogonal matrix,
+and :math:`R` is a :math:`p`-by-:math:`p` upper triangular matrix.
+If we define,
+
+.. only:: not texinfo
+
+   .. math:: z = Q^T y = \begin{pmatrix} z_1 \\ z_2 \end{pmatrix}
+
+.. only:: texinfo
+
+   ::
+
+      z = Q^T y = [ z_1 ; z_2 ]
+
+where :math:`z_1` is :math:`p`-by-1 and :math:`z_2` is :math:`(n-p)`-by-1,
+then the residual becomes
+
+.. math::
+   
+   \chi^2 &= \left|\left| y - X c \right|\right|^2 + \lambda^2 ||c||^2 \\
+          &= \left|\left| Q^T y - \begin{pmatrix} R \\ 0 \end{pmatrix} c \right|\right|^2 + \lambda^2 || c ||^2 \\
+          &= \left|\left| \begin{pmatrix} z_1 \\ z_2 \end{pmatrix} - \begin{pmatrix} R \\ 0 \end{pmatrix} c \right|\right|^2 + \lambda^2 || c ||^2 \\
+          &= \left|\left| \begin{pmatrix} z_1 \\ 0 \end{pmatrix} - \begin{pmatrix} R \\ \lambda I \end{pmatrix} c \right|\right|^2 + || z_2 ||^2
+
+Since :math:`z_2` does not depend on :math:`c`, the solution can be found
+by solving the least squares system,
 
 .. only:: not texinfo
 
@@ -1316,7 +1346,7 @@ which can be written as the matrix equation
       \right) c =
       \left(
         \begin{array}{c}
-          Q^T y \\
+          z_1 \\
           0
         \end{array}
       \right)
@@ -1330,11 +1360,11 @@ which can be written as the matrix equation
 The matrix on the left hand side is now a much
 smaller :math:`2p`-by-:math:`p` matrix which can
 be solved with a standard SVD approach. The
-:math:`Q` matrix is just as large as the original
-matrix :math:`X`, however it does not need to be
+:math:`Q` matrix is large, however it does not need to be
 explicitly constructed. The TSQR algorithm
 computes only the :math:`p`-by-:math:`p` matrix
-:math:`R` and the :math:`p`-by-1 vector :math:`Q^T y`,
+:math:`R`, the :math:`p`-by-1 vector :math:`z_1`,
+and the norm :math:`||z_2||`,
 and updates these quantities as new blocks
 are added to the system. Each time a new block of rows
 (:math:`X_i,y_i`) is added, the algorithm performs a QR decomposition
@@ -1561,13 +1591,16 @@ Large Dense Linear Least Squares Routines
 
 .. function:: const gsl_matrix * gsl_multilarge_linear_matrix_ptr (const gsl_multilarge_linear_workspace * work)
 
-   For the normal equations method, this function returns a pointer to the :math:`X^T X` matrix. For
-   the TSQR method, this function returns a pointer to the upper triangular :math:`R` matrix.
+   For the normal equations method, this function returns a pointer to the :math:`X^T X` matrix
+   of size :math:`p`-by-:math:`p`. For the TSQR method, this function returns a pointer to the
+   upper triangular :math:`R` matrix of size :math:`p`-by-:math:`p`.
 
 .. function:: const gsl_vector * gsl_multilarge_linear_rhs_ptr (const gsl_multilarge_linear_workspace * work)
 
-   For the normal equations method, this function returns a pointer to the :math:`X^T y` right hand side
-   vector. For the TSQR method, this function returns a pointer to the :math:`Q^T y` right hand side vector.
+   For the normal equations method, this function returns a pointer to the :math:`p`-by-1 right hand
+   side vector :math:`X^T y`. For the TSQR method, this function returns a pointer to a vector of length
+   :math:`p+1`. The first :math:`p` elements of this vector contain :math:`z_1`, while the last element
+   contains :math:`||z_2||`.
 
 .. function:: int gsl_multilarge_linear_rcond (double * rcond, gsl_multilarge_linear_workspace * work)
 
