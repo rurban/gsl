@@ -648,6 +648,17 @@ squares problem are as follows:
    is equal to :math:`W^{1/2} X` and :data:`Wy` is equal to :math:`W^{1/2} y`. It is allowed
    for :data:`WX` = :data:`X` and :data:`Wy` = :data:`y` for an in-place transform.
 
+.. function:: int gsl_multifit_linear_lreg (const double smin, const double smax, gsl_vector * reg_param)
+
+   This function computes a set of possible regularization parameters for L-curve analysis
+   and stores them in the output vector :data:`reg_param` of length :math:`k`, where :math:`k` is
+   the number of desired points on the L-curve. The regularization parameters are equally logarithmically
+   distributed between the provided values :data:`smin` and :data:`smax`, which typically correspond to
+   the minimum and maximum singular value of the least squares matrix in standard form.
+   The regularization parameters are calculated as,
+
+   .. math:: \lambda_i = S_{min} \left( \frac{S_{max}}{S_{min}} \right)^{\frac{i-1}{k-1}}, \quad i = 1, \dots, k
+
 .. function:: int gsl_multifit_linear_lcurve (const gsl_vector * y, gsl_vector * reg_param, gsl_vector * rho, gsl_vector * eta, gsl_multifit_linear_workspace * work)
 
    This function computes the L-curve for a least squares system
@@ -1329,9 +1340,10 @@ then the residual becomes
    \chi^2 &= \left|\left| y - X c \right|\right|^2 + \lambda^2 ||c||^2 \\
           &= \left|\left| Q^T y - \begin{pmatrix} R \\ 0 \end{pmatrix} c \right|\right|^2 + \lambda^2 || c ||^2 \\
           &= \left|\left| \begin{pmatrix} z_1 \\ z_2 \end{pmatrix} - \begin{pmatrix} R \\ 0 \end{pmatrix} c \right|\right|^2 + \lambda^2 || c ||^2 \\
-          &= \left|\left| \begin{pmatrix} z_1 \\ 0 \end{pmatrix} - \begin{pmatrix} R \\ \lambda I \end{pmatrix} c \right|\right|^2 + || z_2 ||^2
+          &= \left|\left| z_1 - R c \right|\right|^2 + || z_2 ||^2 + \lambda^2 || c ||^2 \\
+          &= \left|\left| \begin{pmatrix} z_1 \\ 0 \end{pmatrix} - \begin{pmatrix} R \\ \lambda I_p \end{pmatrix} c \right|\right|^2 + || z_2 ||^2
 
-Since :math:`z_2` does not depend on :math:`c`, the solution can be found
+Since :math:`z_2` does not depend on :math:`c`, :math:`\chi^2` is minimized
 by solving the least squares system,
 
 .. only:: not texinfo
@@ -1341,7 +1353,7 @@ by solving the least squares system,
       \left(
         \begin{array}{c}
           R \\
-          \lambda I
+          \lambda I_p
         \end{array}
       \right) c =
       \left(

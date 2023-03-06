@@ -6,12 +6,11 @@
 
 #include <gsl/gsl_math.h>
 #include <gsl/gsl_errno.h>
-#include <gsl/gsl_sf_legendre.h>
+#include <gsl/gsl_sf_alf.h>
 #include <gsl/gsl_vector.h>
 
 #include <shtns.h>
-
-#include "shtools.h"
+#include <shtools.h>
 
 #define TIME_DIFF(a,b) (((b).tv_sec + (b).tv_usec * 1.0e-6) - ((a).tv_sec + (a).tv_usec * 1.0e-6))
 
@@ -23,12 +22,12 @@ proc_P_gsl(const size_t flags, const size_t lmax, const size_t n, const double x
   double dt;
   size_t i;
 
+  gsl_sf_alf_precompute(GSL_SF_ALF_SPHARM, lmax, lmax, flags, Plm);
+
   gettimeofday(&tv0, NULL);
 
-  gsl_sf_legendre_precompute(GSL_SF_LEGENDRE_SPHARM, lmax, flags, Plm);
-
   for (i = 0; i < n; ++i)
-    gsl_sf_legendre_arrayx(GSL_SF_LEGENDRE_SPHARM, lmax, x, Plm);
+    gsl_sf_alf_array(GSL_SF_ALF_SPHARM, lmax, lmax, x, Plm);
 
   gettimeofday(&tv1, NULL);
 
@@ -100,7 +99,7 @@ main(int argc, char * argv[])
   size_t eval_lmin = 2;
   size_t eval_lmax = 400;
   size_t n = 2000;
-  const size_t plm_size = gsl_sf_legendre_array_n(lmax);
+  const size_t plm_size = gsl_sf_alf_array_size(lmax, lmax);
   double * Plm = (double *) malloc(plm_size * sizeof(double));
   shtns_cfg shtns = shtns_create((int) lmax, (int) lmax, 1, (shtns_norm) (sht_orthonormal | SHT_NO_CS_PHASE));
   size_t l;
@@ -121,7 +120,7 @@ main(int argc, char * argv[])
 
   for (l = eval_lmin; l <= eval_lmax; ++l)
     {
-      double dt_gsll = proc_P_gsl(GSL_SF_LEGENDRE_FLG_INDEXL, l, n, x, Plm);
+      double dt_gsll = proc_P_gsl(0, l, n, x, Plm);
       double dt_gslm = proc_P_gsl(0, l, n, x, Plm);
       double dt_shtools = proc_P_shtools(l, n, x, Plm);
       double dt_shtns = proc_P_shtns(shtns, l, n, x, Plm);

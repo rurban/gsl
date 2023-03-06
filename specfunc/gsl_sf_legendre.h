@@ -331,6 +331,8 @@ int gsl_sf_legendre_precompute(const gsl_sf_legendre_t norm, const size_t lmax,
 size_t gsl_sf_legendre_array_n(const size_t lmax);
 int gsl_sf_legendre_arrayx(const gsl_sf_legendre_t norm, const size_t lmax,
                            const double x, double result_array[]);
+int gsl_sf_legendre_alt_arrayx(const gsl_sf_legendre_t norm, const size_t lmax,
+                               const double x, double result_array[]);
 int gsl_sf_legendre_deriv_alt_arrayx(const gsl_sf_legendre_t norm, const size_t lmax,
                                      const double x, double result_array[], double result_deriv_array[]);
 int gsl_sf_legendre_deriv_arrayx(const gsl_sf_legendre_t norm, const size_t lmax,

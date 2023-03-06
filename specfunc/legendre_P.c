@@ -19,6 +19,7 @@
 
 #include <config.h>
 #include <stdlib.h>
+#include <assert.h> /*XXX*/
 #include <gsl/gsl_math.h>
 #include <gsl/gsl_errno.h>
 #include <gsl/gsl_sf_legendre.h>
@@ -107,7 +108,7 @@ sqrts: length 2*lmax+2
 Special storage:
 
 a(0,0) = alm[2*idx(0,0) = 0]           = P(0,0)
-a(1,0) = alm[2*idx(1,0) = 2]           = unused
+a(1,0) = alm[2*idx(1,0) = 2]           = P(1,1)/sin(theta)
 a(1,1) = alm[2*idx(1,1) = 2*(L+1)]     = unused
 b(0,0) = alm[2*idx(0,0)+1 = 1]         = +1 for 'm' indexing, -1 for 'l' indexing
 b(1,0) = alm[2*idx(1,0)+1 = 3]         = unused
@@ -145,6 +146,7 @@ gsl_sf_legendre_precompute(const gsl_sf_legendre_t norm, const size_t lmax,
       if (lmax == 0)
         return GSL_SUCCESS;
 
+      alm[2] = 1.0; /* S(1,1)/sin(theta) */
       cl[1] = M_SQRT3;
       dl[1] = csfac;
 
@@ -195,6 +197,7 @@ gsl_sf_legendre_precompute(const gsl_sf_legendre_t norm, const size_t lmax,
       if (lmax == 0)
         return GSL_SUCCESS;
 
+      alm[2] = M_SQRT3; /* R(1,1)/sin(theta) */
       cl[1] = sqrts[5];
       dl[1] = csfac * M_SQRT3;
 
@@ -236,6 +239,7 @@ gsl_sf_legendre_precompute(const gsl_sf_legendre_t norm, const size_t lmax,
       if (lmax == 0)
         return GSL_SUCCESS;
 
+      alm[2] = M_SQRT3 / sqrt(8.0 * M_PI); /* Y(1,1)/sin(theta) */
       cl[1] = sqrt(5.0);
       dl[1] = csfac * (M_SQRT3 / M_SQRT2);
 
@@ -277,6 +281,7 @@ gsl_sf_legendre_precompute(const gsl_sf_legendre_t norm, const size_t lmax,
       if (lmax == 0)
         return GSL_SUCCESS;
 
+      alm[2] = 0.5 * M_SQRT3;     /* N(1,1)/sin(theta) */
       cl[1] = sqrt(5.0);
       dl[1] = csfac * (M_SQRT3 / M_SQRT2);
 
@@ -318,6 +323,7 @@ gsl_sf_legendre_precompute(const gsl_sf_legendre_t norm, const size_t lmax,
       if (lmax == 0)
         return GSL_SUCCESS;
 
+      alm[2] = 1.0;         /* P(1,1)/sin(theta) */
       cl[1] = 3.0;
       dl[1] = csfac;
 
@@ -413,6 +419,266 @@ gsl_sf_legendre_arrayx(const gsl_sf_legendre_t norm, const size_t lmax,
 }
 
 /*
+gsl_sf_legendre_alt_arrayx()
+  Compute array of associated Legendre functions at a
+given point x suitable for vector spherical harmonic
+expansions
+
+Inputs: norm         - ALF normalization
+        lmax         - maximum degree
+        x            - input point
+        result_array - (input/output) output array of ALFs
+                       Plm(x)            for m = 0
+                       Plm(x)/sin(theta) for m > 0
+
+Notes:
+1) result_array must be of length returned by gsl_sf_legendre_array_n()
+and be initialized by gsl_sf_legendre_precompute()
+
+2) result_array is indexed by gsl_sf_legendre_array_index_m(l,m),
+result_array[index(l,0)] = Pl0(x)
+result_array[index(l,m)] = Plm(x)/sin(theta), m > 0
+*/
+
+int
+gsl_sf_legendre_alt_arrayx(const gsl_sf_legendre_t norm, const size_t lmax,
+                           const double x, double result_array[])
+{
+  const size_t nlm = gsl_sf_legendre_nlm(lmax);
+  const double * alm = &result_array[nlm];
+  const double * cl = alm + 2 * nlm;
+  const double * dl = cl + lmax + 1;
+  const double * sqrts = dl + lmax + 1;
+
+  if (alm[1] < 0.0)
+    {
+      GSL_ERROR("L indexing not supported", GSL_EDOM);
+    }
+  else if (x < -1.0 || x > 1.0)
+    {
+      GSL_ERROR ("x is outside [-1,1]", GSL_EDOM);
+    }
+  else if (x == -1.0 || x == 1.0) /* endpoints */
+    {
+      size_t l, m, k;
+
+      /* l=0 m=0 term */
+      result_array[0] = alm[0];
+
+      /* check for quick return */
+      if (lmax == 0)
+        return GSL_SUCCESS;
+
+      /* set P(l,m) = 0 for m > 0 */
+      k = lmax + 1;
+      for (m = 1; m <= lmax; ++m)
+        {
+          for (l = m; l <= lmax; ++l)
+            result_array[k++] = 0.0;
+        }
+
+      /* set m=0 terms according to normalization */
+      if (norm == GSL_SF_LEGENDRE_SCHMIDT)
+        {
+          if (x == 1.0)
+            {
+              for (l = 1; l <= lmax; ++l)
+                result_array[l] = 1.0;
+            }
+          else
+            {
+              for (l = 1; l <= lmax; ++l)
+                {
+                  if (l & 1)
+                    result_array[l] = -1.0;
+                  else
+                    result_array[l] =  1.0;
+                }
+            }
+        }
+      else if (norm == GSL_SF_LEGENDRE_SPHARM)
+        {
+          if (x == 1.0)
+            {
+              for (l = 1; l <= lmax; ++l)
+                result_array[l] = alm[0] * sqrts[2*l + 1];
+            }
+          else
+            {
+              for (l = 1; l <= lmax; ++l)
+                {
+                  if (l & 1)
+                    result_array[l] = -alm[0] * sqrts[2*l + 1];
+                  else
+                    result_array[l] =  alm[0] * sqrts[2*l + 1];
+                }
+            }
+        }
+      else if (norm == GSL_SF_LEGENDRE_FULL)
+        {
+          if (x == 1.0)
+            {
+              for (l = 1; l <= lmax; ++l)
+                result_array[l] = sqrt(l + 0.5);
+            }
+          else
+            {
+              for (l = 1; l <= lmax; ++l)
+                {
+                  if (l & 1)
+                    result_array[l] = -sqrt(l + 0.5);
+                  else
+                    result_array[l] =  sqrt(l + 0.5);
+                }
+            }
+        }
+      else if (norm == GSL_SF_LEGENDRE_FOURPI)
+        {
+          if (x == 1.0)
+            {
+              for (l = 1; l <= lmax; ++l)
+                result_array[l] = alm[0] * sqrts[2*l + 1];
+            }
+          else
+            {
+              for (l = 1; l <= lmax; ++l)
+                {
+                  if (l & 1)
+                    result_array[l] = -alm[0] * sqrts[2*l + 1];
+                  else
+                    result_array[l] =  alm[0] * sqrts[2*l + 1];
+                }
+            }
+        }
+      else if (norm == GSL_SF_LEGENDRE_NONE)
+        {
+          if (x == 1.0)
+            {
+              for (l = 1; l <= lmax; ++l)
+                result_array[l] = 1.0;
+            }
+          else
+            {
+              for (l = 1; l <= lmax; ++l)
+                {
+                  if (l & 1)
+                    result_array[l] = -1.0;
+                  else
+                    result_array[l] =  1.0;
+                }
+            }
+        }
+      else
+        {
+          GSL_ERROR ("unknown normalization", GSL_EDOM);
+        }
+
+      return GSL_SUCCESS;
+    }
+  else
+    {
+      /* interior point */
+
+      const double eps = 1.0e-280;
+      const double u = sqrt((1.0 - x) * (1.0 + x)); /* sin(theta) */
+      const size_t Lp1 = lmax + 1;
+      size_t l, m, k;
+      double plm,      /* eps * P(l,m) / u^m */
+             pmm;      /* eps * P(m,m) / u^m */
+      double plmp1;    /* P(l+1,m) */
+      double rescalem; /* u^m / eps */
+      size_t idxmm;    /* idx(m,m) */
+      const double *al;
+
+      /* initial values P(0,0) and P(1,0) */
+
+      plm = alm[0];            /* P(0,0) */
+      result_array[0] = plm;
+
+      /* check for quick return */
+      if (lmax == 0)
+        return GSL_SUCCESS;
+
+      plmp1 = cl[0] * x * plm; /* P(1,0) */
+      result_array[1] = plmp1;
+
+      /* Compute P(l,0), l=2:lmax */
+
+      k = 2; /* idx(2,0) */
+      al = &alm[k << 1];
+      for (l = 2; l < lmax; l += 2)
+        {
+          plm   = (al[0] * x) * plmp1 + al[1] * plm;
+          plmp1 = (al[2] * x) * plm   + al[3] * plmp1;
+
+          result_array[k] = plm; result_array[k+1] = plmp1;
+          k += 2; al += 4;
+        }
+
+      if (l == lmax)
+        result_array[k] = (al[0] * x) * plmp1 + al[1] * plm;
+
+      /* compute P(m,m), P(m+1,m) and P(l,m) */
+
+      idxmm = Lp1;                  /* idx(1,1) */
+      result_array[idxmm] = alm[2]; /* P(1,1) / sin(theta) */
+      assert(idxmm == gsl_sf_legendre_array_index_m(1, 1, lmax));
+
+      if (lmax == 1)
+        return GSL_SUCCESS;
+
+      pmm = alm[2] * eps;   /* eps * P(1,1) / sin(theta) */
+      rescalem = 1.0 / eps;
+
+      for (m = 1; m < lmax; ++m)
+        {
+
+          plm = pmm;
+
+          /* compute P(m+1,m) = c_m * x * P(m,m) */
+          k = idxmm + 1; /* idx(m+1,m) = idx(m,m) + 1 */
+          assert(k == gsl_sf_legendre_array_index_m(m+1, m, lmax));
+          plmp1 = (cl[m] * x) * plm;
+          result_array[k] = plmp1 * rescalem;
+
+          /* compute P(l,m) for l=m+2:lmax */
+          ++k;
+          al = &alm[k << 1];
+          for (l = m + 2; l < lmax; l += 2)
+            {
+              plm   = (al[0] * x) * plmp1 + al[1] * plm;
+              plmp1 = (al[2] * x) * plm   + al[3] * plmp1;
+
+              assert(k == gsl_sf_legendre_array_index_m(l, m, lmax));
+
+              result_array[k]     = plm * rescalem;
+              result_array[k + 1] = plmp1 * rescalem;
+
+              k += 2; al += 4;
+            }
+
+          if (l == lmax)
+            {
+              plm = (al[0] * x) * plmp1 + al[1] * plm;
+              result_array[k] = plm * rescalem;
+              assert(k == gsl_sf_legendre_array_index_m(lmax, m, lmax));
+            }
+
+          /* rescalem = u^m / eps */
+          rescalem *= u;
+
+          /* compute P(m+1,m+1) = d_{m+1} * u * P(m,m) */
+          idxmm += Lp1 - m; /* idx(m+1,m+1) = idx(m,m) + L + 1 - m */
+          pmm *= dl[m+1];
+          result_array[idxmm] = pmm * rescalem;
+          assert(idxmm == gsl_sf_legendre_array_index_m(m+1, m+1, lmax));
+        }
+
+      return GSL_SUCCESS;
+    }
+}
+
+/*
 gsl_sf_legendre_deriv_alt_arrayx()
   Compute array of associated Legendre functions and their
 derivatives with respect to theta at a given point x,
@@ -465,6 +731,7 @@ gsl_sf_legendre_deriv_alt_arrayx(const gsl_sf_legendre_t norm,
       status = legendre_derivk_alt_array_l(norm, lmax, csfac, sqrts,
                                            result_array, result_deriv_array);
     }
+
   if (status)
     return status;
 
@@ -490,7 +757,7 @@ and be initialized by gsl_sf_legendre_precompute()
 
 2) result_deriv_array must be of length at least nlm
 
-3) output arrays are indexed by gsl_sf_legendre_array_index(l,m)
+3) output arrays are indexed by gsl_sf_legendre_array_index_m(l,m,lmax)
 */
 
 int
