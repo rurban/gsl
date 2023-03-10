@@ -210,6 +210,10 @@ Legendre Functions and Spherical Harmonics
 ==========================================
 .. include:: specfunc-legendre.rst
 
+Associated Legendre Functions and Spherical Harmonics
+=====================================================
+.. include:: specfunc-alf.rst
+
 Logarithm and Related Functions
 ===============================
 .. include:: specfunc-log.rst

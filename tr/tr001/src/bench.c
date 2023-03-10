@@ -27,7 +27,7 @@ proc_P_gsl(const size_t flags, const size_t lmax, const size_t n, const double x
   gettimeofday(&tv0, NULL);
 
   for (i = 0; i < n; ++i)
-    gsl_sf_alf_array(GSL_SF_ALF_SPHARM, lmax, lmax, x, Plm);
+    gsl_sf_alf_array(lmax, lmax, x, Plm);
 
   gettimeofday(&tv1, NULL);
 
