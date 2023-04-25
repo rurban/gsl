@@ -628,7 +628,7 @@ gsl_sf_alf_deriv_array(const size_t lmax, const size_t mmax, const double x,
 }
 
 /*
-gsl_sf_alf_theta_deriv_array()
+gsl_sf_alf_vsh_array()
   Compute array of associated Legendre functions and their
 theta derivatives at a given point x suitable for vector spherical
 harmonic expansions
@@ -653,8 +653,8 @@ result_deriv_array[index(l,m,lmax)] = dPlm(x)/dtheta
 */
 
 int
-gsl_sf_alf_theta_deriv_array(const size_t lmax, const size_t mmax, const double x,
-                             double result_array[], double result_deriv_array[])
+gsl_sf_alf_vsh_array(const size_t lmax, const size_t mmax, const double x,
+                     double result_array[], double result_deriv_array[])
 {
   const size_t nlm = gsl_sf_alf_nlm(lmax, mmax);
   const double * alm = &result_array[nlm];

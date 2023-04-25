@@ -276,7 +276,7 @@ test_alf_schmidt(const size_t lmax, const size_t mmax, const size_t flags, const
   test_value(lmax, mmax, 3, 3, dPlm, -0.351731209519428, tol, desc, "deriv x=0.15");
 
   x = 0.35;
-  gsl_sf_alf_theta_deriv_array(lmax, mmax, x, Plm, dPlm_theta);
+  gsl_sf_alf_vsh_array(lmax, mmax, x, Plm, dPlm_theta);
   test_value(lmax, mmax, 0, 0, Plm,   1.000000000000000, tol, desc, "theta x=0.35");
   test_value(lmax, mmax, 1, 0, Plm,   0.350000000000000, tol, desc, "theta x=0.35");
   test_value(lmax, mmax, 1, 1, Plm,   1.000000000000000, tol, desc, "theta x=0.35");
@@ -300,7 +300,7 @@ test_alf_schmidt(const size_t lmax, const size_t mmax, const size_t flags, const
   test_value(lmax, mmax, 3, 3, dPlm_theta,  0.728410894784410, tol, desc, "deriv theta x=0.35");
 
   x = 1.0;
-  gsl_sf_alf_theta_deriv_array(lmax, mmax, x, Plm, dPlm);
+  gsl_sf_alf_vsh_array(lmax, mmax, x, Plm, dPlm);
   test_value(lmax, mmax, 0, 0, Plm,  1.000000000000000,  tol, desc, "theta x=1");
   test_value(lmax, mmax, 1, 0, Plm,  1.000000000000000,  tol, desc, "theta x=1");
   test_value(lmax, mmax, 2, 0, Plm,  1.000000000000000,  tol, desc, "theta x=1");
@@ -317,7 +317,7 @@ test_alf_schmidt(const size_t lmax, const size_t mmax, const size_t flags, const
   test_value(lmax, mmax, 3, 3, dPlm, 0.000000000000000,  tol, desc, "deriv theta x=1");
 
   x = -1.0;
-  gsl_sf_alf_theta_deriv_array(lmax, mmax, x, Plm, dPlm);
+  gsl_sf_alf_vsh_array(lmax, mmax, x, Plm, dPlm);
   test_value(lmax, mmax, 0, 0, Plm,   1.000000000000000,  tol, desc, "theta x=-1");
   test_value(lmax, mmax, 1, 0, Plm,  -1.000000000000000,  tol, desc, "theta x=-1");
   test_value(lmax, mmax, 2, 0, Plm,   1.000000000000000,  tol, desc, "theta x=-1");
@@ -357,7 +357,7 @@ test_alf_schmidt(const size_t lmax, const size_t mmax, const size_t flags, const
       size_t m;
 
       s += gsl_sf_alf_array(lmax, mmax, x, Plm2);
-      s += gsl_sf_alf_theta_deriv_array(lmax, mmax, x, Plm_theta, dPlm_theta);
+      s += gsl_sf_alf_vsh_array(lmax, mmax, x, Plm_theta, dPlm_theta);
 
       if (x < 1.0 && x > -1.0)
         s += gsl_sf_alf_deriv_array(lmax, mmax, x, Plm, dPlm);

@@ -264,7 +264,7 @@ code demonstrates how to access the array elements in order,
    to initialize :data:`result_array` with the multiplicative factors
    used in the recurrence relations.
 
-.. function:: int gsl_sf_alf_theta_deriv_array (const size_t lmax, const size_t mmax, const double x, double result_array[], double result_deriv_array[])
+.. function:: int gsl_sf_alf_vsh_array (const size_t lmax, const size_t mmax, const double x, double result_array[], double result_deriv_array[])
 
    In vector spherical harmonic expansions, it is often necessary to simultaneously
    compute terms of the form
@@ -287,7 +287,7 @@ code demonstrates how to access the array elements in order,
 
       \textrm{result\_array[index(l,0,lmax)]} &= P_l^0(x) \\
       \textrm{result\_array[index(l,m,lmax)]} &= \frac{P_l^m(x)}{\sin{\theta}}, \qquad m > 0 \\
-      \textrm{result\_deriv\_array[index(l,m,lmax)]} &= \frac{d}{d\theta} P_l^m(x)
+      \textrm{result\_deriv\_array[index(l,m,lmax)]} &= \frac{d}{d\theta} P_l^m(x), \qquad m \geq 0
    
    The :code:`index` notation above refers to the :func:`gsl_sf_alf_array_index` function.
    All associated Legendre functions and their first :math:`\theta` derivatives are computed

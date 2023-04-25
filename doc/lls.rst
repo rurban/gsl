@@ -691,7 +691,9 @@ squares problem are as follows:
 
    .. math:: \kappa(\lambda) = \frac{\hat{\rho}' \hat{\eta}'' - \hat{\rho}'' \hat{\eta}'}{\left( (\hat{\rho}')^2 + (\hat{\eta}')^2 \right)^{\frac{3}{2}}}
 
-   The curvature values are stored in :data:`kappa` on output.
+   The curvature values are stored in :data:`kappa` on output. The function
+   :func:`gsl_multifit_linear_svd` must be called on the least squares matrix
+   :math:`X` prior to calling this function.
 
 .. function:: int gsl_multifit_linear_lcurvature_menger(const gsl_vector * rho, const gsl_vector * eta, gsl_vector * kappa)
 
